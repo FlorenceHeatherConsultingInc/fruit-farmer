@@ -14,8 +14,10 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request).then(res => {
-    if (res.ok && new URL(e.request.url).origin === location.origin) {
+  // Ask GitHub whether each file changed, so one update never mixes old and new game files.
+  const own = new URL(e.request.url).origin === location.origin;
+  e.respondWith((own ? fetch(e.request.url, { cache: 'no-cache' }) : fetch(e.request)).then(res => {
+    if (res.ok && own) {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy));
     }
