@@ -146,6 +146,8 @@ FF.data = {
     friends: { rowBonus: [1, 0], maxAsk: [3, 2], mixChance: 0 },
     wall:    { rowBonus: [2, 1, 0], maxAsk: [4, 3, 2], mixChance: 0.25 },
     newFriendTier: 2,     // carrier number that brings the third animal (2 = Big basket)
+    // The Barrel wall appears in the shop from the start. Reach all three goals, then buy it.
+    wallUnlock: { tier: 3, fruitKinds: 3, filled: 10, cost: 150 },  // tier 3 = Wheelbarrow
     anyChance: 0.15,      // chance an animal takes any fruit (1 coin plus the row bonus)
     tipPerFruit: 1,       // bonus when a basket or barrel is filled, per fruit it held
     perfectBonus: 1,      // extra coins for a center shot

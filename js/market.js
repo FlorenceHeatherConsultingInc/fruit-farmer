@@ -183,6 +183,16 @@
     FX.clear();
   };
 
+  // Back from the shop: rebuild if the layout changed or a new friend arrived. Fruit already
+  // sold stays sold, and this trip's earnings carry on.
+  Market.refresh = () => {
+    const wanted = FF.save.wallOwned ? FF.save.marketLayout : 'friends';
+    if (wanted === active && Layouts[active].build().length === targets.length) return;
+    const kept = earned;
+    Market.start();
+    earned = kept;
+  };
+
   Market.update = dt => {
     shake = Math.max(0, shake - dt * 4); wobble = Math.max(0, wobble - dt * 2.4);
     streakBump = Math.max(0, streakBump - dt * 4); popIn = Math.max(0, popIn - dt * 5);

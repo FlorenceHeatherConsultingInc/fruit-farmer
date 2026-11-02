@@ -9,6 +9,42 @@
   const pips = (on, total) => `<div class="pips" aria-label="Level ${on} of ${total}">${Array.from({ length: total }, (_, i) => `<span class="pip${i < on ? ' on' : ''}"></span>`).join('')}</div>`;
   const pickStatus = (on, owned, cost) => on ? 'Using' : owned ? 'Use it' : I.coin + cost;
 
+  const wallGoals = () => {
+    const save = FF.save, W = D.market.wallUnlock, kinds = save.trees.length;
+    return [
+      { text: 'Get the ' + D.carriers[W.tier].name, done: save.tier >= W.tier },
+      { text: 'Grow ' + W.fruitKinds + ' kinds of fruit (' + Math.min(kinds, W.fruitKinds) + '/' + W.fruitKinds + ')', done: kinds >= W.fruitKinds },
+      { text: 'Fill ' + W.filled + ' baskets (' + Math.min(save.filled, W.filled) + '/' + W.filled + ')', done: save.filled >= W.filled }
+    ];
+  };
+  const animalBadge = kind => FF.draw.toCanvas(84, 84, s => FF.animals.drawHead(kind, s / 2, s * 0.56, s * 0.3, 'idle', 0, { x: 0, y: 0.4 }));
+
+  function renderMarket() {
+    const save = FF.save, box = $('shopMarket'), goals = wallGoals(), W = D.market.wallUnlock;
+    box.innerHTML = '';
+    if (save.wallOwned) {
+      box.className = 'grid3';
+      [['friends', 'Animal friends', 'bunny'], ['wall', 'Barrel wall', 'pig']].forEach(([id, name, kind]) => {
+        const on = save.marketLayout === id, btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'pick' + (on ? ' on' : '');
+        btn.dataset.act = 'layout'; btn.dataset.id = id;
+        btn.setAttribute('aria-pressed', String(on));
+        btn.appendChild(animalBadge(kind));
+        btn.insertAdjacentHTML('beforeend', `<b>${name}</b><small>${pickStatus(on, true)}</small>`);
+        box.appendChild(btn);
+      });
+      return;
+    }
+    box.className = 'rows';
+    const ready = goals.every(g => g.done), row = document.createElement('div'); row.className = 'up';
+    const badge = document.createElement('div'); badge.className = 'badge'; badge.appendChild(animalBadge('pig'));
+    row.appendChild(badge);
+    row.insertAdjacentHTML('beforeend', `<div><h3>Barrel wall</h3><p>12 barrels. Far ones pay the most!</p><ul class="goals">` +
+      goals.map(g => `<li class="${g.done ? 'done' : ''}">${g.text}</li>`).join('') + `</ul></div>` +
+      (ready ? buyBtn('wall', 'buy', W.cost, 'Buy the Barrel wall') : `<button class="mini" type="button" disabled>Locked</button>`));
+    box.appendChild(row);
+  }
+
   function render() {
     const save = FF.save, fa = document.activeElement;
     const focusKey = fa && fa.dataset && fa.dataset.act ? fa.dataset.act + ':' + (fa.dataset.id || '') : '';
@@ -30,6 +66,8 @@
         (save.trees.includes(t.type) ? ownedBtn('Planted') : buyBtn('tree', t.type, t.cost, 'Plant ' + t.name)));
       trees.appendChild(row);
     });
+
+    renderMarket();
 
     $('shopUps').innerHTML = D.upgrades.map(u => {
       const lvl = save.up[u.id], max = lvl >= u.costs.length;
@@ -86,6 +124,8 @@
       case 'tier': { const nx = D.carriers[save.tier + 1]; if (nx && spend(nx.cost)) { save.tier++; FF.layout(); } break; }
       case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) save.trees.push(id); break; }
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) save.up[id]++; break; }
+      case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; } break;
+      case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
       case 'skin': wear('skins', 'skin', D.skins.find(x => x.id === id)); break;
       case 'scene': wear('scenes', 'scene', D.scenes.find(x => x.id === id)); break;
       case 'done': FF.shop.close(); return;
