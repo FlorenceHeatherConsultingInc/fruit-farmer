@@ -36,7 +36,7 @@
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
-      friends: {}, friendsSeeded: false, decor: []
+      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -78,6 +78,8 @@
     if (raw.friends && typeof raw.friends === 'object') s.friends = raw.friends;
     s.friendsSeeded = raw.friendsSeeded === true;
     if (Array.isArray(raw.decor)) s.decor = raw.decor;
+    if (Array.isArray(raw.stickers)) s.stickers = raw.stickers;
+    if (raw.stats && typeof raw.stats === 'object') s.stats = raw.stats;
     if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;
     return s;
   }

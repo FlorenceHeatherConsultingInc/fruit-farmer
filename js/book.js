@@ -25,6 +25,8 @@
     t.special = FF.special();
     s.diary = s.diary.concat({ day: s.day, ...t }).slice(-MAX_PAGES);
     s.bestDay = Math.max(s.bestDay, t.earned);
+    const fruits = new Set(Object.values(t.sales).map(x => x.fruit));
+    if (fruits.size === 1 && Object.values(t.sales).reduce((n, x) => n + x.n, 0) >= 5) FF.stickers.add('oneFruitDay');
     s.day++; s.today = blankDay();
   }
 
@@ -89,7 +91,7 @@
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
-    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : farmsHTML();
+    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : tab === 'stickers' ? FF.stickers.html() : farmsHTML();
   }
 
   /* ---------- New farm ---------- */
@@ -99,6 +101,7 @@
     s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary });
     ['coins', 'crate', 'tier', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
     s.farmNo++;
+    FF.stickers.check();
     FF.persist(); FF.layout();
   }
 
@@ -113,6 +116,7 @@
       return;
     }
     if (b.dataset.board) { FF.board.act(b.dataset.board); return; }
+    if (b.dataset.sticker) { FF.stickers.act(b.dataset.sticker); return; }
     switch (b.dataset.book) {
       case 'done': FF.book.close(); break;
       case 'more': shown += PAGE_STEP; render(); break;
@@ -136,10 +140,11 @@
     bonus: earn,
     bought(name) { today().bought.push(name); },
     sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
-    startDay() { if (today().sold) { closeDay(); FF.persist(); } },
+    startDay() { if (today().sold) { closeDay(); FF.stickers.check(); FF.persist(); } },
     open(origin) {
       FF.sound.ensure();
       from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false;
+      FF.stickers.check();
       $('familyTab').hidden = !FF.board.enabled();
       render();
       UI.show('book');

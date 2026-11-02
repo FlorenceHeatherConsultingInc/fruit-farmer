@@ -83,7 +83,7 @@
     }).join('');
 
     const scenes = $('shopScenes'); scenes.innerHTML = '';
-    D.scenes.forEach(s => {
+    D.scenes.filter(s => !s.reward || save.scenes.includes(s.id)).forEach(s => {
       const owned = save.scenes.includes(s.id), on = save.scene === s.id;
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'pick' + (on ? ' on' : '');
@@ -124,12 +124,13 @@
       case 'tier': { const nx = D.carriers[save.tier + 1]; if (nx && spend(nx.cost)) { save.tier++; FF.book.bought(nx.name); FF.layout(); } break; }
       case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
-      case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); } break;
+      case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
       case 'skin': wear('skins', 'skin', D.skins.find(x => x.id === id)); break;
       case 'scene': wear('scenes', 'scene', D.scenes.find(x => x.id === id)); break;
       case 'done': FF.shop.close(); return;
     }
+    FF.stickers.check();
     FF.persist(); render(); UI.bump($('shopCoins'));
   });
 

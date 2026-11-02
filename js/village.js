@@ -55,6 +55,14 @@
     ctx.fillStyle = sc.ground.top; ctx.fillRect(0, H * 0.32, W, H * 0.68);
     ctx.fillStyle = sc.ground.deep; ctx.fillRect(0, H * 0.93, W, H * 0.07);
 
+    if (FF.stickers.hasReward('party')) {
+      ctx.strokeStyle = D.colors.ink; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, 18); ctx.quadraticCurveTo(W / 2, 44, W, 18); ctx.stroke();
+      for (let i = 1; i < 12; i++) {
+        const k = i / 12, x = W * k, y = 18 + 52 * k * (1 - k);
+        ctx.beginPath(); ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 13); ctx.closePath(); Draw.fillStroke(sc.awnings[i % sc.awnings.length], 1.5);
+      }
+    }
     D.decorations.forEach(d => { if (FF.save.decor.includes(d.id)) DECOR[d.id](ctx, W * d.x, H * d.y); });
 
     spots = [];
@@ -123,6 +131,7 @@
       if (save.coins < d.cost) return;
       save.coins -= d.cost; save.decor.push(id); FF.book.bought(d.name); FF.sfx.buy();
     } else return;
+    FF.stickers.check();
     FF.persist(); render(); UI.bump($('villageCoins'));
   });
   // Tap an animal's home to jump to its card.

@@ -80,9 +80,11 @@ FF.data = {
     { id: 'ocean',   name: 'Ocean',   cost: 20,  body: '#5bb4f0', rim: '#2f86c6', weave: '#3a93d2' },
     { id: 'mint',    name: 'Mint',    cost: 30,  body: '#6fd39b', rim: '#3fa56c', weave: '#4cb67b' },
     { id: 'gold',    name: 'Gold',    cost: 120, body: '#ffd23f', rim: '#d9a400', weave: '#e8b800' },
+    { id: 'comet', name: 'Comet', cost: 1e9, reward: true, body: '#3a3a78', rim: '#ffd23f', weave: '#6a6ac0' },
+    { id: 'goofy', name: 'Goofy', cost: 1e9, reward: true, body: '#ffffff', rim: '#ff5e7a', weave: '#d0c8e8' },
     { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
   ],
-  // skins for best friends are added below, one per animal
+  // Rewards you can't buy. Best friends each add one more below.
   rainbow: ['#ff4d4d', '#ff9a1f', '#ffd93b', '#5cc24a', '#4aa3e8', '#8a4bd6'],
 
   // Scenery changes everything around you: sky, hills, tree leaves and trunks, the ground,
@@ -97,6 +99,13 @@ FF.data = {
       ground: { top: '#67bf45', edge: '#57ab38', deep: '#489a2f', bits: 'flowers' },
       foliage: ['#4fae3a', '#6cc957', '#3f9530'], trunk: '#8a5a32',
       plaza: ['#e8d8b8', '#c9b48c'], awnings: ['#ff6b6b', '#4aa3e8', '#ffb02e', '#5cc24a'],
+      ambient: 'butterflies' },
+    { id: 'fest', name: 'Fruit Fest', cost: 1e9, reward: true,
+      sky: ['#ffb7c5', '#fff0d6'], sun: '#ffd23f', cloud: 'rgba(255,255,255,0.95)',
+      hills: ['#ffc98f', '#f5ad7a'],
+      ground: { top: '#8fd06a', edge: '#7ac058', deep: '#62a848', bits: 'flowers' },
+      foliage: ['#ff8fb1', '#ffc0d4', '#e86d94'], trunk: '#8a5a32',
+      plaza: ['#fff0d0', '#f5d6a8'], awnings: ['#ff5e7a', '#ffd23f', '#4aa3e8', '#5cc24a'],
       ambient: 'butterflies' },
     { id: 'sunset', name: 'Sunset', cost: 40,
       sky: ['#ff7f6b', '#ffd9a0'], sun: '#ff5e3a', cloud: 'rgba(255,232,214,0.9)',
@@ -167,6 +176,91 @@ FF.data = {
     sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff', arrive: 12 },
     hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230', arrive: 15 },
     turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c', arrive: 18 }
+  },
+
+  // The Sticker Book. stat is the number a sticker watches (see stickers.js), n is the goal,
+  // and within means "at this number or lower", such as reaching the wall by a certain day.
+  stickerPages: [
+    { id: 'shooter', name: 'Sharp Shooter', icon: 'apple', reward: 'gold', stickers: [
+      { id: 'shooter1', name: 'First Perfect', stat: 'perfect', n: 1, icon: 'star' },
+      { id: 'shooter2', name: '10 Perfect shots', stat: 'perfect', n: 10, icon: 'star' },
+      { id: 'shooter3', name: '50 Perfect shots', stat: 'perfect', n: 50, icon: 'star' },
+      { id: 'shooter4', name: '200 Perfect shots', stat: 'perfect', n: 200, icon: 'star' },
+      { id: 'shooter5', name: 'Streak of 5', stat: 'bestStreak', n: 5, icon: 'orange' },
+      { id: 'shooter6', name: 'Streak of 10', stat: 'bestStreak', n: 10, icon: 'orange' },
+      { id: 'shooter7', name: 'Streak of 20', stat: 'bestStreak', n: 20, icon: 'orange' },
+      { id: 'shooter8', name: 'A Lucky shot', stat: 'lucky', n: 1, icon: 'grapes' },
+      { id: 'shooter9', name: '10 Lucky shots', stat: 'lucky', n: 10, icon: 'grapes' },
+      { id: 'shooter10', name: '50 Lucky shots', stat: 'lucky', n: 50, icon: 'grapes' }
+    ] },
+    { id: 'boss', name: 'Fruit Boss', icon: 'banana', reward: 'fest', stickers: [
+      { id: 'boss1', name: '100 apples sold', stat: 'soldApple', n: 100, icon: 'apple' },
+      { id: 'boss2', name: '100 oranges sold', stat: 'soldOrange', n: 100, icon: 'orange' },
+      { id: 'boss3', name: '100 bananas sold', stat: 'soldBanana', n: 100, icon: 'banana' },
+      { id: 'boss4', name: '100 strawberries sold', stat: 'soldStrawberry', n: 100, icon: 'strawberry' },
+      { id: 'boss5', name: '100 grapes sold', stat: 'soldGrapes', n: 100, icon: 'grapes' },
+      { id: 'boss6', name: '10 gold stars sold', stat: 'soldStar', n: 10, icon: 'star' },
+      { id: 'boss7', name: '25 special fruit sold', stat: 'soldSpecial', n: 25, icon: 'star' },
+      { id: 'boss8', name: 'One fruit for a day', stat: 'oneFruitDay', n: 1, icon: 'grapes' },
+      { id: 'boss9', name: '500 fruit sold', stat: 'sold', n: 500, icon: 'apple' },
+      { id: 'boss10', name: '2,000 fruit sold', stat: 'sold', n: 2000, icon: 'banana' }
+    ] },
+    { id: 'friends', name: 'Best Friends', icon: 'bunny', reward: 'party', stickers: [
+      { id: 'friends1', name: '5 hearts', stat: 'hearts', n: 5, icon: 'bunny' },
+      { id: 'friends2', name: '20 hearts', stat: 'hearts', n: 20, icon: 'pig' },
+      { id: 'friends3', name: '40 hearts', stat: 'hearts', n: 40, icon: 'bear' },
+      { id: 'friends4', name: 'First home', stat: 'homes', n: 1, icon: 'frog' },
+      { id: 'friends5', name: '5 homes', stat: 'homes', n: 5, icon: 'cat' },
+      { id: 'friends6', name: '12 homes', stat: 'homes', n: 12, icon: 'duck' },
+      { id: 'friends7', name: 'First best friend', stat: 'bestFriends', n: 1, icon: 'owl' },
+      { id: 'friends8', name: '3 best friends', stat: 'bestFriends', n: 3, icon: 'fox' },
+      { id: 'friends9', name: 'Met everyone', stat: 'met', n: 12, icon: 'goat' },
+      { id: 'friends10', name: '8 decorations', stat: 'decor', n: 8, icon: 'sheep' }
+    ] },
+    { id: 'speedy', name: 'Speedy Farmer', icon: 'orange', reward: 'comet', stickers: [
+      { id: 'speedy1', name: 'Wall by Day 30', stat: 'wallDay', within: 30, icon: 'orange' },
+      { id: 'speedy2', name: 'Wall by Day 15', stat: 'wallDay', within: 15, icon: 'orange' },
+      { id: 'speedy3', name: 'Own the cart', stat: 'tier', n: 4, icon: 'banana' },
+      { id: 'speedy4', name: 'All five trees', stat: 'kinds', n: 5, icon: 'grapes' },
+      { id: 'speedy5', name: '100 coins in a day', stat: 'bestDay', n: 100, icon: 'star' },
+      { id: 'speedy6', name: '300 coins in a day', stat: 'bestDay', n: 300, icon: 'star' },
+      { id: 'speedy7', name: '600 coins in a day', stat: 'bestDay', n: 600, icon: 'star' },
+      { id: 'speedy8', name: 'Reach Day 50', stat: 'farmDay', n: 50, icon: 'apple' },
+      { id: 'speedy9', name: 'Reach Day 150', stat: 'farmDay', n: 150, icon: 'apple' },
+      { id: 'speedy10', name: 'Earn 10,000 coins', stat: 'lifetime', n: 10000, icon: 'star' }
+    ] },
+    { id: 'family', name: 'Family', icon: 'pig', reward: 'crown', stickers: [
+      { id: 'family1', name: 'Join a family', stat: 'joined', n: 1, icon: 'pig' },
+      { id: 'family2', name: 'Get a save code', stat: 'saved', n: 1, icon: 'bear' },
+      { id: 'family3', name: 'First crown', stat: 'crowns', n: 1, icon: 'star' },
+      { id: 'family4', name: '3 crowns', stat: 'crowns', n: 3, icon: 'star' },
+      { id: 'family5', name: '10 crowns', stat: 'crowns', n: 10, icon: 'star' },
+      { id: 'family6', name: 'First ribbon', stat: 'ribbons', n: 1, icon: 'strawberry' },
+      { id: 'family7', name: '3 ribbons', stat: 'ribbons', n: 3, icon: 'strawberry' },
+      { id: 'family8', name: '5 ribbons', stat: 'ribbons', n: 5, icon: 'strawberry' },
+      { id: 'family9', name: '10 ribbons', stat: 'ribbons', n: 10, icon: 'strawberry' },
+      { id: 'family10', name: 'Play on 30 days', stat: 'playDays', n: 30, icon: 'bunny' }
+    ] },
+    { id: 'silly', name: 'Silly', icon: 'frog', reward: 'goofy', stickers: [
+      { id: 'silly1', name: 'Wrong fruit!', stat: 'wrong', n: 1, icon: 'frog' },
+      { id: 'silly2', name: '10 wrong fruit', stat: 'wrong', n: 10, icon: 'duck' },
+      { id: 'silly3', name: '50 wrong fruit', stat: 'wrong', n: 50, icon: 'goat' },
+      { id: 'silly4', name: '3 wrong at one animal', stat: 'sameWrong', n: 1, icon: 'pig' },
+      { id: 'silly5', name: '10 misses', stat: 'miss', n: 10, icon: 'hedgehog' },
+      { id: 'silly6', name: '50 misses', stat: 'miss', n: 50, icon: 'turtle' },
+      { id: 'silly7', name: '25 fruit swaps', stat: 'swaps', n: 25, icon: 'cat' },
+      { id: 'silly8', name: '100 fruit swaps', stat: 'swaps', n: 100, icon: 'sheep' },
+      { id: 'silly9', name: 'Start a second farm', stat: 'farms', n: 2, icon: 'bunny' },
+      { id: 'silly10', name: 'Start a fourth farm', stat: 'farms', n: 4, icon: 'fox' }
+    ] }
+  ],
+  stickerRewards: {
+    gold: { name: 'Gold slingshot' },
+    fest: { name: 'Fruit Fest scenery', scene: 'fest' },
+    party: { name: 'Party village' },
+    comet: { name: 'Comet basket', skin: 'comet' },
+    crown: { name: 'Crown hats' },
+    goofy: { name: 'Goofy basket', skin: 'goofy' }
   },
 
   // Fruit sold to reach each heart. A favorite fruit counts this many times.

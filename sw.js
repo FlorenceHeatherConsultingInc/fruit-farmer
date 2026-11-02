@@ -5,7 +5,7 @@ const CACHE = 'fruit-farmer';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/styles.css', 'icons/icon-192.png', 'icons/icon-512.png',
   'js/data.js', 'js/core.js', 'js/draw.js', 'js/scenery.js', 'js/ui.js', 'js/farm.js',
-  'js/animals.js', 'js/friends.js', 'js/market-layouts.js', 'js/market.js', 'js/shop.js', 'js/board.js', 'js/book.js', 'js/village.js', 'js/main.js'
+  'js/animals.js', 'js/friends.js', 'js/stickers.js', 'js/market-layouts.js', 'js/market.js', 'js/shop.js', 'js/board.js', 'js/book.js', 'js/village.js', 'js/main.js'
 ];
 
 self.addEventListener('install', e => {

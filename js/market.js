@@ -50,7 +50,7 @@
   const takes = (t, type) => t && t.state === 'open' && t.got < t.need && (t.wants === 'any' || t.wants === type);
 
   function newRequest(t, force) {
-    t.got = 0; t.inside = []; t.t = 0; t.pop = 1;
+    t.got = 0; t.inside = []; t.t = 0; t.pop = 1; t.wrongs = 0;
     t.state = 'new';
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
@@ -143,6 +143,11 @@
     FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
     FF.save.coins += coins; earned += coins;
     FF.book.sale(t.kind, s.type, coins, perfect);
+    const St = FF.stickers, fruitName = s.type[0].toUpperCase() + s.type.slice(1);
+    St.add('sold'); St.add('sold' + fruitName); St.best('bestStreak', streak);
+    if (perfect) St.add('perfect');
+    if (s.rim) St.add('lucky');
+    if (t.special) St.add('soldSpecial');
     const pal = FF.friends.sell(t.kind, s.type), who = FF.friends.name(t.kind);
     if (pal.hearts) {
       setTimeout(() => FX.text(G.W / 2, M.horizon + 30, who + ': ' + pal.hearts + (pal.hearts === 1 ? ' heart!' : ' hearts!'), true), 500);
@@ -161,6 +166,7 @@
       rings.push({ x: t.x, y: t.y, r: t.R, t: 0, ry: t.ry / t.R });
     }
     if (t.got >= t.need) fillUp(t);
+    FF.stickers.check();
     FF.persist(); FF.hud.coins();
   }
   function bounceOff(s, vx, vy) { s.phase = 'fall'; s.t = 0; s.bounced = false; s.vx = vx; s.vy = vy; }
@@ -175,9 +181,14 @@
       if (t.state === 'open') { t.mood = 'no'; t.moodT = 0.7; }
       FX.text(t.x, t.y - t.R, t.state === 'open' ? 'Not that one!' : 'Full!', false);
       FF.sfx.nope(); streak = 0;
+      t.wrongs = (t.wrongs || 0) + 1;
+      if (t.state === 'open') FF.stickers.add('wrong');
+      if (t.wrongs === 3) FF.stickers.add('sameWrong');
+      FF.stickers.check();
     } else {
       bounceOff(s, rand(-70, 70), -170);
       FF.sfx.miss(); streak = 0;
+      FF.stickers.add('miss'); FF.stickers.check();
     }
   }
 
@@ -306,6 +317,7 @@
     if (i === n) { if (ammo.length > n) { ammo.push(...ammo.splice(0, n)); FF.sfx.tick(); } return; }
     [ammo[i], loaded] = [loaded, ammo[i]];
     popIn = 1; FF.sfx.tick();
+    FF.stickers.add('swaps'); FF.stickers.check();
   }
   // A throw has to start on the fruit, so stray taps around the screen never fire one.
   Market.pointerDown = e => {
@@ -361,7 +373,7 @@
     ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(tipX(-1), tipY);
     ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(tipX(1), tipY);
     ctx.stroke();
-    ctx.strokeStyle = '#a8692c'; ctx.lineWidth = 10; ctx.stroke();
+    ctx.strokeStyle = FF.stickers.hasReward('gold') ? '#ffc83a' : '#a8692c'; ctx.lineWidth = 10; ctx.stroke();
     const band = d => {
       ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 7 - pow * 3;
       ctx.beginPath(); ctx.moveTo(tipX(d), tipY); ctx.lineTo(p.x + d * 9, p.y); ctx.stroke();

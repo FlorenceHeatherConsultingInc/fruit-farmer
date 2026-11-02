@@ -71,7 +71,7 @@
   function hat(r, lw) {
     const ctx = G.ctx;
     ctx.save(); ctx.translate(r * 0.42, -r * 0.72); ctx.rotate(0.3);
-    ctx.beginPath(); ctx.moveTo(-r * 0.3, 0); ctx.lineTo(0, -r * 0.72); ctx.lineTo(r * 0.3, 0); ctx.closePath(); Draw.fillStroke('#c77dff', lw);
+    ctx.beginPath(); ctx.moveTo(-r * 0.3, 0); ctx.lineTo(0, -r * 0.72); ctx.lineTo(r * 0.3, 0); ctx.closePath(); Draw.fillStroke(FF.stickers && FF.stickers.hasReward('crown') ? D.colors.sun : '#c77dff', lw);
     ctx.beginPath(); ctx.arc(0, -r * 0.72, r * 0.11, 0, TAU); Draw.fillStroke(D.colors.sun, lw * 0.7);
     ctx.restore();
   }

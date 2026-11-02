@@ -71,7 +71,7 @@
       const me = list.find(r => r.me), s = FF.save;
       if (me && top && me.last_week === top && !s.crownWeeks.includes(monday)) s.crownWeeks.push(monday);
       if (me && week.ribbons.includes(me.name) && !s.ribbonWeeks.includes(monday)) s.ribbonWeeks.push(monday);
-      FF.persist();
+      FF.stickers.check(); FF.persist();
     } catch (e) { week = null; }
   }
 
