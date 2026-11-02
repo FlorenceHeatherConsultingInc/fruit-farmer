@@ -128,8 +128,8 @@ FF.data = {
       ambient: 'fireflies' }
   ],
 
-  // Family leaderboards. Empty url and key turn them off. The key is the public one, safe to ship.
-  board: { url: '', key: '' },
+  // Family leaderboards. Empty url and key turn them off. This key is the public one, safe to ship.
+  board: { url: 'https://wurecjpetnooddiftoao.supabase.co', key: 'sb_publishable_8dFdsxOWlMA9UnlbzH9YbA_pBhpsjuk' },
   // Farm names are built from these lists only. They must match valid_farm_name in supabase/schema.sql.
   boardWords: {
     first: ['Sunny', 'Happy', 'Silly', 'Jolly', 'Lucky', 'Golden', 'Bouncy', 'Sleepy', 'Rainbow', 'Sparkly', 'Cozy', 'Giggly', 'Mighty', 'Tiny', 'Windy', 'Starry'],
