@@ -39,9 +39,9 @@
     const ready = goals.every(g => g.done), row = document.createElement('div'); row.className = 'up';
     const badge = document.createElement('div'); badge.className = 'badge'; badge.appendChild(animalBadge('pig'));
     row.appendChild(badge);
-    row.insertAdjacentHTML('beforeend', `<div><h3>Barrel wall</h3><p>12 barrels. Far ones pay the most!</p><ul class="goals">` +
-      goals.map(g => `<li class="${g.done ? 'done' : ''}">${g.text}</li>`).join('') + `</ul></div>` +
-      (ready ? buyBtn('wall', 'buy', W.cost, 'Buy the Barrel wall') : `<button class="mini" type="button" disabled>Locked</button>`));
+    row.insertAdjacentHTML('beforeend', `<div><h3>Barrel wall</h3><p>12 barrels. Far ones pay the most!</p></div>` +
+      (ready ? buyBtn('wall', 'buy', W.cost, 'Buy the Barrel wall') : `<button class="mini" type="button" disabled>Locked</button>`) +
+      `<ul class="goals">` + goals.map(g => `<li class="${g.done ? 'done' : ''}">${g.text}</li>`).join('') + `</ul>`);
     box.appendChild(row);
   }
 

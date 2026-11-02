@@ -17,7 +17,7 @@
   let coinsFly = [], rings = [], drag = null, aim = null, stretched = 0;
   let earned = 0, streak = 0, streakBump = 0, hits = 0, soldT = -1, shake = 0, wobble = 0, revealT = 0;
 
-  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded };
+  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded, aim: () => aim };
   const pay = () => MK[active];
 
   /* ---------- Layout ---------- */

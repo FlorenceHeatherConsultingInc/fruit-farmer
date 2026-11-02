@@ -9,12 +9,22 @@ browser on that computer.
 
 - **Orchard:** tap an arrow to scoot, or hold it to zip. You can also drag your basket.
   You start with just your hands, which hold 2 fruit. When you're full, head to the market.
-- **Market:** tap once to lock where you're aiming, then tap again to throw when the ring is
-  over the barrel you want. You can also pull back the slingshot, or flick upward. Barrels
-  further back usually pay more. Missed fruit comes back to your tray.
-- **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery.
+- **Market:** press anywhere, drag down to pull back the slingshot, and let go. The dotted arc
+  shows where your fruit will land. On a keyboard, use the arrow keys to aim and Space to throw.
+  Give each animal the fruit it asks for. The tag shows what the whole basket still pays, and
+  animals farther back pay more per fruit. Missed fruit comes back to your tray.
+- **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery. Reach the
+  goals on the Barrel wall card to unlock a bigger market with 12 barrels.
 
 ## Changing the game
+
+Every change is saved in Git. To see the game as it was before the new market:
+
+```bash
+git checkout before-new-market
+```
+
+Run `git checkout main` to come back.
 
 Most numbers and content live in `js/data.js`. `CLAUDE.md` explains how the rest of the files
 fit together. Claude Code reads it automatically when you open this folder.

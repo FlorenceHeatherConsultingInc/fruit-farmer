@@ -18,7 +18,7 @@
 
   /* ---------- Shared pieces ---------- */
   function drawBubble(t, x, y, s, boost = 1) {
-    const ctx = G.ctx, fs = Math.round(clamp(20 * s, 13, 20));
+    const ctx = G.ctx, fs = G.W < 500 ? Math.round(clamp(15 * s, 11, 15)) : Math.round(clamp(20 * s, 13, 20));
     ctx.font = `800 ${fs}px ${FONT}`; ctx.textBaseline = 'middle';
     const p = t.pop > 0 ? 1 + 0.4 * Math.sin(t.pop * Math.PI) : 1;
     ctx.save(); ctx.translate(x, y); ctx.scale(p * boost, p * boost);

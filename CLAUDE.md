@@ -1,7 +1,8 @@
 # Fruit Farmer
 
-A browser game for a 7-year-old. You harvest fruit in an orchard, sell it at a skee-ball style
-market by slingshotting it into barrels, and spend coins to grow your farm.
+A browser game for a 7-year-old. You harvest fruit in an orchard, sell it to silly animals by
+slingshotting it into their baskets, and spend coins to grow your farm. Later you unlock a wall
+of barrels.
 
 ## Run it
 
@@ -20,7 +21,9 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
 | `js/farm.js` | Harvest mode: carrier movement, fruit spawning, catching, carrier drawing. |
-| `js/market.js` | Market mode: barrel wall, tap-tap aiming, pull-back and flick throwing, selling. |
+| `js/animals.js` | Animal head drawing (`FF.animals`). |
+| `js/market-layouts.js` | The two market layouts (`FF.marketLayouts`): animal friends and the barrel wall, including the covered wall and its reveal. Tags and request bubbles. |
+| `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
 | `js/shop.js` | Shop overlay, built from the tables in `data.js`. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
 
@@ -29,7 +32,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
 - Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
-  market → shop → main.
+  animals → market-layouts → market → shop → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans
@@ -45,6 +48,10 @@ It works offline except for the Google Font, which falls back to a system font.
   in `draw.js`.
 - **New carrier:** add a row to `carriers`. A new `look` needs drawing code in `drawCarrier()`
   in `farm.js`.
+- **Market pay and aim feel:** edit `market` in `data.js`. Each layout has its own `rowBonus`,
+  `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
+  and price.
+- **New animal:** add it to `animals` in `data.js`, then add its ears and snout in `animals.js`.
 
 ## Art rules
 
@@ -58,15 +65,24 @@ It works offline except for the Google Font, which falls back to a system font.
 
 - No game over and no losing fruit. Misses roll back or fade away.
 - Every falling fruit must be reachable (see `reach()` and `spawnFruit()` in `farm.js`).
+- In the market, the player must never hold a fruit nobody wants (see `askForLoaded()`), and
+  every opening must be reachable by a pull (see `aimRange()`).
 - Big touch targets, short words, lots of sound and sparkle feedback.
 - Short taps should feel precise; holding should build up to a fast, smooth zip.
 - In the market, back rows usually pay more, with some variety.
+- Keep Perfect and streak coins small. The sparkle and sound are the reward, not the money.
+- No timers, daily rewards that can be lost, limited-time offers, pay-to-skip or random prize boxes.
+
+## Version control
+
+The project uses Git, on this computer only for now. Commit each finished piece of work. The tag
+`before-new-market` marks the game before the slingshot rebuild.
 
 ## Checking changes
 
-1. Open `index.html` and play one full loop: harvest until full, sell everything, buy something, harvest again.
+1. Open `index.html` and play one full loop: harvest until full, sell everything, buy something, harvest again. Do this on both market layouts.
 2. Try a phone-sized window (about 390×780) as well as desktop.
-3. Switch scenes in the shop and check that the farm and market both change.
+3. Switch scenes in the shop and check that the farm, both market layouts and the covered wall all change.
 4. Watch the browser console for errors.
 
 To reset progress, run `localStorage.removeItem('fruitfarmer.save')` in the browser console.
