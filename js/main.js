@@ -201,4 +201,12 @@
   }
   Screens.title();
   requestAnimationFrame(frame);
+
+  // Add to Home Screen and offline play only work from a web address, not a double-clicked file.
+  if (location.protocol !== 'file:') {
+    const link = document.createElement('link');
+    link.rel = 'manifest'; link.href = 'manifest.webmanifest';
+    document.head.appendChild(link);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 })();

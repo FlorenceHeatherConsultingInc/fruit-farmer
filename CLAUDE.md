@@ -26,6 +26,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
 | `js/shop.js` | Shop overlay, built from the tables in `data.js`. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
+| `manifest.webmanifest`, `sw.js`, `icons/` | Add to Home Screen and offline play on the hosted site. A new game file must also go in `FILES` in `sw.js`. |
 
 ## How the code fits together
 
