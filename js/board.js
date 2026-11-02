@@ -5,7 +5,8 @@
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, { pick } = FF.util;
   const PERIODS = [['day', 'Today'], ['week', 'This week'], ['month', 'This month'], ['all', 'All time']];
-  let period = 'week', rows = null, status = '', draftName = '', showJoin = false;
+  let period = 'week', rows = null, week = null, status = '', draftName = '', showJoin = false;
+  let saveStatus = '', showUse = false, pendingLoad = null;
 
   const on = () => !!(D.board.url && D.board.key);
   const words = D.boardWords;
@@ -56,10 +57,71 @@
     try {
       await sync();
       rows = await call('family_board', { p_code: f.code, p_since: since(period), p_player: f.id });
+      await loadWeek(f);
       status = '';
     } catch (e) { status = "Can't reach the board right now."; }
     FF.book.refresh();
   }
+  // The crown and ribbons. Skipped quietly if the server hasn't been updated for them yet.
+  async function loadWeek(f) {
+    try {
+      const monday = since('week'), list = await call('family_week', { p_code: f.code, p_week: monday, p_player: f.id });
+      const top = list.reduce((m, r) => Math.max(m, r.last_week), 0);
+      week = { crown: top ? list.filter(r => r.last_week === top).map(r => r.name) : [], ribbons: list.filter(r => r.best_before > 0 && r.this_week > r.best_before).map(r => r.name) };
+      const me = list.find(r => r.me), s = FF.save;
+      if (me && top && me.last_week === top && !s.crownWeeks.includes(monday)) s.crownWeeks.push(monday);
+      if (me && week.ribbons.includes(me.name) && !s.ribbonWeeks.includes(monday)) s.ribbonWeeks.push(monday);
+      FF.persist();
+    } catch (e) { week = null; }
+  }
+
+  /* ---------- Save codes ---------- */
+  function backupData() {
+    const data = JSON.parse(JSON.stringify(FF.save));
+    if (JSON.stringify(data).length > 400000) data.pastFarms.forEach(f => { f.diary = []; });
+    return data;
+  }
+  async function backup() {
+    const b = FF.save.backup;
+    if (!on() || !b) return;
+    try { await call('update_backup', { p_code: b.code, p_secret: b.secret, p_data: backupData() }); } catch (e) {}
+  }
+  async function makeCode() {
+    saveStatus = 'One moment...'; FF.book.refresh();
+    try {
+      const key = secret(), code = await call('create_backup', { p_secret: key, p_data: backupData() });
+      if (!code) throw new Error('refused');
+      FF.save.backup = { code, secret: key };
+      await call('update_backup', { p_code: code, p_secret: key, p_data: backupData() });
+      FF.persist(); FF.sfx.buy(); saveStatus = '';
+    } catch (e) { saveStatus = "Couldn't make a code right now. Try again later."; }
+    FF.book.refresh();
+  }
+  async function findCode() {
+    const code = ($('saveCode').value || '').trim().toUpperCase();
+    if (code.length !== 8) { saveStatus = 'Save codes have 8 letters and numbers.'; FF.book.refresh(); return; }
+    saveStatus = 'One moment...'; FF.book.refresh();
+    try {
+      const data = await call('load_backup', { p_code: code });
+      if (!data) saveStatus = "That code didn't work. Check it and try again.";
+      else { pendingLoad = data; saveStatus = ''; }
+    } catch (e) { saveStatus = "Can't reach the save right now."; }
+    FF.book.refresh();
+  }
+  function saveHTML() {
+    const b = FF.save.backup;
+    let html = `<div class="label">Save code</div>`;
+    if (pendingLoad) return html + `<p class="note">Replace this game with Farm ${pendingLoad.farmNo || 1}, day ${pendingLoad.day || 1}? The game on this device will be gone.</p>` +
+      `<div class="btnrow"><button class="btn primary" type="button" data-board="useyes">Use that save</button><button class="btn secondary" type="button" data-board="useno">Keep this game</button></div>`;
+    html += b
+      ? `<p class="note">Your code: <b class="code">${b.code}</b><br>Write it down. It backs up after each market trip and works on any device. Anyone with it can load your game.</p>`
+      : `<p class="note">Get a code to keep your game safe and move it to another device.</p><button class="btn secondary" type="button" data-board="makecode">Get my code</button>`;
+    html += showUse
+      ? `<label class="label" for="saveCode">Enter a save code</label><input id="saveCode" class="codebox" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn primary" type="button" data-board="findcode">Find my game</button>`
+      : `<button class="btn secondary" type="button" data-board="showuse">Use a code</button>`;
+    return html + (saveStatus ? `<p class="note">${saveStatus}</p>` : '');
+  }
+
   async function create() {
     const f = ensureIdentity();
     status = 'One moment...'; FF.book.refresh();
@@ -98,13 +160,15 @@
         : `<button class="btn secondary" type="button" data-board="showjoin">Join with a code</button>`) +
       (status ? `<p class="note">${status}</p>` : '');
   }
+  const daysLeft = () => 7 - (new Date().getDay() + 6) % 7;
   function boardHTML() {
     const f = FF.save.family;
     const list = rows
-      ? `<ol class="board">${rows.map(r => `<li class="${r.me ? 'on' : ''}"><b>${FF.book.esc(r.name)}</b><span class="pay">${I.coin}${r.coins}</span></li>`).join('')}</ol>`
+      ? `<ol class="board">${rows.map(r => `<li class="${r.me ? 'on' : ''}">${week && week.crown.includes(r.name) ? '<span class="crown" aria-label="Last week\'s crown">♛</span>' : ''}<b>${FF.book.esc(r.name)}</b>${week && week.ribbons.includes(r.name) ? '<span class="ribbon">Best week!</span>' : ''}<span class="pay">${I.coin}${r.coins}</span></li>`).join('')}</ol>`
       : `<p class="note">Loading...</p>`;
     return `<div class="periods">${PERIODS.map(([k, name]) => `<button type="button" data-board="p-${k}" aria-pressed="${k === period}">${name}</button>`).join('')}</div>` +
       list + (status ? `<p class="note">${status}</p>` : '') +
+      (week ? `<p class="note">${daysLeft()} ${daysLeft() === 1 ? 'day' : 'days'} left to win this week's crown.</p>` : '') +
       `<p class="note">Family code: <b class="code">${f.code}</b><br>Share it with your family to play together.</p>` +
       `<button class="btn secondary" type="button" data-board="leave">Leave family</button>`;
   }
@@ -114,8 +178,15 @@
     html: () => (FF.save.family && FF.save.family.code) ? boardHTML() : setupHTML(),
     opened() { status = ''; load(); },
     sync() { sync().catch(() => {}); },
+    backup,
+    saveHTML,
     act(name) {
       if (name.startsWith('p-')) { period = name.slice(2); rows = null; FF.book.refresh(); load(); return; }
+      if (name === 'makecode') { makeCode(); return; }
+      if (name === 'findcode') { findCode(); return; }
+      if (name === 'showuse') { showUse = true; FF.book.refresh(); return; }
+      if (name === 'useno') { pendingLoad = null; FF.book.refresh(); return; }
+      if (name === 'useyes') { FF.replaceSave(pendingLoad); location.reload(); return; }
       if (name === 'rename') { draftName = randomName(); FF.sfx.tick(); FF.book.refresh(); }
       else if (name === 'showjoin') { showJoin = true; FF.book.refresh(); }
       else if (name === 'create') create();

@@ -56,11 +56,13 @@
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
     t.kind = pick(Animals.kinds.filter(k => k !== t.kind));
-    t.wants = force || (Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
+    const sp = FF.special().fruit;
+    t.wants = force || (spare.includes(sp) && Math.random() < 0.4 ? sp : Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
+    t.special = t.wants === sp;
     t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
     let bonus = pay().rowBonus[t.row];
     if (Math.random() < pay().mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
-    t.price = (t.wants === 'any' ? 1 : D.fruits[t.wants].price) + bonus;
+    t.price = (t.wants === 'any' ? 1 : D.fruits[t.wants].price * (t.special ? D.specialPay : 1)) + bonus;
     t.state = 'open';
   }
   // A request can outgrow the fruit left in play. Shrink it, or finish it if it's already started.

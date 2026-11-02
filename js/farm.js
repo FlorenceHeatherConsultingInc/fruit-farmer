@@ -102,6 +102,7 @@
     fullT = FF.carried() >= FF.cap() ? 0.4 : -1;
   };
   Farm.reset = () => { fruits = []; pile = []; };
+  Farm.nextFruitX = () => { let n = null; for (const f of fruits) if (!f.landed && (!n || f.y > n.y)) n = f; return n ? n.x : null; };
 
   Farm.update = (dt, demo) => {
     const inp = G.input, mt = tuning(), prevX = basket.x;
@@ -146,7 +147,7 @@
     if (spawnT <= 0) {
       const falling = fruits.filter(f => !f.landed).length;
       if (!demo && FF.carried() + falling >= FF.cap()) spawnT = 0.3;
-      else if (spawnFruit(demo)) spawnT = D.speeds[FF.save.speed].gap * rand(0.75, 1.25);
+      else if (spawnFruit(demo)) spawnT = Math.min(D.speeds[FF.save.speed].gap, D.harvest.tripSeconds / FF.cap()) * rand(0.75, 1.25);
       else spawnT = 0.1;
     }
 
@@ -154,7 +155,7 @@
     for (const f of fruits) {
       if (f.landed) { f.life -= dt * 1.4; continue; }
       f.y += f.vy * dt; f.rot += f.vr * dt;
-      if (mag && !demo) {
+      if (mag && !demo && f.type !== 'star') {
         const dx = basket.x - f.x, dy = basket.y - f.y;
         if (dy > -f.r && dy < basket.h * 3.2 && Math.abs(dx) < basket.w * (0.55 + 0.4 * mag)) {
           f.x += Math.sign(dx) * Math.min(Math.abs(dx), G.W * (0.18 + 0.12 * mag) * dt);

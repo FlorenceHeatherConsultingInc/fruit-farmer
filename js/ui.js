@@ -27,7 +27,12 @@
     hud(which) {
       $('farmHud').hidden = which !== 'farm';
       $('pads').hidden = which !== 'farm';
+      $('farmSpecial').hidden = which !== 'farm';
       $('marketHud').hidden = which !== 'market';
+    },
+    specialText() {
+      const sp = FF.special(), name = FF.data.fruits[sp.fruit].name.toLowerCase(), who = sp.animal[0].toUpperCase() + sp.animal.slice(1);
+      return who + ' is craving ' + name + '! Double pay today.';
     },
     bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); },
     coinHTML: n => FF.icons.coin + '<span>' + n + '</span>'

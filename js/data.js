@@ -37,6 +37,12 @@ FF.data = {
     wheels: { top: 0.22, tap: 0.03, ramp: -0.07 }  // added for each Zippy wheels level
   },
 
+  // Bigger carriers make fruit fall faster, so a full load takes about this many seconds at most.
+  harvest: { tripSeconds: 22 },
+
+  // Each game day one fruit pays this many times its price.
+  specialPay: 2,
+
   // Gold star chance for each fruit: base + perLevel × Lucky stars level.
   stars: { base: 0.04, perLevel: 0.05 },
 
@@ -128,7 +134,7 @@ FF.data = {
       ambient: 'fireflies' }
   ],
 
-  // Family leaderboards. Empty url and key turn them off. This key is the public one, safe to ship.
+  // Family leaderboards and save codes. Empty url and key turn them off. This key is the public one, safe to ship.
   board: { url: 'https://wurecjpetnooddiftoao.supabase.co', key: 'sb_publishable_8dFdsxOWlMA9UnlbzH9YbA_pBhpsjuk' },
   // Farm names are built from these lists only. They must match valid_farm_name in supabase/schema.sql.
   boardWords: {

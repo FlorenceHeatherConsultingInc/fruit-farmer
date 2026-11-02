@@ -35,7 +35,7 @@
       skins: [D.skins[0].id], skin: D.skins[0].id,
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
-      day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null
+      day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: []
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -72,12 +72,23 @@
     if (Array.isArray(raw.pastFarms)) s.pastFarms = raw.pastFarms;
     if (raw.today && typeof raw.today === 'object') s.today = raw.today;
     if (raw.family && typeof raw.family === 'object') s.family = raw.family;
+    if (raw.backup && typeof raw.backup === 'object') s.backup = raw.backup;
+    if (Array.isArray(raw.crownWeeks)) s.crownWeeks = raw.crownWeeks;
+    if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;
     return s;
   }
 
   FF.freshSave = freshSave;
+  FF.replaceSave = data => localStorage.setItem(SAVE_KEY, JSON.stringify(data));
   FF.save = loadSave();
   FF.persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(FF.save)); } catch (e) {} };
+
+  // Today's special: one fruit you grow, chosen from the game day so it never depends on the calendar.
+  FF.special = () => {
+    const s = FF.save, kinds = Object.keys(D.animals);
+    const fruit = s.trees[(s.day * 7 + s.farmNo * 3) % s.trees.length], animal = kinds[(s.day * 5 + s.farmNo) % kinds.length];
+    return { fruit, animal };
+  };
 
   // Handy lookups for the current progress
   FF.carrier = () => D.carriers[FF.save.tier];

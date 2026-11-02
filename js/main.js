@@ -31,6 +31,7 @@
       stat(I.coin, s.coins, 'coin') +
       stat(I.basket, c.name + ' · holds ' + c.cap) +
       stat(I.tree, s.trees.length + (s.trees.length > 1 ? ' trees' : ' tree'));
+    $('titleSpecial').textContent = UI.specialText();
     $('titleMarketBtn').hidden = n === 0;
     $('titleMarketBtn').innerHTML = I.stall + ' Sell ' + n + ' fruit';
   }
@@ -55,6 +56,7 @@
       clearInput();
       FF.farm.start();
       UI.hud('farm');
+      $('farmSpecial').textContent = UI.specialText();
       FF.hud.load();
     },
     market() {

@@ -22,6 +22,7 @@
     const s = FF.save, t = today();
     if (!hasEntries(t)) return;
     delete t.sold;
+    t.special = FF.special();
     s.diary = s.diary.concat({ day: s.day, ...t }).slice(-MAX_PAGES);
     s.bestDay = Math.max(s.bestDay, t.earned);
     s.day++; s.today = blankDay();
@@ -52,7 +53,9 @@
   /* ---------- Pages ---------- */
   function pageHTML(p, title) {
     const fruit = Object.entries(p.harvest), sales = Object.values(p.sales);
+    const sp = p.special;
     return `<article class="page"><h3>${title}</h3>` +
+      (sp ? `<div class="row">${animalPic(sp.animal)}<span>craved</span>${fruitPic(sp.fruit)}</div>` : '') +
       (fruit.length ? `<div class="row"><span>Picked</span>${fruit.map(([t, n]) => `<span class="item">${fruitPic(t)}×${n}</span>`).join('')}</div>` : '') +
       sales.map(x => `<div class="row">${animalPic(x.animal)}<span>bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
       (p.perfect ? `<div class="row"><span>${p.perfect} Perfect ${p.perfect > 1 ? 'shots' : 'shot'}!</span></div>` : '') +
@@ -81,7 +84,8 @@
       farms.map(f => `<li class="${f.now ? 'on' : ''}"><b>Farm ${f.no}</b><span>${f.days} ${f.days === 1 ? 'day' : 'days'}</span><span class="pay">${I.coin}${f.earned}</span></li>`).join('') + `</ol>` +
       (confirmNew
         ? `<p class="note">Start over with no coins and only an apple tree? You keep your colors and scenery. This farm stays in your book.</p><div class="btnrow"><button class="btn primary" type="button" data-book="newyes">Start new farm</button><button class="btn secondary" type="button" data-book="newno">Keep this farm</button></div>`
-        : `<button class="btn secondary" type="button" data-book="new">Start a new farm</button>`);
+        : `<button class="btn secondary" type="button" data-book="new">Start a new farm</button>`) +
+      (FF.board.enabled() ? FF.board.saveHTML() : '');
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
@@ -131,7 +135,7 @@
     },
     bonus: earn,
     bought(name) { today().bought.push(name); },
-    sold() { today().sold = true; FF.persist(); FF.board.sync(); },
+    sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
     startDay() { if (today().sold) { closeDay(); FF.persist(); } },
     open(origin) {
       FF.sound.ensure();

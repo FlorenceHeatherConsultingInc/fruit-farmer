@@ -104,7 +104,68 @@ begin
   return found;
 end $$;
 
+-- Each family's week by week picture, for the crown and ribbons. p_week is this week's Monday.
+create or replace function family_week(p_code text, p_week date, p_player uuid)
+returns table (name text, this_week bigint, last_week bigint, best_before bigint, me boolean)
+language sql stable security definer set search_path = public as $$
+  with weeks as (
+    select s.player_id, (s.day - ((s.day - p_week) % 7 + 7) % 7)::date as week, sum(s.coins)::bigint as coins
+    from scores s join players p on p.id = s.player_id
+    where p.family_code = p_code
+    group by 1, 2
+  )
+  select p.name,
+    coalesce(max(w.coins) filter (where w.week = p_week), 0)::bigint,
+    coalesce(max(w.coins) filter (where w.week = p_week - 7), 0)::bigint,
+    coalesce(max(w.coins) filter (where w.week < p_week), 0)::bigint,
+    p.id = p_player
+  from players p left join weeks w on w.player_id = p.id
+  where p.family_code = p_code
+  group by p.id, p.name
+  order by 2 desc, p.name
+$$;
+
+-- Save codes: a backup of one player's game. The code is the only key needed to load it; the
+-- secret stays on the device that made it and is what lets that device update it.
+create table if not exists saves (
+  code text primary key check (code ~ '^[A-HJ-NP-Z2-9]{8}$'),
+  secret_hash text not null,
+  data jsonb not null check (pg_column_size(data) <= 600000),
+  updated_at timestamptz not null default now()
+);
+alter table saves enable row level security;
+revoke all on saves from anon, authenticated;
+
+create or replace function create_backup(p_secret text, p_data jsonb) returns text
+language plpgsql security definer set search_path = public as $$
+declare
+  letters constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  new_code text;
+begin
+  if length(p_secret) < 32 then return null; end if;
+  loop
+    select string_agg(substr(letters, 1 + floor(random() * 32)::int, 1), '') into new_code from generate_series(1, 8);
+    exit when not exists (select 1 from saves where code = new_code);
+  end loop;
+  insert into saves (code, secret_hash, data) values (new_code, hash_secret(p_secret), p_data);
+  return new_code;
+end $$;
+
+create or replace function update_backup(p_code text, p_secret text, p_data jsonb) returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  update saves set data = p_data, updated_at = now() where code = p_code and secret_hash = hash_secret(p_secret);
+  return found;
+end $$;
+
+create or replace function load_backup(p_code text) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select data from saves where code = p_code
+$$;
+
 revoke execute on function hash_secret(text), valid_farm_name(text) from public, anon, authenticated;
+revoke execute on function family_week(text, date, uuid), create_backup(text, jsonb), update_backup(text, text, jsonb), load_backup(text) from public;
+grant execute on function family_week(text, date, uuid), create_backup(text, jsonb), update_backup(text, text, jsonb), load_backup(text) to anon;
 revoke execute on function join_family(text, uuid, text, text), create_family(uuid, text, text),
   submit_scores(uuid, text, jsonb), family_board(text, date, uuid), leave_family(uuid, text) from public;
 grant execute on function join_family(text, uuid, text, text), create_family(uuid, text, text),
