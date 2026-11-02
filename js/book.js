@@ -70,7 +70,7 @@
     return `<div class="score"><small>Farm Score</small><b>${s.lifetime}</b><span class="rank">${rank.name}</span>` +
       (next ? `<small>${next.score - s.lifetime} more to ${next.name}</small>` : '') + `</div>` +
       `<div class="tiles">${stat('Today', t.day)}${stat('This week', t.week)}${stat('This month', t.month)}${stat('All time', s.lifetime)}${stat('This farm', s.farmEarned)}${stat('Best day', s.bestDay)}</div>` +
-      `<p class="note">Farm ${s.farmNo}, day ${s.day}</p>`;
+      `<p class="note">Farm ${s.farmNo}, day ${s.day}${s.challenge ? ' · ' + challengeName(s.challenge) : ''} · ${s.seeds} Golden Seeds</p>`;
   }
   function diaryHTML() {
     const s = FF.save, t = today(), pages = s.diary.slice().reverse();
@@ -80,12 +80,15 @@
     return open + list + (pages.length > shown ? `<button class="btn secondary" type="button" data-book="more">Show older days</button>` : '');
   }
   function farmsHTML() {
-    const s = FF.save, farms = s.pastFarms.map(f => ({ ...f, now: false })).concat({ no: s.farmNo, days: s.day, earned: s.farmEarned, now: true });
+    const s = FF.save, farms = s.pastFarms.map(f => ({ ...f, now: false })).concat({ no: s.farmNo, days: s.day, earned: s.farmEarned, challenge: s.challenge, now: true });
     farms.sort((a, b) => b.earned - a.earned);
     return `<div class="label">My best farms</div><ol class="board">` +
-      farms.map(f => `<li class="${f.now ? 'on' : ''}"><b>Farm ${f.no}</b><span>${f.days} ${f.days === 1 ? 'day' : 'days'}</span><span class="pay">${I.coin}${f.earned}</span></li>`).join('') + `</ol>` +
+      farms.map(f => `<li class="${f.now ? 'on' : ''}"><b>Farm ${f.no}</b><span>${f.challenge ? challengeName(f.challenge) + ', ' : ''}${f.days} ${f.days === 1 ? 'day' : 'days'}</span><span class="pay">${I.coin}${f.earned}</span></li>`).join('') + `</ol>` +
       (confirmNew
-        ? `<p class="note">Start over with no coins and only an apple tree? You keep your colors and scenery. This farm stays in your book.</p><div class="btnrow"><button class="btn primary" type="button" data-book="newyes">Start new farm</button><button class="btn secondary" type="button" data-book="newno">Keep this farm</button></div>`
+        ? `<p class="note">Start over? This farm earns you <b>${seedsFromFarm()} Golden Seeds</b>. You keep your friends, village, stickers, colors and scenery.</p>` +
+          `<button class="btn primary" type="button" data-book="newyes">Regular farm</button>` +
+          `<div class="label">Challenge farms pay double seeds</div><div class="rows">${D.challenges.map(c => `<button class="choice" type="button" data-book="ch-${c.id}"><b>${c.name}</b><small>${c.desc}</small></button>`).join('')}</div>` +
+          `<button class="btn secondary" type="button" data-book="newno">Keep this farm</button>`
         : `<button class="btn secondary" type="button" data-book="new">Start a new farm</button>`) +
       (FF.board.enabled() ? FF.board.saveHTML() : '');
   }
@@ -95,15 +98,28 @@
   }
 
   /* ---------- New farm ---------- */
-  function newFarm() {
+  function seedsFromFarm() {
+    const s = FF.save, base = Math.floor(Math.sqrt(s.farmEarned / D.seeds.per));
+    return s.challenge ? base * D.seeds.challengePay : base;
+  }
+  const challengeName = id => { const c = D.challenges.find(x => x.id === id); return c ? c.name : ''; };
+
+  function newFarm(challenge) {
     const s = FF.save, n = FF.freshSave();
     closeDay();
-    s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary });
+    s.seeds += seedsFromFarm();
+    s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary, challenge: s.challenge });
     ['coins', 'crate', 'tier', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
     s.farmNo++;
+    s.challenge = challenge || null;
+    if (s.seedBuys.includes('start-basket')) s.tier = 1;
+    if (s.seedBuys.includes('start-tree') && challenge !== 'apples') s.trees.push('orange');
+    if (challenge === 'wallrush') { s.wallOwned = true; s.wallRevealed = true; s.marketLayout = 'wall'; }
     FF.stickers.check();
     FF.persist(); FF.layout();
   }
+
+  function startOver(challenge) { confirmNew = false; newFarm(challenge); FF.sfx.party(); from = 'title'; FF.book.close(); }
 
   $('bookOv').addEventListener('click', e => {
     const b = e.target.closest('button');
@@ -122,7 +138,8 @@
       case 'more': shown += PAGE_STEP; render(); break;
       case 'new': confirmNew = true; render(); break;
       case 'newno': confirmNew = false; render(); break;
-      case 'newyes': confirmNew = false; newFarm(); FF.sfx.party(); from = 'title'; FF.book.close(); break;
+      case 'newyes': startOver(); break;
+      default: if (b.dataset.book && b.dataset.book.startsWith('ch-')) startOver(b.dataset.book.slice(3));
     }
   });
 

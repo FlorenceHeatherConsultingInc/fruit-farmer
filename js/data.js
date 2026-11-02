@@ -107,6 +107,13 @@ FF.data = {
       foliage: ['#ff8fb1', '#ffc0d4', '#e86d94'], trunk: '#8a5a32',
       plaza: ['#fff0d0', '#f5d6a8'], awnings: ['#ff5e7a', '#ffd23f', '#4aa3e8', '#5cc24a'],
       ambient: 'butterflies' },
+    { id: 'gold', name: 'Golden Hour', cost: 1e9, reward: true,
+      sky: ['#ffb84d', '#ffeeb0'], sun: '#fff0a0', cloud: 'rgba(255,244,214,0.92)',
+      hills: ['#e0b04a', '#cf9a38'],
+      ground: { top: '#a8bf4a', edge: '#94ab3e', deep: '#7c9230', bits: 'sparkle' },
+      foliage: ['#d9a52c', '#f0c84a', '#b88a20'], trunk: '#7a4c2a',
+      plaza: ['#f5e3b0', '#dcc081'], awnings: ['#ffb02e', '#e8743a', '#d9a400', '#c86bd6'],
+      ambient: 'sparkles' },
     { id: 'sunset', name: 'Sunset', cost: 40,
       sky: ['#ff7f6b', '#ffd9a0'], sun: '#ff5e3a', cloud: 'rgba(255,232,214,0.9)',
       hills: ['#d9a35e', '#c98e4c'],
@@ -175,8 +182,30 @@ FF.data = {
     goat:     { name: 'Nibbles',   fav: 'orange',     color: '#e8e0d0', accent: '#b8a890', arrive: 9 },
     sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff', arrive: 12 },
     hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230', arrive: 15 },
-    turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c', arrive: 18 }
+    turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c', arrive: 18 },
+    // Rare animals are bought with Golden Seeds. They shop at the market but don't take a home.
+    // like = which animal's shape to draw.
+    goldie:   { name: 'Goldie',    fav: 'banana',     color: '#ffd23f', accent: '#ff9a1f', like: 'bunny', rare: true },
+    moon:     { name: 'Moonbeam',  fav: 'grapes',     color: '#b8a8f0', accent: '#8a6fe0', like: 'pig', rare: true }
   },
+
+  // Golden Seeds are earned when you leave a farm: the square root of (coins earned / per), rounded
+  // down. Farms played as a challenge pay challengePay times as many.
+  seeds: { per: 100, challengePay: 2, tinyCap: 5 },
+  challenges: [
+    { id: 'apples',   name: 'Apples Only', desc: 'One tree, forever' },
+    { id: 'nomagnet', name: 'No Magnet',   desc: 'Catch everything yourself' },
+    { id: 'tiny',     name: 'Tiny Hands',  desc: 'Carry 5 fruit at most' },
+    { id: 'wallrush', name: 'Wall Rush',   desc: 'The Barrel wall from day one' }
+  ],
+  // Bought with Golden Seeds and kept forever.
+  seedShop: [
+    { id: 'rare-goldie', name: 'Goldie',      desc: 'A rare golden bunny comes to market.', cost: 5, animal: 'goldie' },
+    { id: 'rare-moon',   name: 'Moonbeam',    desc: 'A rare moonlit pig comes to market.',  cost: 5, animal: 'moon' },
+    { id: 'scene-gold',  name: 'Golden Hour', desc: 'Special scenery for every farm.',      cost: 8, scene: 'gold' },
+    { id: 'start-basket', name: 'Head start: basket', desc: 'New farms start with the Little basket.', cost: 6 },
+    { id: 'start-tree',   name: 'Head start: tree',   desc: 'New farms start with the Orange tree.',   cost: 10 }
+  ],
 
   // The Sticker Book. stat is the number a sticker watches (see stickers.js), n is the goal,
   // and within means "at this number or lower", such as reaching the wall by a certain day.

@@ -36,7 +36,8 @@
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
-      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}
+      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {},
+      seeds: 0, seedBuys: [], challenge: null
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -80,6 +81,9 @@
     if (Array.isArray(raw.decor)) s.decor = raw.decor;
     if (Array.isArray(raw.stickers)) s.stickers = raw.stickers;
     if (raw.stats && typeof raw.stats === 'object') s.stats = raw.stats;
+    s.seeds = n(raw.seeds);
+    if (Array.isArray(raw.seedBuys)) s.seedBuys = raw.seedBuys;
+    if (D.challenges.some(c => c.id === raw.challenge)) s.challenge = raw.challenge;
     if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;
     return s;
   }
@@ -98,7 +102,7 @@
 
   // Handy lookups for the current progress
   FF.carrier = () => D.carriers[FF.save.tier];
-  FF.cap = () => FF.carrier().cap;
+  FF.cap = () => (FF.save.challenge === 'tiny' ? Math.min(D.seeds.tinyCap, FF.carrier().cap) : FF.carrier().cap);
   FF.carried = () => FF.FRUIT_TYPES.reduce((sum, t) => sum + FF.save.crate[t], 0);
   FF.scene = () => D.scenes.find(s => s.id === FF.save.scene) || D.scenes[0];
   FF.skin = () => D.skins.find(s => s.id === FF.save.skin) || D.skins[0];

@@ -119,7 +119,8 @@
     color: kind => D.animals[kind].color,
     // r is the head radius. mood: idle, excited, happy or no. look: a -1..1 direction for the eyes.
     drawHead(kind, x, y, r, mood, clock, look) {
-      const ctx = G.ctx, a = D.animals[kind], lw = Math.max(2, r * 0.13);
+      const ctx = G.ctx, who = kind, a = D.animals[kind], lw = Math.max(2, r * 0.13);
+      kind = a.like || kind;
       ctx.save();
       ctx.translate(x + (mood === 'no' ? Math.sin(clock * 34) * r * 0.16 : 0), y);
       ears(kind, a, r, lw, clock);
@@ -137,7 +138,7 @@
       }
       snout(kind, a, r, lw);
       mouth(kind, r, lw, mood);
-      if (FF.friends && FF.friends.wearsHat(kind)) hat(r, lw);
+      if (FF.friends && FF.friends.wearsHat(who)) hat(r, lw);
       ctx.restore();
     }
   };

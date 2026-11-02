@@ -290,6 +290,9 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .periods.sixes { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .periods.sixes button { display: flex; flex-direction: column; align-items: center; padding: 2px 0; min-height: 56px; }
 .periods.sixes small { font-size: 12px; }
+.choice { font: inherit; display: flex; flex-direction: column; align-items: flex-start; gap: 0; text-align: left; padding: 6px 12px; min-height: 50px; justify-content: center; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.choice b { font-size: 18px; line-height: 1.15; }
+.choice small { font-size: 15px; font-weight: 600; opacity: .8; }
 .pagehead { display: flex; justify-content: space-between; align-items: center; }
 .pagehead h3 { margin: 0; font-size: 20px; }
 .stickers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }

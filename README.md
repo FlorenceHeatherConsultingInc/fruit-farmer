@@ -21,6 +21,8 @@ browser on that computer.
 - **Village:** sell fruit to animals to earn hearts. At 3 hearts, build them a home. Friends stay
   across every farm, and best friends give you a special basket color.
 - **Stickers:** 60 stickers in the Farm book. Fill a page to unlock a reward you can't buy.
+- **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
+  animals, scenery and head starts in the shop.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it
   to another device.
 - **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery. Reach the

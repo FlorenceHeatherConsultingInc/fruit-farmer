@@ -58,6 +58,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - **Market pay and aim feel:** edit `market` in `data.js`. Each layout has its own `rowBonus`,
   `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
   and price.
+- **Seeds and challenges:** `seeds`, `challenges` and `seedShop` in `data.js`. A new challenge also needs its rule added where it applies (see `save.challenge`).
 - **New animal:** add it to `animals` in `data.js` with a name, favorite and `arrive`, then add its ears and snout in `animals.js`.
 
 ## Art rules

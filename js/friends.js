@@ -10,7 +10,11 @@
     return FR.hearts.filter(n => sold >= n).length;
   };
   const totalHearts = () => Object.keys(D.animals).reduce((n, k) => n + hearts(k), 0);
-  const available = () => Object.keys(D.animals).filter(k => !D.animals[k].arrive || totalHearts() >= D.animals[k].arrive);
+  const arrived = k => {
+    const a = D.animals[k];
+    return a.rare ? FF.save.seedBuys.includes(D.seedShop.find(x => x.animal === k).id) : !a.arrive || totalHearts() >= a.arrive;
+  };
+  const available = () => Object.keys(D.animals).filter(arrived);
 
   // Saves from before friends existed: count what the diaries remember.
   function seedFromDiaries() {
@@ -32,19 +36,19 @@
     hasHome: kind => !!(FF.save.friends[kind] && FF.save.friends[kind].home),
     homesBuilt: () => Object.values(FF.save.friends).filter(f => f.home).length,
     homeCost() { const list = D.homeCosts, n = this.homesBuilt(); return list[Math.min(n, list.length - 1)]; },
-    canMoveIn: kind => hearts(kind) >= FR.homeAt,
+    canMoveIn: kind => !D.animals[kind].rare && hearts(kind) >= FR.homeAt,
     buildHome(kind) { record(kind).home = true; },
     wearsHat: kind => hearts(kind) >= FR.hatAt,
     // Returns what changed, so the market can celebrate it.
     sell(kind, fruit) {
       const before = hearts(kind), known = available();
       record(kind).sold += fruit === D.animals[kind].fav ? FR.favoriteCounts : 1;
-      const now = hearts(kind), arrived = available().filter(k => !known.includes(k));
+      const now = hearts(kind), newcomers = available().filter(k => !known.includes(k));
       if (now === FR.hearts.length && before < now) {
         const id = 'friend-' + kind;
         if (!FF.save.skins.includes(id)) FF.save.skins.push(id);
       }
-      return { hearts: now > before ? now : 0, arrived };
+      return { hearts: now > before ? now : 0, arrived: newcomers };
     }
   };
 })();
