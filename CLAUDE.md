@@ -31,6 +31,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/friends.js` | Hearts and friendship (`FF.friends`). Kept across farms. |
 | `js/stickers.js` | The Sticker Book (`FF.stickers`). Stickers and rewards are listed in `data.js`; new counters go through `add()`, `best()` or `first()`. |
 | `js/village.js` | The Village screen: homes, decorations and the friends list. |
+| `js/parade.js` | The Fruit Legend parade, shown once and replayable from the Farm book. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Add to Home Screen and offline play on the hosted site. A new game file must also go in `FILES` in `sw.js`. |
 
@@ -39,7 +40,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
 - Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
-  animals → friends → stickers → market-layouts → market → shop → board → book → village → main.
+  animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans

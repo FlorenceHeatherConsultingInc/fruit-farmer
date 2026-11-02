@@ -23,6 +23,7 @@ browser on that computer.
 - **Stickers:** 60 stickers in the Farm book. Fill a page to unlock a reward you can't buy.
 - **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
   animals, scenery and head starts in the shop.
+- **Fruit Legend:** reach a Farm Score of 100,000 for a parade of all your friends.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it
   to another device.
 - **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery. Reach the

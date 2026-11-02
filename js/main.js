@@ -36,6 +36,13 @@
     $('titleMarketBtn').innerHTML = I.stall + ' Sell ' + n + ' fruit';
   }
 
+  function showSoldCard() {
+    $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin');
+    UI.show('sold');
+    FF.fx.confetti(); FF.sfx.party();
+    $('soldShopBtn').focus();
+  }
+
   const Screens = FF.screens = {
     title() {
       G.state = 'title';
@@ -79,10 +86,9 @@
     showSold() {
       const earned = FF.market.earned();
       FF.book.sold();
+      if (FF.save.legend && !FF.save.legendSeen) { FF.save.legendSeen = true; FF.persist(); FF.parade.open('sold'); return; }
       $('soldMsg').textContent = earned ? 'You earned ' + earned + ' coins this trip. Nice throwing!' : 'All your fruit is sold.';
-      $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin');
-      UI.show('sold');
-      FF.fx.confetti(); FF.sfx.party();
+      showSoldCard();
       $('soldShopBtn').focus();
     },
     pause() {
@@ -101,7 +107,7 @@
       else { renderTitle(); UI.show('title'); }
     },
     afterBook(from) {
-      if (from === 'sold') UI.show('sold');
+      if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else Screens.title();
     }
   };
@@ -210,6 +216,7 @@
     else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
     else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
     if (G.overlay === 'village') FF.village.tick();
+    if (G.overlay === 'parade') FF.parade.tick(dt);
     if (G.state === 'market') FF.market.draw(); else FF.farm.draw(G.state === 'title');
     requestAnimationFrame(frame);
   }

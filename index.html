@@ -157,6 +157,16 @@
   </div>
 </div>
 
+<!-- Fruit Legend parade -->
+<div class="overlay parade" id="paradeOv" hidden>
+  <canvas id="paradeArt" aria-hidden="true"></canvas>
+  <div class="card parade-card" role="dialog" aria-labelledby="paradeTitle">
+    <h2 id="paradeTitle">Fruit Legend!</h2>
+    <p id="paradeText"></p>
+    <button class="btn primary" type="button" id="paradeDone">Keep farming</button>
+  </div>
+</div>
+
 <!-- Load order matters: each file adds to the shared FF object that later files use. -->
 <script src="js/data.js"></script>
 <script src="js/core.js"></script>
@@ -173,6 +183,7 @@
 <script src="js/board.js"></script>
 <script src="js/book.js"></script>
 <script src="js/village.js"></script>
+<script src="js/parade.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

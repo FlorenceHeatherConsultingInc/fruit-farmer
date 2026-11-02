@@ -17,6 +17,7 @@
     const s = FF.save, key = dateKey();
     s.farmEarned += coins; s.lifetime += coins; today().earned += coins;
     s.byDate[key] = (s.byDate[key] || 0) + coins;
+    if (!s.legend && s.lifetime >= D.ranks[D.ranks.length - 1].score) { s.legend = true; today().legend = true; }
   }
   function closeDay() {
     const s = FF.save, t = today();
@@ -62,6 +63,7 @@
       sales.map(x => `<div class="row">${animalPic(x.animal)}<span>${FF.friends.name(x.animal)} bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
       (p.perfect ? `<div class="row"><span>${p.perfect} Perfect ${p.perfect > 1 ? 'shots' : 'shot'}!</span></div>` : '') +
       (p.bought.length ? `<div class="row"><span>Got: ${p.bought.join(', ')}</span></div>` : '') +
+      (p.legend ? `<div class="row"><b>Became a Fruit Legend! The whole village held a parade.</b></div>` : '') +
       (p.earned ? `<div class="row total"><span>Earned</span><span class="pay">${I.coin}${p.earned}</span></div>` : '') +
       `</article>`;
   }
@@ -70,6 +72,7 @@
     return `<div class="score"><small>Farm Score</small><b>${s.lifetime}</b><span class="rank">${rank.name}</span>` +
       (next ? `<small>${next.score - s.lifetime} more to ${next.name}</small>` : '') + `</div>` +
       `<div class="tiles">${stat('Today', t.day)}${stat('This week', t.week)}${stat('This month', t.month)}${stat('All time', s.lifetime)}${stat('This farm', s.farmEarned)}${stat('Best day', s.bestDay)}</div>` +
+      (s.legend ? `<button class="btn secondary" type="button" data-book="parade">Watch the parade</button>` : '') +
       `<p class="note">Farm ${s.farmNo}, day ${s.day}${s.challenge ? ' · ' + challengeName(s.challenge) : ''} · ${s.seeds} Golden Seeds</p>`;
   }
   function diaryHTML() {
@@ -139,6 +142,7 @@
       case 'new': confirmNew = true; render(); break;
       case 'newno': confirmNew = false; render(); break;
       case 'newyes': startOver(); break;
+      case 'parade': FF.parade.open(from === 'sold' ? 'sold' : 'title'); break;
       default: if (b.dataset.book && b.dataset.book.startsWith('ch-')) startOver(b.dataset.book.slice(3));
     }
   });

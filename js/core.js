@@ -37,7 +37,7 @@
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {},
-      seeds: 0, seedBuys: [], challenge: null
+      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -82,6 +82,7 @@
     if (Array.isArray(raw.stickers)) s.stickers = raw.stickers;
     if (raw.stats && typeof raw.stats === 'object') s.stats = raw.stats;
     s.seeds = n(raw.seeds);
+    s.legend = raw.legend === true; s.legendSeen = raw.legendSeen === true;
     if (Array.isArray(raw.seedBuys)) s.seedBuys = raw.seedBuys;
     if (D.challenges.some(c => c.id === raw.challenge)) s.challenge = raw.challenge;
     if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;

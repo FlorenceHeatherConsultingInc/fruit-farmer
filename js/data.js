@@ -159,13 +159,13 @@ FF.data = {
     second: ['Pig', 'Bunny', 'Bear', 'Frog', 'Cat', 'Duck', 'Apple', 'Berry', 'Banana', 'Grape', 'Orange', 'Barrel', 'Basket', 'Sprout', 'Acorn', 'Clover']
   },
 
-  // Farm Score ranks. score = coins earned across all farms.
+  // Farm Score ranks. score = coins earned across all farms. Reaching the last one plays the parade.
   ranks: [
     { name: 'Sprout', score: 0 },
     { name: 'Grower', score: 250 },
     { name: 'Farmer', score: 1000 },
     { name: 'Master Farmer', score: 5000 },
-    { name: 'Fruit Legend', score: 20000 }
+    { name: 'Fruit Legend', score: 100000 }
   ],
 
   // The silly animals who shop at the market. New kinds also need drawing in animals.js.
@@ -256,7 +256,7 @@ FF.data = {
       { id: 'speedy7', name: '600 coins in a day', stat: 'bestDay', n: 600, icon: 'star' },
       { id: 'speedy8', name: 'Reach Day 50', stat: 'farmDay', n: 50, icon: 'apple' },
       { id: 'speedy9', name: 'Reach Day 150', stat: 'farmDay', n: 150, icon: 'apple' },
-      { id: 'speedy10', name: 'Earn 10,000 coins', stat: 'lifetime', n: 10000, icon: 'star' }
+      { id: 'speedy10', name: 'Fruit Legend', stat: 'lifetime', n: 100000, icon: 'star' }
     ] },
     { id: 'family', name: 'Family', icon: 'pig', reward: 'crown', stickers: [
       { id: 'family1', name: 'Join a family', stat: 'joined', n: 1, icon: 'pig' },
