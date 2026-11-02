@@ -8,7 +8,8 @@
 
   FF.layout = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    G.W = window.innerWidth; G.H = window.innerHeight;
+    const box = cv.getBoundingClientRect();
+    G.W = Math.round(box.width); G.H = Math.round(box.height);
     cv.width = Math.round(G.W * dpr); cv.height = Math.round(G.H * dpr);
     screenCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     FF.scenery.layout(); FF.farm.layout(); FF.market.layout();
@@ -45,6 +46,7 @@
     },
     farm() {
       FF.sound.ensure();
+      FF.book.startDay();
       const sel = document.querySelector('input[name="speed"]:checked');
       if (sel) { FF.save.speed = sel.value; FF.persist(); }
       G.state = 'farm';
@@ -74,6 +76,7 @@
     },
     showSold() {
       const earned = FF.market.earned();
+      FF.book.sold();
       $('soldMsg').textContent = earned ? 'You earned ' + earned + ' coins this trip. Nice throwing!' : 'All your fruit is sold.';
       $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin');
       UI.show('sold');
@@ -94,6 +97,10 @@
       if (from === 'market') { UI.hideAll(); FF.market.refresh(); FF.hud.coins(); }
       else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else { renderTitle(); UI.show('title'); }
+    },
+    afterBook(from) {
+      if (from === 'sold') UI.show('sold');
+      else Screens.title();
     }
   };
 
@@ -114,6 +121,8 @@
   const on = (id, fn) => $(id).addEventListener('click', fn);
   on('harvestBtn', Screens.farm);
   on('titleShopBtn', () => FF.shop.open('title'));
+  on('titleBookBtn', () => FF.book.open('title'));
+  on('soldBookBtn', () => FF.book.open('sold'));
   on('titleMarketBtn', Screens.market);
   on('toMarketBtn', Screens.market);
   on('pauseBtn', Screens.pause);

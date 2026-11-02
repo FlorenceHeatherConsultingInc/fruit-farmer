@@ -128,6 +128,15 @@ FF.data = {
       ambient: 'fireflies' }
   ],
 
+  // Farm Score ranks. score = coins earned across all farms.
+  ranks: [
+    { name: 'Sprout', score: 0 },
+    { name: 'Grower', score: 250 },
+    { name: 'Farmer', score: 1000 },
+    { name: 'Master Farmer', score: 5000 },
+    { name: 'Fruit Legend', score: 20000 }
+  ],
+
   // The silly animals who shop at the market. New kinds also need drawing in animals.js.
   animals: {
     bunny: { color: '#f6f0e6', accent: '#ffb3c7' },

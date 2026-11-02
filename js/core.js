@@ -34,7 +34,8 @@
       trees: D.trees.filter(t => !t.cost).map(t => t.type),
       skins: [D.skins[0].id], skin: D.skins[0].id,
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
-      marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0
+      marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
+      day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -63,9 +64,17 @@
     s.wallRevealed = raw.wallRevealed === true;
     if (s.wallOwned && raw.marketLayout === 'wall') s.marketLayout = 'wall';
     s.filled = n(raw.filled);
+    s.day = Math.max(1, n(raw.day) || s.trips + 1);
+    s.farmNo = Math.max(1, n(raw.farmNo));
+    s.farmEarned = n(raw.farmEarned); s.lifetime = n(raw.lifetime); s.bestDay = n(raw.bestDay);
+    if (raw.byDate && typeof raw.byDate === 'object') s.byDate = raw.byDate;
+    if (Array.isArray(raw.diary)) s.diary = raw.diary;
+    if (Array.isArray(raw.pastFarms)) s.pastFarms = raw.pastFarms;
+    if (raw.today && typeof raw.today === 'object') s.today = raw.today;
     return s;
   }
 
+  FF.freshSave = freshSave;
   FF.save = loadSave();
   FF.persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(FF.save)); } catch (e) {} };
 

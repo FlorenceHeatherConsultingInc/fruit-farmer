@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="css/styles.css">
-<meta name="theme-color" content="#6ec2f5">
+<meta name="theme-color" content="#2b2350">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Fruit Farmer">
@@ -62,6 +62,7 @@
     <div class="btnrow">
       <button class="btn yellow" id="titleMarketBtn" type="button" hidden>Market</button>
       <button class="btn secondary" id="titleShopBtn" type="button">Shop</button>
+      <button class="btn secondary" id="titleBookBtn" type="button">Farm book</button>
     </div>
     <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
   </div>
@@ -96,6 +97,7 @@
     <p id="soldMsg"></p>
     <div class="stats" id="soldStats"></div>
     <button class="btn primary" id="soldShopBtn" type="button">Shop</button>
+    <button class="btn secondary" id="soldBookBtn" type="button">Farm book</button>
     <button class="btn secondary" id="soldFarmBtn" type="button">Back to the farm</button>
   </div>
 </div>
@@ -117,6 +119,20 @@
   </div>
 </div>
 
+<!-- Farm book -->
+<div class="overlay" id="bookOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="bookTitle">
+    <div class="shop-head"><h2 id="bookTitle">Farm book</h2></div>
+    <div class="tabs" role="group" aria-label="Farm book pages">
+      <button type="button" data-tab="score" aria-pressed="true">Score</button>
+      <button type="button" data-tab="diary" aria-pressed="false">Diary</button>
+      <button type="button" data-tab="farms" aria-pressed="false">Farms</button>
+    </div>
+    <div class="bookbody" id="bookBody"></div>
+    <button class="btn primary done" type="button" data-book="done" id="bookDone">Done</button>
+  </div>
+</div>
+
 <!-- Load order matters: each file adds to the shared FF object that later files use. -->
 <script src="js/data.js"></script>
 <script src="js/core.js"></script>
@@ -128,6 +144,7 @@
 <script src="js/market-layouts.js"></script>
 <script src="js/market.js"></script>
 <script src="js/shop.js"></script>
+<script src="js/book.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

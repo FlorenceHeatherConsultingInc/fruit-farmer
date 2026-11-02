@@ -10,7 +10,7 @@
   const Draw = FF.draw, FX = FF.fx, Layouts = FF.marketLayouts, Animals = FF.animals;
   const INK = D.colors.ink, CARD = D.colors.card, SUN = D.colors.sun, MK = D.market;
   const FONT = '"Baloo 2", "Trebuchet MS", sans-serif';
-  const KEY_STEP = 12, HAPPY_SECONDS = 1.25, COIN_SECONDS = 0.62, REVEAL_SECONDS = 1.5;
+  const MIN_PULL = 16, KEY_STEP = 12, HAPPY_SECONDS = 1.25, COIN_SECONDS = 0.62, REVEAL_SECONDS = 1.5;
 
   const M = { horizon: 0 };
   let active = 'friends', targets = [], ammo = [], shots = [], loaded = null, reloadT = 0, popIn = 0;
@@ -87,10 +87,10 @@
   // Full pull reaches past the farthest opening; the smallest pull lands just short of the nearest.
   function aimRange() {
     const ys = targets.map(t => t.y);
-    return { far: M.ay - (Math.min(...ys) - 40), near: (M.ay - Math.max(...ys)) * 0.7, wide: G.W * MK.aim.reachX };
+    return { far: M.ay - (Math.min(...ys) - 40), near: (M.ay - Math.max(...ys)) * 0.55, wide: G.W * MK.aim.reachX };
   }
   function aimFrom(d) {
-    if (Math.hypot(d.px - d.sx, d.py - d.sy) < 14) return null;
+    if (Math.hypot(d.px - d.sx, d.py - d.sy) < MIN_PULL) return null;
     const fx = clamp((d.px - d.sx) / M.maxPull, -1, 1), fy = clamp((d.py - d.sy) / M.maxPull, 0, 1);
     const dx = fx * M.maxPull, dy = fy * M.maxPull, power = Math.max(Math.abs(fx), fy), { far, near, wide } = aimRange();
     let x = clamp(M.ax - fx * wide, 10, G.W - 10), y = Math.max(40, M.ay - (near + fy * (far - near)));
@@ -122,6 +122,7 @@
   function fillUp(t) {
     const tip = t.need * MK.tipPerFruit;
     FF.save.coins += tip; earned += tip;
+    FF.book.bonus(tip);
     FF.save.filled++;
     coinShower(t, tip, 0.25);
     setTimeout(() => FX.text(t.x, t.y - t.R - 34, 'Full! +' + tip, true), 280);
@@ -137,6 +138,7 @@
     t.got++; t.inside.push(s.type); t.bump = 1;
     FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
     FF.save.coins += coins; earned += coins;
+    FF.book.sale(t.kind, s.type, coins, perfect);
     coinShower(t, clamp(coins, 3, 10), 0);
     t.mood = 'happy'; t.moodT = 0.9;
     FX.burst(t.x, t.y, [SUN, '#fff3a8'], perfect ? 22 : 10, 'star');
@@ -280,7 +282,25 @@
     drag = null; aim = null;
     if (a && loaded) fire(a);
   }
-  Market.pointerDown = e => { drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, px: e.clientX, py: e.clientY }; stretched = 0; };
+  // Where the waiting fruit sit in the tray. Tapping one swaps it into the slingshot.
+  function trayRow() {
+    const r = Math.min(M.fr * 0.72, M.trayH * 0.34), step = r * 2.3;
+    const room = Math.max(1, Math.floor((M.ax - 50) / step));
+    return { r, step, cy: M.trayY + M.trayH * 0.52, n: Math.min(ammo.length, ammo.length > room ? room - 1 : room) };
+  }
+  function tapTray(x) {
+    const { step, n } = trayRow(), i = Math.floor((x - 24 + step / 2) / step);
+    if (!loaded || i < 0 || i > n) return;
+    if (i === n) { if (ammo.length > n) { ammo.push(...ammo.splice(0, n)); FF.sfx.tick(); } return; }
+    [ammo[i], loaded] = [loaded, ammo[i]];
+    popIn = 1; FF.sfx.tick();
+  }
+  // A throw has to start on the fruit, so stray taps around the screen never fire one.
+  Market.pointerDown = e => {
+    if (e.clientY >= M.trayY) return tapTray(e.clientX);
+    if (!loaded || Math.hypot(e.clientX - M.ax, e.clientY - M.ay) > Math.max(48, M.fr * 1.7)) return;
+    drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, px: e.clientX, py: e.clientY }; stretched = 0;
+  };
   Market.pointerMove = e => {
     if (!drag || e.pointerId !== drag.id) return;
     drag.px = e.clientX; drag.py = e.clientY;
@@ -307,9 +327,7 @@
     const ctx = G.ctx, { W, H } = G, y = M.trayY;
     Draw.rr(-10, y, W + 20, H - y + 10, 10); Draw.fillStroke('#b98652', 4);
     ctx.fillStyle = 'rgba(43,35,80,0.12)'; ctx.fillRect(0, y + 10, W, 4);
-    const r = Math.min(M.fr * 0.72, M.trayH * 0.34), cy = y + M.trayH * 0.52, step = r * 2.3;
-    const room = Math.max(1, Math.floor((M.ax - 50) / step));
-    const n = Math.min(ammo.length, ammo.length > room ? room - 1 : room);
+    const { r, cy, step, n } = trayRow();
     for (let i = 0; i < n; i++) Draw.fruit(ammo[i], 24 + i * step, cy, r);
     ctx.font = `800 22px ${FONT}`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     if (ammo.length > n) {
@@ -386,7 +404,7 @@
   function drawStreak() {
     if (streak < 2) return;
     const ctx = G.ctx, s = 1 + streakBump * 0.3, w = 112;
-    ctx.save(); ctx.translate(G.W / 2, 33); ctx.scale(s, s);
+    ctx.save(); ctx.translate(Math.min(G.W - 66, M.ax + 126), M.slingY + 8); ctx.scale(s, s);
     Draw.rr(-w / 2, -19, w, 38, 19); Draw.fillStroke(streak >= 5 ? '#ff9a1f' : CARD, 3);
     ctx.font = `800 18px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = INK;
     ctx.fillText('Streak ' + streak, 0, 1); ctx.textBaseline = 'alphabetic';
@@ -400,6 +418,10 @@
     ctx.restore();
     ctx.font = `800 22px ${FONT}`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
     ctx.strokeText('Pull back!', tx, M.slingY + 8); ctx.fillStyle = SUN; ctx.fillText('Pull back!', tx, M.slingY + 8);
+    if (ammo.length) {
+      ctx.font = `800 17px ${FONT}`; ctx.textAlign = 'left'; ctx.lineWidth = 5;
+      ctx.strokeText('Tap to swap', 16, M.trayY - 12); ctx.fillStyle = CARD; ctx.fillText('Tap to swap', 16, M.trayY - 12);
+    }
   }
 
   Market.draw = () => {

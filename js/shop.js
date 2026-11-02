@@ -110,7 +110,7 @@
   }
   function wear(list, key, item) {
     const save = FF.save;
-    if (!save[list].includes(item.id)) { if (!spend(item.cost)) return; save[list].push(item.id); }
+    if (!save[list].includes(item.id)) { if (!spend(item.cost)) return; save[list].push(item.id); FF.book.bought(item.name); }
     else FF.sfx.coin();
     save[key] = item.id;
   }
@@ -121,10 +121,10 @@
     FF.sound.ensure();
     const id = b.dataset.id, save = FF.save;
     switch (b.dataset.act) {
-      case 'tier': { const nx = D.carriers[save.tier + 1]; if (nx && spend(nx.cost)) { save.tier++; FF.layout(); } break; }
-      case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) save.trees.push(id); break; }
-      case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) save.up[id]++; break; }
-      case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; } break;
+      case 'tier': { const nx = D.carriers[save.tier + 1]; if (nx && spend(nx.cost)) { save.tier++; FF.book.bought(nx.name); FF.layout(); } break; }
+      case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
+      case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
+      case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
       case 'skin': wear('skins', 'skin', D.skins.find(x => x.id === id)); break;
       case 'scene': wear('scenes', 'scene', D.scenes.find(x => x.id === id)); break;

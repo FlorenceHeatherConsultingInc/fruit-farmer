@@ -82,6 +82,7 @@
     if (pile.length > 9) pile.shift();
     if (demo || FF.carried() >= FF.cap()) return;
     FF.save.crate[f.type]++;
+    FF.book.harvest(f.type);
     combo++;
     FF.persist();
     FF.hud.load(true);

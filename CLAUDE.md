@@ -25,6 +25,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/market-layouts.js` | The two market layouts (`FF.marketLayouts`): animal friends and the barrel wall, including the covered wall and its reveal. Tags and request bubbles. |
 | `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
 | `js/shop.js` | Shop overlay, built from the tables in `data.js`. |
+| `js/book.js` | The Farm Book (`FF.book`): days, diary, Farm Score, totals by date, new farms. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Add to Home Screen and offline play on the hosted site. A new game file must also go in `FILES` in `sw.js`. |
 
@@ -33,7 +34,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
 - Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
-  animals → market-layouts → market → shop → main.
+  animals → market-layouts → market → shop → book → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans
