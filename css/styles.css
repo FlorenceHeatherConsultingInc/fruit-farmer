@@ -1,0 +1,276 @@
+/* Fruit Farmer: interface styles.
+   Layout: a full-screen canvas world (orchard or market plaza) with chunky sticker-style
+   HUD chips, arrow pads and cards floating on top. One committed daytime-cartoon look. */
+:root {
+  --sky-low: #dcf2ff;
+  --grass: #67bf45;
+  --grass-deep: #489a2f;
+  --ink: #2b2350;
+  --pop: #ff6b35;
+  --pop-deep: #e2521f;
+  --card: #fffaf0;
+  --paper: #ffffff;
+  --sun: #ffd23f;
+  --display: "Baloo 2", "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--sky-low);
+  color: var(--ink);
+  font-family: var(--display);
+  overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+canvas#game {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+/* ---------- HUD ---------- */
+.hud {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-block: max(12px, env(safe-area-inset-top, 0px)) 12px;
+  pointer-events: none;
+}
+.hud-right { display: flex; gap: 8px; }
+.chip {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 0 4px 0 var(--ink);
+  padding: 2px 16px 0 10px;
+  font-weight: 800;
+  font-size: clamp(22px, 6vw, 32px);
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chip svg, .chip-icon svg { width: 1em; height: 1em; flex: none; display: block; }
+.chip.full { background: var(--sun); }
+.bump { animation: bump .35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.18) rotate(-4deg); } }
+.iconbtn {
+  pointer-events: auto;
+  min-width: 50px; height: 50px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--card);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--ink);
+  cursor: pointer;
+  padding: 0 10px;
+  font: inherit; font-weight: 800; font-size: 20px;
+}
+.iconbtn svg { width: 26px; height: 26px; flex: none; }
+.iconbtn.go { background: var(--sun); padding: 2px 14px 0 10px; }
+.iconbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var(--pop); outline-offset: 3px; }
+@media (max-width: 420px) { .iconbtn.go .txt { display: none; } }
+
+/* ---------- Hold-to-move pads ---------- */
+.pads {
+  position: fixed;
+  z-index: 2;
+  left: 0; right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.pad {
+  pointer-events: auto;
+  touch-action: none;
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  border: 4px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 5px 0 var(--ink);
+  display: grid; place-items: center;
+  padding: 0;
+  cursor: pointer;
+  opacity: .94;
+}
+.pad svg { width: 30px; height: 30px; }
+.pad.held { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); background: var(--sun); }
+
+/* ---------- Overlay cards ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: color-mix(in srgb, var(--ink) 20%, transparent);
+}
+.card {
+  background: var(--card);
+  border: 4px solid var(--ink);
+  border-radius: 28px;
+  box-shadow: 0 8px 0 var(--ink);
+  padding: 22px 22px 26px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.card h1, .card h2 {
+  margin: 0;
+  line-height: .9;
+  font-weight: 800;
+  color: var(--pop);
+  text-shadow: 0 4px 0 var(--ink);
+  -webkit-text-stroke: 2px var(--ink);
+  letter-spacing: .5px;
+  text-wrap: balance;
+}
+.card h1 { font-size: clamp(52px, 15vw, 80px); transform: rotate(-3deg); padding-top: 6px; }
+.card h2 { font-size: clamp(40px, 11vw, 58px); }
+.card p { margin: 0; font-size: 21px; font-weight: 600; line-height: 1.25; max-width: 30ch; text-wrap: balance; }
+.label {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  opacity: .7;
+  margin-bottom: -6px;
+}
+.stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.stat {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 18px; font-weight: 700; line-height: 1.3;
+  border: 3px solid var(--ink); border-radius: 999px;
+  background: var(--paper); padding: 1px 12px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+.stat svg { width: 22px; height: 22px; }
+.stat.coin { background: var(--sun); }
+.speeds { display: flex; gap: 8px; border: 0; margin: 0; padding: 0; }
+.speed { position: relative; }
+.speed input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.speed span {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  padding: 4px 13px 2px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 3px 0 var(--ink);
+}
+.speed input:checked + span { background: var(--sun); }
+.btn {
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 6px 0 var(--ink);
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink); }
+.btn.primary { background: var(--pop); color: #fff; font-size: 32px; padding: 10px 40px 6px; text-shadow: 0 2px 0 var(--pop-deep); }
+.btn.secondary { background: var(--card); color: var(--ink); font-size: 21px; padding: 6px 20px 3px; }
+.btn.yellow { background: var(--sun); color: var(--ink); font-size: 22px; padding: 6px 20px 3px; }
+.btn svg { width: 1.15em; height: 1.15em; }
+.btnrow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.hint { font-size: 15px; font-weight: 500; opacity: .7; max-width: 34ch; }
+
+/* ---------- Shop ---------- */
+.card.shop { max-width: 580px; align-items: stretch; text-align: left; gap: 18px; }
+.shop-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: -22px; background: var(--card); padding-top: 4px; padding-bottom: 6px; z-index: 1; }
+.coins {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 800; font-size: 26px; line-height: 1.3;
+  background: var(--sun);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  padding: 1px 16px 0 6px;
+  box-shadow: 0 3px 0 var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.coins svg { width: 28px; height: 28px; }
+.msec { display: flex; flex-direction: column; gap: 10px; }
+.rows { display: flex; flex-direction: column; gap: 10px; }
+.up {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  border: 3px solid var(--ink); border-radius: 18px; background: var(--paper); padding: 10px 12px;
+}
+.badge { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); display: grid; place-items: center; background: var(--sky-low); box-sizing: border-box; overflow: hidden; }
+.badge svg { width: 30px; height: 30px; }
+.badge canvas { width: 42px; height: 42px; }
+.up h3 { margin: 0; font-size: 20px; line-height: 1.1; }
+.up p { margin: 0; font-size: 15px; font-weight: 500; opacity: .75; line-height: 1.25; max-width: none; text-wrap: pretty; }
+.pips { display: flex; gap: 4px; margin-top: 5px; }
+.pip { width: 16px; height: 8px; border-radius: 4px; border: 2px solid var(--ink); background: var(--paper); }
+.pip.on { background: var(--grass); }
+.mini {
+  font: inherit; font-weight: 800; font-size: 17px; line-height: 1.2;
+  border: 3px solid var(--ink); border-radius: 12px;
+  background: var(--pop); color: #fff;
+  padding: 4px 12px 2px;
+  box-shadow: 0 3px 0 var(--ink); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  text-shadow: 0 1px 0 var(--pop-deep);
+  min-width: 82px;
+}
+.mini svg { width: 18px; height: 18px; }
+.mini:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.mini:disabled { opacity: .4; cursor: default; transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.mini.owned { background: var(--grass); text-shadow: 0 1px 0 var(--grass-deep); opacity: 1; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pick {
+  font: inherit; color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 18px; background: var(--paper);
+  padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer; min-width: 0; box-shadow: 0 3px 0 var(--ink);
+}
+.pick:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.pick:disabled { opacity: .45; cursor: default; }
+.pick.on { background: var(--sun); }
+.sw { width: 46px; height: 30px; border-radius: 6px 6px 16px 16px; border: 3px solid var(--ink); box-sizing: border-box; }
+.pick canvas.scene { width: 64px; height: 40px; border-radius: 8px; border: 3px solid var(--ink); box-sizing: border-box; }
+.pick b { font-size: 16px; line-height: 1.2; text-align: center; }
+.pick small { font-size: 14px; font-weight: 700; opacity: .75; display: inline-flex; align-items: center; gap: 3px; }
+.pick small svg { width: 15px; height: 15px; }
+.done { align-self: center; }
+@media (prefers-reduced-motion: reduce) { .bump { animation: none; } }

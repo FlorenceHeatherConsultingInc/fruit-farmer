@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fruit Farmer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<canvas id="game" aria-label="Fruit Farmer game"></canvas>
+
+<!-- Orchard heads-up display -->
+<div class="hud" id="farmHud" hidden>
+  <div class="chip" id="loadChip" aria-live="polite"><span class="chip-icon" id="loadIcon"></span><span id="load">0/2</span></div>
+  <div class="hud-right">
+    <button class="iconbtn go" id="toMarketBtn" type="button" aria-label="Go to market" hidden></button>
+    <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+    <button class="iconbtn" id="pauseBtn" type="button" aria-label="Pause"></button>
+  </div>
+</div>
+
+<!-- Market heads-up display -->
+<div class="hud" id="marketHud" hidden>
+  <div class="chip" id="coinChip" aria-live="polite"></div>
+  <div class="hud-right">
+    <button class="iconbtn" id="shopBtn" type="button" aria-label="Shop"></button>
+    <button class="iconbtn" id="farmBtn" type="button" aria-label="Back to the farm"></button>
+    <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+  </div>
+</div>
+
+<!-- Hold-to-move arrows -->
+<div class="pads" id="pads" hidden>
+  <button class="pad" id="padL" type="button" aria-label="Move left"></button>
+  <button class="pad" id="padR" type="button" aria-label="Move right"></button>
+</div>
+
+<!-- Title screen -->
+<div class="overlay" id="titleOv" hidden>
+  <div class="card">
+    <h1>Fruit Farmer</h1>
+    <p id="titleIntro"></p>
+    <div class="stats" id="titleStats"></div>
+    <div class="label">Harvest speed</div>
+    <fieldset class="speeds">
+      <legend hidden>Harvest speed</legend>
+      <label class="speed"><input type="radio" name="speed" id="sp-slow" value="slow" checked><span>Slow</span></label>
+      <label class="speed"><input type="radio" name="speed" id="sp-medium" value="medium"><span>Medium</span></label>
+      <label class="speed"><input type="radio" name="speed" id="sp-fast" value="fast"><span>Fast</span></label>
+    </fieldset>
+    <button class="btn primary" id="harvestBtn" type="button">Go harvest</button>
+    <div class="btnrow">
+      <button class="btn yellow" id="titleMarketBtn" type="button" hidden>Market</button>
+      <button class="btn secondary" id="titleShopBtn" type="button">Shop</button>
+    </div>
+    <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div class="overlay" id="pauseOv" hidden>
+  <div class="card">
+    <h2>Paused</h2>
+    <p id="pauseMsg"></p>
+    <button class="btn primary" id="resumeBtn" type="button">Keep playing</button>
+    <div class="btnrow">
+      <button class="btn yellow" id="pauseMarketBtn" type="button">Go to market</button>
+      <button class="btn secondary" id="homeBtn" type="button">Back to start</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carrier is full -->
+<div class="overlay" id="fullOv" hidden>
+  <div class="card">
+    <h2 id="fullTitle">Hands full!</h2>
+    <p id="fullMsg"></p>
+    <button class="btn primary" id="goMarketBtn" type="button">Go to market</button>
+  </div>
+</div>
+
+<!-- Everything sold -->
+<div class="overlay" id="soldOv" hidden>
+  <div class="card">
+    <h2>Sold out!</h2>
+    <p id="soldMsg"></p>
+    <div class="stats" id="soldStats"></div>
+    <button class="btn primary" id="soldShopBtn" type="button">Shop</button>
+    <button class="btn secondary" id="soldFarmBtn" type="button">Back to the farm</button>
+  </div>
+</div>
+
+<!-- Shop -->
+<div class="overlay" id="shopOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="shopTitle">
+    <div class="shop-head">
+      <h2 id="shopTitle">Shop</h2>
+      <div class="coins" id="shopCoins" aria-live="polite"></div>
+    </div>
+    <section class="msec"><div class="label">Carry more fruit</div><div class="rows" id="shopCarry"></div></section>
+    <section class="msec"><div class="label">Plant fruit trees</div><div class="rows" id="shopTrees"></div></section>
+    <section class="msec"><div class="label">Upgrades</div><div class="rows" id="shopUps"></div></section>
+    <section class="msec"><div class="label">Basket colors</div><div class="grid3" id="shopSkins"></div></section>
+    <section class="msec"><div class="label">Farm scenery</div><div class="grid3" id="shopScenes"></div></section>
+    <button class="btn primary done" type="button" data-act="done" id="shopDone">Done</button>
+  </div>
+</div>
+
+<!-- Load order matters: each file adds to the shared FF object that later files use. -->
+<script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/scenery.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/farm.js"></script>
+<script src="js/market.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
