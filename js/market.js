@@ -1,22 +1,24 @@
-/* Fruit Farmer: the market, played like skee-ball.
-   Twelve barrels sit on three shelves. Each barrel asks for a fruit and shows its price;
-   the back rows usually pay more. Throw fruit from the slingshot three ways:
-     1. Tap to lock the swinging aim, tap again to lock the power.
-     2. Pull back the slingshot and let go.
-     3. Flick upward.
-   Aim and power map to a landing spot (shown as a ring). Fruit that misses or goes in the
-   wrong barrel rolls back to your tray, so nothing is ever lost. */
+/* Fruit Farmer: the market. Animals ask for fruit; you sling it to them.
+   Drag down anywhere to pull back the slingshot and let go. A dotted arc shows exactly where the
+   fruit will land, so the same pull always makes the same shot. On a keyboard, the arrow keys
+   move the aim and Space throws.
+   Center shots are Perfect, edge shots rattle around the rim and drop in. Fruit that misses or
+   goes to the wrong animal rolls back to your tray, so nothing is ever lost.
+   The two layouts (animal friends and the barrel wall) are in market-layouts.js. */
 (() => {
   const FF = window.FF, G = FF.G, D = FF.data, { TAU, clamp, rand, randi, pick } = FF.util;
-  const Draw = FF.draw, FX = FF.fx, INK = D.colors.ink, CARD = D.colors.card, SUN = D.colors.sun;
-  const ROWS = 3, COLS = 4, ROW_SCALE = [0.72, 0.86, 1];   // back, middle, front
+  const Draw = FF.draw, FX = FF.fx, Layouts = FF.marketLayouts, Animals = FF.animals;
+  const INK = D.colors.ink, CARD = D.colors.card, SUN = D.colors.sun, MK = D.market;
+  const FONT = '"Baloo 2", "Trebuchet MS", sans-serif';
+  const KEY_STEP = 12, HAPPY_SECONDS = 1.25, COIN_SECONDS = 0.62, REVEAL_SECONDS = 1.5;
 
-  const M = {};
-  let ammo = [], shots = [], loaded = null, reloadT = 0, barrels = [];
-  let earned = 0, shotsFired = 0, soldT = -1, streak = 0, hintPulse = 0;
-  let phase = 'aim', aimT = 0, powT = 0, lockedAngle = 0, drag = null;
+  const M = { horizon: 0 };
+  let active = 'friends', targets = [], ammo = [], shots = [], loaded = null, reloadT = 0, popIn = 0;
+  let coinsFly = [], rings = [], drag = null, aim = null, stretched = 0;
+  let earned = 0, streak = 0, streakBump = 0, hits = 0, soldT = -1, shake = 0, wobble = 0, revealT = 0;
 
-  const Market = FF.market = { earned: () => earned };
+  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded };
+  const pay = () => MK[active];
 
   /* ---------- Layout ---------- */
   Market.layout = () => {
@@ -26,40 +28,11 @@
     M.slingY = M.trayY - clamp(H * 0.11, 64, 96);
     M.ax = W / 2; M.ay = M.slingY - 14;
     M.fr = clamp(W * 0.045, 20, 30);
-    const top = 84, frontBottom = M.slingY - clamp(H * 0.09, 48, 80);
-    const colW = W / COLS, avail = frontBottom - top;
-    M.bw = Math.max(40, Math.min(colW * 0.74, 118, (avail - 3 * 34) / 2.45));
-    const heights = ROW_SCALE.map(s => 30 * s + M.bw * s * 0.9);
-    const gap = Math.max(8, (avail - heights.reduce((a, b) => a + b, 0)) / 3);
-    M.rows = [];
-    let y = top + gap * 0.5;
-    ROW_SCALE.forEach(s => {
-      const bw = M.bw * s, bh = bw * 0.9, mouth = y + 30 * s;
-      M.rows.push({ s, bw, bh, mouth, bottom: mouth + bh, xs: Array.from({ length: COLS }, (_, c) => W / 2 + (c - 1.5) * colW * (0.8 + 0.2 * s)) });
-      y = mouth + bh + gap;
-    });
-    M.horizon = M.rows[0].mouth + M.rows[0].bh * 0.4;
-    M.dMin = (M.ay - M.rows[2].mouth) * 0.55;
-    M.dMax = (M.ay - M.rows[0].mouth) * 1.15;
-    M.maxAngle = Math.atan((W / 2 - colW * 0.2) / (M.ay - M.rows[2].mouth));
-    M.maxPull = clamp(Math.min(W, H) * 0.22, 90, 170);
-    M.g = H * 2.2;
+    M.maxPull = clamp(Math.min(W, H) * MK.aim.pull, MK.aim.pullMin, MK.aim.pullMax);
+    Layouts[active].place(M, targets);
   };
 
-  const landing = (angle, power) => {
-    const d = M.dMin + power * (M.dMax - M.dMin);
-    return { x: M.ax + Math.tan(angle) * d, y: M.ay - d };
-  };
-  // How big things look at a given height on screen (smaller toward the back).
-  function depthScale(y) {
-    const r = M.rows;
-    if (y >= r[2].mouth) return clamp(1 + (y - r[2].mouth) / (M.ay - r[2].mouth) * 0.15, 1, 1.15);
-    if (y >= r[1].mouth) return r[1].s + (r[2].s - r[1].s) * (y - r[1].mouth) / (r[2].mouth - r[1].mouth);
-    if (y >= r[0].mouth) return r[0].s + (r[1].s - r[0].s) * (y - r[0].mouth) / (r[1].mouth - r[0].mouth);
-    return Math.max(0.55, r[0].s - (r[0].mouth - y) / 400);
-  }
-
-  /* ---------- Barrels ---------- */
+  /* ---------- Requests ---------- */
   function available(type) {
     const m = t => type === 'any' || t === type;
     let n = 0;
@@ -68,127 +41,212 @@
     if (loaded && m(loaded)) n++;
     return n;
   }
-  function newRequest(b) {
-    const mk = D.market, types = FF.FRUIT_TYPES.filter(t => available(t) > 0);
-    b.got = 0; b.inBarrel = []; b.t = 0; b.pop = 1;
-    if (!types.length) { b.state = 'closed'; return; }
-    b.state = 'open';
-    b.wants = Math.random() < mk.anyChance ? 'any' : pick(types);
-    b.need = randi(1, mk.maxAsk[b.r]);
-    let bonus = mk.rowBonus[b.r];
-    if (Math.random() < mk.mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
-    b.price = (b.wants === 'any' ? 1 : D.fruits[b.wants].price) + bonus;
+  // Fruit of this type not already spoken for by another open request.
+  function free(type, self) {
+    let n = available(type);
+    for (const t of targets) if (t !== self && t.state === 'open' && (type === 'any' || t.wants === type || t.wants === 'any')) n -= t.need - t.got;
+    return n;
   }
-  function barrelAt(x, y) {
-    for (const b of barrels) {
-      const row = M.rows[b.r], bx = row.xs[b.c];
-      if (Math.abs(x - bx) < row.bw * 0.5 + M.fr * 0.25 && Math.abs(y - row.mouth) < row.bh * 0.38) return b;
-    }
-    return null;
-  }
-  const wantsFruit = (b, type) => b && b.state === 'open' && b.got < b.need && (b.wants === 'any' || b.wants === type);
+  const takes = (t, type) => t && t.state === 'open' && t.got < t.need && (t.wants === 'any' || t.wants === type);
 
-  /* ---------- Throwing ---------- */
-  function fire(angle, power) {
-    if (!loaded) return false;
-    const L = landing(angle, power);
-    shots.push({ type: loaded, phase: 'fly', t: 0, T: 0.42 + 0.38 * power, arc: 50 + 170 * power, lx: L.x, ly: L.y, s1: depthScale(L.y), x: M.ax, y: M.ay, s: 1, rot: 0, vr: rand(-6, 6), vx: 0, vy: 0 });
-    loaded = null; reloadT = 0.18;
-    shotsFired++; phase = 'aim';
-    FF.sfx.twang();
-    return true;
+  function newRequest(t, force) {
+    t.got = 0; t.inside = []; t.t = 0; t.pop = 1;
+    t.state = 'new';
+    const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
+    if (!stock.length) { t.state = 'closed'; return; }
+    const spare = stock.filter(f => free(f, t) > 0);
+    t.kind = pick(Animals.kinds.filter(k => k !== t.kind));
+    t.wants = force || (Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
+    t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
+    let bonus = pay().rowBonus[t.row];
+    if (Math.random() < pay().mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
+    t.price = (t.wants === 'any' ? 1 : D.fruits[t.wants].price) + bonus;
+    t.state = 'open';
   }
-  Market.tap = () => {
-    if (!loaded) { hintPulse = 1; return; }
-    if (phase === 'aim') { lockedAngle = currentAngle(); phase = 'power'; powT = 0; FF.sfx.tick(); }
-    else fire(lockedAngle, currentPower());
+  // A request can outgrow the fruit left in play. Shrink it, or finish it if it's already started.
+  function fitRequest(t) {
+    if (t.state !== 'open') return;
+    const left = available(t.wants);
+    if (t.need - t.got <= left) return;
+    if (shots.some(s => s.target === t)) return;
+    if (t.got === 0 && left === 0) { if (t.t > 0.6) newRequest(t); return; }
+    t.need = t.got + left;
+    if (left === 0) fillUp(t);
+  }
+  // Never leave the player holding a fruit nobody wants.
+  function askForLoaded() {
+    if (!loaded || drag || shots.length || revealT > 0 || targets.some(t => takes(t, loaded))) return;
+    const t = targets.find(x => x.state === 'closed') || targets.find(x => x.state === 'open' && x.got === 0);
+    if (t) { newRequest(t, loaded); return; }
+    // everyone is waiting on fruit further back in the tray, so bring one forward
+    const i = ammo.findIndex(f => targets.some(x => takes(x, f)));
+    if (i >= 0) { const next = ammo.splice(i, 1)[0]; ammo.push(loaded); loaded = next; popIn = 1; }
+  }
+
+  /* ---------- Aiming ---------- */
+  // Full pull reaches past the farthest opening; the smallest pull lands just short of the nearest.
+  function aimRange() {
+    const ys = targets.map(t => t.y);
+    return { far: M.ay - (Math.min(...ys) - 40), near: (M.ay - Math.max(...ys)) * 0.7, wide: G.W * MK.aim.reachX };
+  }
+  function aimFrom(d) {
+    if (Math.hypot(d.px - d.sx, d.py - d.sy) < 14) return null;
+    const fx = clamp((d.px - d.sx) / M.maxPull, -1, 1), fy = clamp((d.py - d.sy) / M.maxPull, 0, 1);
+    const dx = fx * M.maxPull, dy = fy * M.maxPull, power = Math.max(Math.abs(fx), fy), { far, near, wide } = aimRange();
+    let x = clamp(M.ax - fx * wide, 10, G.W - 10), y = Math.max(40, M.ay - (near + fy * (far - near)));
+    // a soft pull toward an opening, so close shots feel good instead of fiddly
+    let best = null, bq = MK.aim.snap;
+    for (const t of targets) { const q = offCenter(t, x, y); if (q < bq) { bq = q; best = t; } }
+    if (best) { x += (best.x - x) * MK.aim.assist; y += (best.y - y) * MK.aim.assist; }
+    return { x, y, power, dx, dy, target: best };
+  }
+  // The pull that lands on a spot: the reverse of aimFrom().
+  Market.pullFor = (x, y) => {
+    const { far, near, wide } = aimRange();
+    return { dx: (M.ax - x) / wide * M.maxPull, dy: (M.ay - y - near) / (far - near) * M.maxPull };
   };
-  const currentAngle = () => M.maxAngle * Math.sin(aimT * TAU / D.market.aimSeconds);
-  const currentPower = () => 0.5 - 0.5 * Math.cos(powT * TAU / D.market.powerSeconds);
+  const offCenter = (t, x, y) => Math.hypot((x - t.x) / t.R, (y - t.y) / Math.max(t.ry, t.R * 0.72));
+  const arcFor = (x, y) => 40 + Math.hypot(x - M.ax, y - M.ay) * 0.24;
 
+  function fire(a) {
+    const fromX = M.ax + a.dx * 0.5, fromY = M.ay + a.dy * 0.5, dist = Math.hypot(a.x - M.ax, a.y - M.ay);
+    shots.push({ type: loaded, phase: 'fly', t: 0, T: 0.26 + dist / 1500, lx: a.x, ly: a.y, fromX, fromY, arc: arcFor(a.x, a.y), z: a.target ? a.target.z : 0.8, target: a.target, x: fromX, y: fromY, s: 1, rot: 0, vr: rand(-9, 9), trail: [], hot: streak >= 3 });
+    loaded = null; reloadT = 0.22; wobble = 1;
+    FF.sfx.twang();
+  }
+
+  /* ---------- Hits ---------- */
+  function coinShower(t, n, delay) {
+    for (let i = 0; i < n; i++) coinsFly.push({ x: t.x, y: t.y, t: -delay - i * 0.05, sx: t.x + rand(-40, 40), sy: t.y - rand(30, 90) });
+  }
+  function fillUp(t) {
+    const tip = t.need * MK.tipPerFruit;
+    FF.save.coins += tip; earned += tip;
+    FF.save.filled++;
+    coinShower(t, tip, 0.25);
+    setTimeout(() => FX.text(t.x, t.y - t.R - 34, 'Full! +' + tip, true), 280);
+    t.state = 'happy'; t.t = 0; t.mood = 'happy'; t.moodT = HAPPY_SECONDS;
+    FX.burst(t.x, t.y - 10, ['#ff3b5c', '#ff7a9c'], 14, 'heart');
+    setTimeout(FF.sfx.buy, 130);
+  }
+  function payOut(s, t, q) {
+    const perfect = q < MK.aim.perfect;
+    streak++; streakBump = 1; hits++;
+    const bonus = (perfect ? MK.perfectBonus : 0) + Math.min(MK.streakBonusMax, Math.floor(streak / MK.streakEvery));
+    const coins = t.price + bonus;
+    t.got++; t.inside.push(s.type); t.bump = 1;
+    FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
+    FF.save.coins += coins; earned += coins;
+    coinShower(t, clamp(coins, 3, 10), 0);
+    t.mood = 'happy'; t.moodT = 0.9;
+    FX.burst(t.x, t.y, [SUN, '#fff3a8'], perfect ? 22 : 10, 'star');
+    FX.text(t.x, t.y - t.R, (perfect ? 'Perfect! +' : s.rim ? 'Lucky! +' : '+') + coins, perfect || s.rim);
+    FF.sfx.coin(streak);
+    if (perfect) {
+      shake = 1; FF.sfx.star();
+      rings.push({ x: t.x, y: t.y, r: t.R, t: 0, ry: t.ry / t.R });
+    }
+    if (t.got >= t.need) fillUp(t);
+    FF.persist(); FF.hud.coins();
+  }
+  function bounceOff(s, vx, vy) { s.phase = 'fall'; s.t = 0; s.bounced = false; s.vx = vx; s.vy = vy; }
   function land(s) {
-    const b = barrelAt(s.lx, s.ly);
+    const t = s.target, q = t ? offCenter(t, s.lx, s.ly) : 9;
     s.x = s.lx; s.y = s.ly;
-    if (wantsFruit(b, s.type)) {
-      s.phase = 'drop'; s.t = 0;
-      const row = M.rows[b.r], bx = row.xs[b.c];
-      b.got++; b.inBarrel.push(s.type); b.bump = 1;
-      FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
-      FF.save.coins += b.price; earned += b.price;
-      FX.text(bx, row.mouth - 30 * row.s, '+' + b.price, b.price >= 5);
-      FX.burst(bx, row.mouth, [SUN, '#fff3a8'], 8, 'star');
-      FF.sfx.coin(streak++);
-      if (b.got >= b.need) {
-        const tip = b.need * D.market.tipPerFruit;
-        FF.save.coins += tip; earned += tip;
-        b.state = 'happy'; b.t = 0;
-        setTimeout(() => FX.text(bx, row.mouth - 60 * row.s, 'Full! +' + tip, true), 250);
-        FX.burst(bx, row.mouth - 10, ['#ff3b5c', '#ff7a9c'], 10, 'heart');
-        setTimeout(FF.sfx.buy, 120);
-      }
-      FF.persist(); FF.hud.coins(true);
-    } else if (b) {
-      s.phase = 'fall'; s.vx = (s.lx < M.rows[b.r].xs[b.c] ? -1 : 1) * rand(120, 200); s.vy = -260;
-      FX.text(s.x, s.y - 20, b.state === 'open' && b.got < b.need ? 'Wrong fruit!' : 'All full!', false);
+    if (t && takes(t, s.type)) {
+      if (q > MK.aim.rim) { s.phase = 'rim'; s.rim = true; s.t = 0; s.q = q; FF.sfx.tick(); t.bump = 0.6; return; }
+      payOut(s, t, q); s.phase = 'drop'; s.t = 0;
+    } else if (t) {
+      bounceOff(s, (s.lx < t.x ? -1 : 1) * rand(130, 210), -320);
+      if (t.state === 'open') { t.mood = 'no'; t.moodT = 0.7; }
+      FX.text(t.x, t.y - t.R, t.state === 'open' ? 'Not that one!' : 'Full!', false);
       FF.sfx.nope(); streak = 0;
     } else {
-      s.phase = 'fall'; s.vx = rand(-60, 60); s.vy = -160;
-      FX.burst(s.x, s.y + 6, ['rgba(160,140,110,0.6)'], 5, 'dot');
+      bounceOff(s, rand(-70, 70), -170);
       FF.sfx.miss(); streak = 0;
     }
   }
 
   /* ---------- Start / update ---------- */
   Market.start = () => {
+    active = FF.save.wallOwned ? FF.save.marketLayout : 'friends';
     ammo = [];
     FF.FRUIT_TYPES.forEach(t => { for (let i = 0; i < FF.save.crate[t]; i++) ammo.push(t); });
     FF.util.shuffle(ammo);
-    shots = []; loaded = ammo.shift() || null; reloadT = 0;
-    barrels = [];
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-      const b = { r, c, bump: 0 };
-      newRequest(b); b.pop = 1 + (r * COLS + c) * 0.06;
-      barrels.push(b);
-    }
-    earned = 0; shotsFired = 0; soldT = -1; streak = 0; phase = 'aim'; aimT = 0; drag = null;
+    shots = []; coinsFly = []; rings = []; loaded = ammo.shift() || null; reloadT = 0;
+    targets = Layouts[active].build();
+    targets.forEach(t => { t.bump = 0; t.mood = 'idle'; t.moodT = 0; t.inside = []; t.got = 0; t.need = 0; t.state = 'closed'; });
+    Market.layout();
+    targets.forEach((t, i) => { newRequest(t); t.pop = 1 + i * 0.1; });
+    earned = 0; soldT = -1; streak = 0; hits = FF.save.trips ? 1 : 0; drag = null; aim = null; popIn = 0;
+    revealT = active === 'wall' && !FF.save.wallRevealed ? REVEAL_SECONDS : 0;
     FX.clear();
   };
 
   Market.update = dt => {
-    hintPulse = Math.max(0, hintPulse - dt);
-    if (!drag || drag.mode === 'tap') { if (phase === 'aim') aimT += dt; else powT += dt; }
+    shake = Math.max(0, shake - dt * 4); wobble = Math.max(0, wobble - dt * 2.4);
+    streakBump = Math.max(0, streakBump - dt * 4); popIn = Math.max(0, popIn - dt * 5);
     reloadT -= dt;
-    if (!loaded && reloadT <= 0 && ammo.length) loaded = ammo.shift();
+    if (revealT > 0) {
+      const was = revealT;
+      revealT -= dt;
+      if (was > 1 && revealT <= 1) { FX.confetti(); FF.sfx.party(); }
+      if (revealT <= 0) { FF.save.wallRevealed = true; FF.persist(); }
+    }
+    if (!loaded && reloadT <= 0 && ammo.length) { loaded = ammo.shift(); popIn = 1; }
+    aim = drag && loaded ? aimFrom(drag) : null;
 
     const anyLeft = ammo.length || shots.length || loaded;
-    for (const b of barrels) {
-      b.bump = Math.max(0, b.bump - dt * 4);
-      b.pop = Math.max(0, b.pop - dt * 3);
-      b.t += dt;
-      if (b.state === 'happy' && b.t > 1.0) newRequest(b);
-      else if (b.state === 'open' && b.wants !== 'any' && !available(b.wants) && anyLeft && b.t > 0.6) newRequest(b);
-      else if (b.state === 'closed' && anyLeft && b.t > 0.6) newRequest(b);
+    for (const t of targets) {
+      t.bump = Math.max(0, t.bump - dt * 3.5); t.pop = Math.max(0, t.pop - dt * 3); t.t += dt;
+      t.moodT -= dt;
+      if (t.moodT <= 0) t.mood = aim && aim.target === t ? 'excited' : 'idle';
+      if (t.state === 'happy' && t.t > HAPPY_SECONDS) newRequest(t);
+      else if (t.state === 'closed' && anyLeft && t.t > 0.6) newRequest(t);
+      else fitRequest(t);
     }
+    askForLoaded();
 
     for (const s of shots) {
       s.rot += s.vr * dt;
       if (s.phase === 'fly') {
         s.t = Math.min(1, s.t + dt / s.T);
-        const k = s.t;
-        s.x = M.ax + (s.lx - M.ax) * k;
-        s.y = M.ay + (s.ly - M.ay) * k - s.arc * 4 * k * (1 - k);
-        s.s = 1 + (s.s1 - 1) * k;
+        const k = s.t, e = 1 - (1 - k) * (1 - k) * 0.35;
+        s.x = s.fromX + (s.lx - s.fromX) * k;
+        s.y = s.fromY + (s.ly - s.fromY) * k - s.arc * 4 * k * (1 - k);
+        s.s = 1 + (s.z * 0.66 - 1) * e;
+        s.trail.push({ x: s.x, y: s.y, r: M.fr * s.s * 0.5, a: 1 });
         if (k >= 1) land(s);
+      } else if (s.phase === 'rim') {
+        // rattles around the rim, then drops in
+        s.t += dt / 0.55;
+        const t = s.target, a = Math.atan2(s.ly - t.y, s.lx - t.x) + s.t * 5, hop = Math.abs(Math.sin(s.t * 9)) * 9 * (1 - s.t);
+        s.x = t.x + Math.cos(a) * t.R * 0.9 * (1 - s.t * 0.5); s.y = t.y + Math.sin(a) * t.ry * 0.9 * (1 - s.t * 0.5) - hop;
+        if (s.t >= 1) {
+          if (takes(t, s.type)) { payOut(s, t, s.q); s.phase = 'drop'; s.t = 0; }
+          else { s.lx = s.x; s.ly = s.y; land(s); }
+        }
       } else if (s.phase === 'drop') {
-        s.t += dt; s.y += 60 * dt * s.s1;
-        if (s.t > 0.18) s.done = true;
+        s.t += dt; s.s = Math.max(0.1, s.s - dt * 3);
+        if (s.t > 0.16) s.done = true;
       } else {
-        s.vy += M.g * dt; s.x += s.vx * dt; s.y += s.vy * dt;
-        s.s += (1 - s.s) * Math.min(1, dt * 2);
-        if (s.y > G.H + 50 || s.x < -60 || s.x > G.W + 60) { s.done = true; ammo.push(s.type); FF.sfx.plop(); }
+        s.t += dt; s.vy += G.H * 2 * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.s += (1 - s.s) * Math.min(1, dt * 3);
+        const floor = M.trayY - 6;
+        if (s.y > floor && !s.bounced) { s.bounced = true; s.y = floor; s.vy *= -0.42; s.vx = (24 - s.x) * 1.5; FF.sfx.plop(); }
+        else if (s.y > floor) { s.y = floor; s.vy = 0; }
+        if (s.t > 1.5 || (s.bounced && s.x < 40)) { s.done = true; ammo.push(s.type); }
       }
+      for (const p of s.trail) p.a -= dt * 3.4;
+      s.trail = s.trail.filter(p => p.a > 0);
     }
     shots = shots.filter(s => !s.done);
+    for (const c of coinsFly) {
+      c.t += dt;
+      if (c.t >= COIN_SECONDS) { c.done = true; FF.hud.coins(true); FF.sfx.tick(); }
+    }
+    coinsFly = coinsFly.filter(c => !c.done);
+    for (const r of rings) r.t += dt * 2.6;
+    rings = rings.filter(r => r.t < 1);
     FX.update(dt);
     FF.scenery.update(dt);
 
@@ -198,174 +256,43 @@
     } else soldT = -1;
   };
 
-  /* ---------- Pointer: tap-tap, pull back, or flick ---------- */
-  function dragAim(d) {
-    const dx = d.px - d.sx, dy = d.py - d.sy, len = Math.hypot(dx, dy);
-    if (len < 1) return null;
-    return { angle: clamp(Math.atan2(-dx, dy), -M.maxAngle, M.maxAngle), power: Math.min(len, M.maxPull) / M.maxPull };
+  /* ---------- Pointer and keyboard ---------- */
+  function pullFeedback() {
+    const a = drag && aimFrom(drag);
+    if (!a) return;
+    const step = Math.floor(a.power * 5);
+    if (step > stretched) FF.sound.tone(150 + step * 60, 0.06, 'sine', 0.05, 0, 200 + step * 60);
+    stretched = step;
+    if (a.target && (!aim || aim.target !== a.target)) FF.sfx.tick();
   }
-  Market.pointerDown = e => {
-    drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, px: e.clientX, py: e.clientY, mode: 'tap', samples: [{ x: e.clientX, y: e.clientY, t: performance.now() }], stretched: 0 };
-  };
+  function letGo() {
+    const a = drag && aimFrom(drag);
+    drag = null; aim = null;
+    if (a && loaded) fire(a);
+  }
+  Market.pointerDown = e => { drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, px: e.clientX, py: e.clientY }; stretched = 0; };
   Market.pointerMove = e => {
     if (!drag || e.pointerId !== drag.id) return;
-    const now = performance.now();
     drag.px = e.clientX; drag.py = e.clientY;
-    drag.samples.push({ x: e.clientX, y: e.clientY, t: now });
-    while (drag.samples.length > 2 && now - drag.samples[0].t > 110) drag.samples.shift();
-    const dx = drag.px - drag.sx, dy = drag.py - drag.sy, len = Math.hypot(dx, dy);
-    if (drag.mode === 'tap' && len > 14) drag.mode = dy > 0 ? 'pull' : 'flick';
-    if (drag.mode === 'pull') {
-      const step = Math.floor(Math.min(len, M.maxPull) / (M.maxPull / 4));
-      if (step > drag.stretched) { drag.stretched = step; FF.sfx.stretch(); }
-    }
+    pullFeedback();
   };
-  Market.pointerUp = e => {
-    if (!drag || e.pointerId !== drag.id) return;
-    const d = drag; drag = null;
-    if (d.mode === 'tap') return Market.tap();
-    if (d.mode === 'pull') { const a = dragAim(d); if (a) fire(a.angle, a.power); return; }
-    const s0 = d.samples[0], s1 = d.samples[d.samples.length - 1];
-    const dt = Math.max(0.016, (s1.t - s0.t) / 1000);
-    let vx = (s1.x - s0.x) / dt, vy = (s1.y - s0.y) / dt;
-    if (vy > -50) { vx = d.px - d.sx; vy = d.py - d.sy; }
-    const speed = Math.hypot(vx, vy);
-    fire(clamp(Math.atan2(vx, -vy), -M.maxAngle, M.maxAngle), clamp(speed / 2600, 0.15, 1));
+  Market.pointerUp = e => { if (drag && e.pointerId === drag.id) letGo(); };
+  Market.pointerCancel = e => { if (drag && e.pointerId === drag.id) { drag = null; aim = null; } };
+
+  // Arrow keys move the landing spot; Space throws.
+  Market.nudge = (dx, dy) => {
+    if (!drag) { drag = { key: true, sx: 0, sy: 0, px: 0, py: M.maxPull * 0.5 }; stretched = 0; }
+    drag.px = clamp(drag.px - dx * KEY_STEP, -M.maxPull, M.maxPull);
+    drag.py = clamp(drag.py - dy * KEY_STEP, 0, M.maxPull);
+    pullFeedback();
   };
-  Market.pointerCancel = e => { if (drag && e.pointerId === drag.id) drag = null; };
+  Market.keyThrow = () => { if (drag && drag.key) letGo(); else if (!drag) Market.nudge(0, 0); };
 
   /* ---------- Drawing ---------- */
-  function drawShelf(row, sc) {
-    const ctx = G.ctx, h = 10 * row.s + 4;
-    Draw.rr(-12, row.bottom - 3, G.W + 24, h, 4); Draw.fillStroke('#c99a62', 3);
-    ctx.fillStyle = 'rgba(43,35,80,0.15)'; ctx.fillRect(0, row.bottom + h - 6, G.W, 3);
-    if (sc.snowCap) { ctx.fillStyle = '#ffffff'; Draw.rr(-12, row.bottom - 7, G.W + 24, 7, 3.5); ctx.fill(); }
+  function pouch() {
+    if (aim) return { x: M.ax + aim.dx * 0.5, y: M.ay + aim.dy * 0.5 };
+    return { x: M.ax, y: M.ay + Math.sin(G.clock * 40) * wobble * 14 };
   }
-
-  function drawBarrel(b, highlight) {
-    const ctx = G.ctx, row = M.rows[b.r], s = row.s, bw = row.bw, bh = row.bh, x = row.xs[b.c], top = row.mouth;
-    const lw = Math.max(2, 3.5 * s);
-    const sq = 1 + 0.1 * Math.sin(b.bump * Math.PI);
-    ctx.save();
-    ctx.translate(x, top + bh); ctx.scale(sq, 1 / sq); ctx.translate(-x, -(top + bh));
-    if (highlight) {
-      ctx.fillStyle = 'rgba(255,230,90,0.45)';
-      ctx.beginPath(); ctx.ellipse(x, top, bw * 0.62, bh * 0.28, 0, 0, TAU); ctx.fill();
-    }
-    ctx.beginPath(); ctx.ellipse(x, top, bw * 0.42, bh * 0.1, 0, 0, TAU); ctx.fillStyle = '#4a2c14'; ctx.fill();
-    const shown = b.inBarrel.slice(-4);
-    shown.forEach((t, i) => Draw.fruit(t, x + (i - (shown.length - 1) / 2) * bw * 0.2, top - 1, bw * 0.15, (i - 1) * 0.3));
-    const path = () => {
-      ctx.beginPath();
-      ctx.moveTo(x - bw * 0.42, top); ctx.quadraticCurveTo(x - bw * 0.56, top + bh * 0.5, x - bw * 0.42, top + bh);
-      ctx.lineTo(x + bw * 0.42, top + bh); ctx.quadraticCurveTo(x + bw * 0.56, top + bh * 0.5, x + bw * 0.42, top);
-      ctx.ellipse(x, top, bw * 0.42, bh * 0.1, 0, 0, Math.PI, false);
-      ctx.closePath();
-    };
-    path();
-    ctx.save(); ctx.clip();
-    ctx.fillStyle = '#c07a3c'; ctx.fillRect(x - bw, top - bh, bw * 2, bh * 3);
-    ctx.strokeStyle = '#9a5a26'; ctx.lineWidth = 2.5 * s;
-    for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * bw * 0.17, top); ctx.lineTo(x + i * bw * 0.17, top + bh); ctx.stroke(); }
-    ctx.fillStyle = '#5c5870';
-    ctx.fillRect(x - bw, top + bh * 0.22, bw * 2, bh * 0.1); ctx.fillRect(x - bw, top + bh * 0.72, bw * 2, bh * 0.1);
-    ctx.restore();
-    path(); ctx.lineWidth = lw; ctx.strokeStyle = INK; ctx.stroke();
-    if (b.state === 'closed') {
-      ctx.beginPath(); ctx.ellipse(x, top, bw * 0.46, bh * 0.13, 0, 0, TAU); Draw.fillStroke('#a8692c', lw);
-    }
-    ctx.restore();
-
-    if (b.state === 'closed' || b.pop >= 1) return;
-    // badges pop in when a barrel gets a new request
-    const bp = b.pop > 0 ? 1 + 0.35 * Math.sin(b.pop * Math.PI) : 1;
-    ctx.save(); ctx.translate(x, top); ctx.scale(bp, bp); ctx.translate(-x, -top);
-    const fs = Math.round(clamp(20 * s, 13, 20));
-    ctx.font = `800 ${fs}px "Baloo 2", "Trebuchet MS", sans-serif`;
-    ctx.textBaseline = 'middle';
-    // request badge on top
-    const by = top - 18 * s - fs * 0.5;
-    if (b.state === 'happy') {
-      ctx.save(); ctx.translate(x, by); Draw.heartPath(fs * 0.9); Draw.fillStroke('#ff5e7a', 2.5); ctx.restore();
-    } else {
-      const label = b.wants === 'any' ? 'Any' : '', qty = '×' + (b.need - b.got);
-      const iconW = b.wants === 'any' ? ctx.measureText(label).width : fs * 1.2, qW = ctx.measureText(qty).width;
-      const w = fs * 0.5 + iconW + 3 + qW + fs * 0.5, h = fs * 1.7, x0 = x - w / 2;
-      Draw.rr(x0, by - h / 2, w, h, h / 2); Draw.fillStroke(CARD, 2.5);
-      ctx.textAlign = 'left'; ctx.fillStyle = INK;
-      if (b.wants === 'any') ctx.fillText(label, x0 + fs * 0.5, by + 1);
-      else Draw.fruit(b.wants, x0 + fs * 0.5 + fs * 0.6, by, fs * 0.48);
-      ctx.fillStyle = INK; ctx.fillText(qty, x0 + fs * 0.5 + iconW + 3, by + 1);
-    }
-    // price tag at the bottom left
-    if (b.state === 'open') {
-      const ts = Math.round(clamp(17 * s, 12, 17));
-      ctx.font = `800 ${ts}px "Baloo 2", "Trebuchet MS", sans-serif`;
-      const pW = ctx.measureText(String(b.price)).width, w = ts * 1.15 + pW + ts * 0.6, h = ts * 1.5;
-      const tx = x - bw * 0.56, ty = top + bh - h * 0.7;
-      Draw.rr(tx, ty, w, h, 6); Draw.fillStroke(SUN, 2.5);
-      Draw.coin(tx + ts * 0.62, ty + h / 2, ts * 0.38);
-      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.fillText(String(b.price), tx + ts * 1.15, ty + h / 2 + 1);
-    }
-    ctx.textBaseline = 'alphabetic';
-    ctx.restore();
-  }
-
-  function drawAimGuide() {
-    const ctx = G.ctx;
-    if (!loaded) return null;
-    let angle, power = null;
-    if (drag && drag.mode === 'pull') { const a = dragAim(drag); if (!a) return null; angle = a.angle; power = a.power; }
-    else if (drag && drag.mode === 'flick') return null;
-    else if (phase === 'aim') angle = currentAngle();
-    else { angle = lockedAngle; power = currentPower(); }
-    const dirX = Math.sin(angle), dirY = -Math.cos(angle);
-    const reachD = power === null ? (M.dMin + M.dMax) * 0.42 : M.dMax / Math.cos(angle);
-    ctx.save();
-    ctx.fillStyle = CARD; ctx.strokeStyle = INK; ctx.lineWidth = 2;
-    for (let d = 40; d < reachD; d += 22) {
-      const k = d / reachD;
-      ctx.globalAlpha = power === null ? 0.95 - k * 0.4 : 0.55;
-      ctx.beginPath(); ctx.arc(M.ax + dirX * d, M.ay + dirY * d, 4.5 - k * 1.5, 0, TAU); ctx.fill(); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-    if (power === null) {
-      const hx = M.ax + dirX * reachD, hy = M.ay + dirY * reachD;
-      ctx.translate(hx, hy); ctx.rotate(angle);
-      ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(-12, 4); ctx.lineTo(12, 4); ctx.closePath(); Draw.fillStroke(SUN, 3);
-      ctx.restore();
-      return null;
-    }
-    ctx.restore();
-    const L = landing(angle, power), ds = depthScale(L.y), b = barrelAt(L.x, L.y), good = wantsFruit(b, loaded);
-    ctx.save();
-    ctx.translate(L.x, L.y);
-    ctx.beginPath(); ctx.ellipse(0, 0, M.fr * 1.3 * ds, M.fr * 0.55 * ds, 0, 0, TAU);
-    ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
-    ctx.lineWidth = 4; ctx.strokeStyle = good ? '#5cc24a' : CARD; ctx.stroke();
-    ctx.restore();
-    return { power, target: good ? b : null };
-  }
-
-  function drawPowerMeter(power) {
-    const ctx = G.ctx, h = clamp(G.H * 0.12, 60, 100), w = 18, x = M.ax + 64, y = M.slingY - h + 30;
-    Draw.rr(x, y, w, h, 8); Draw.fillStroke(CARD, 3);
-    ctx.save(); Draw.rr(x, y, w, h, 8); ctx.clip();
-    const g = ctx.createLinearGradient(0, y + h, 0, y);
-    g.addColorStop(0, '#5cc24a'); g.addColorStop(0.55, '#ffd23f'); g.addColorStop(1, '#ff5e3a');
-    ctx.fillStyle = g; ctx.fillRect(x, y + h * (1 - power), w, h * power);
-    ctx.restore();
-    Draw.rr(x, y, w, h, 8); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
-  }
-
-  function pouchPos() {
-    if (drag && drag.mode === 'pull') {
-      const dx = drag.px - drag.sx, dy = drag.py - drag.sy, len = Math.hypot(dx, dy) || 1, k = Math.min(len, M.maxPull * 0.5) / len;
-      return { x: M.ax + dx * k, y: M.ay + dy * k };
-    }
-    return { x: M.ax, y: M.ay };
-  }
-
   function drawTray() {
     const ctx = G.ctx, { W, H } = G, y = M.trayY;
     Draw.rr(-10, y, W + 20, H - y + 10, 10); Draw.fillStroke('#b98652', 4);
@@ -374,7 +301,7 @@
     const room = Math.max(1, Math.floor((M.ax - 50) / step));
     const n = Math.min(ammo.length, ammo.length > room ? room - 1 : room);
     for (let i = 0; i < n; i++) Draw.fruit(ammo[i], 24 + i * step, cy, r);
-    ctx.font = '800 22px "Baloo 2", "Trebuchet MS", sans-serif'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.font = `800 22px ${FONT}`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     if (ammo.length > n) {
       ctx.textAlign = 'center'; ctx.lineWidth = 5; ctx.strokeStyle = INK;
       const tx = 24 + n * step;
@@ -385,79 +312,117 @@
     ctx.strokeText('+' + earned, M.ax + 70, cy + 1); ctx.fillStyle = SUN; ctx.fillText('+' + earned, M.ax + 70, cy + 1);
     ctx.textBaseline = 'alphabetic';
   }
+  function drawSling() {
+    const ctx = G.ctx, lean = Math.sin(G.clock * 38) * wobble * 6, p = pouch(), pow = aim ? aim.power : 0;
+    const tipX = d => M.ax + d * 34 + lean, tipY = M.slingY - 10;
+    ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 16;
+    ctx.beginPath();
+    ctx.moveTo(M.ax, M.trayY + 4); ctx.lineTo(M.ax, M.slingY + 34);
+    ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(tipX(-1), tipY);
+    ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(tipX(1), tipY);
+    ctx.stroke();
+    ctx.strokeStyle = '#a8692c'; ctx.lineWidth = 10; ctx.stroke();
+    const band = d => {
+      ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 7 - pow * 3;
+      ctx.beginPath(); ctx.moveTo(tipX(d), tipY); ctx.lineTo(p.x + d * 9, p.y); ctx.stroke();
+    };
+    band(1);
+    if (loaded) {
+      const tremble = pow > 0.9 ? Math.sin(G.clock * 60) * 1.6 : 0, grow = 1 + Math.sin(popIn * Math.PI) * 0.35;
+      Draw.fruit(loaded, p.x + tremble, p.y, M.fr * grow * (1 + pow * 0.12));
+    }
+    band(-1);
+    ctx.beginPath(); ctx.ellipse(p.x, p.y + M.fr * 0.55, M.fr * 0.8, M.fr * 0.35, 0, 0, Math.PI); ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 7; ctx.stroke();
+  }
+  function drawAim() {
+    if (!aim) return;
+    const ctx = G.ctx, arc = arcFor(aim.x, aim.y), p = pouch(), good = aim.target && takes(aim.target, loaded);
+    ctx.save();
+    ctx.fillStyle = good ? '#b6f2a4' : CARD; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+    const n = 14, off = (G.clock * 2.4) % 1;
+    for (let i = 0; i < n; i++) {
+      const k = (i + off) / n, x = p.x + (aim.x - p.x) * k, y = p.y + (aim.y - p.y) * k - arc * 4 * k * (1 - k);
+      ctx.globalAlpha = 0.95 - k * 0.3;
+      ctx.beginPath(); ctx.arc(x, y, 6 - k * 3, 0, TAU); ctx.fill(); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    if (!aim.target) {
+      ctx.translate(aim.x, aim.y);
+      ctx.beginPath(); ctx.arc(0, 0, M.fr * 0.62, 0, TAU);
+      ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.lineWidth = 4; ctx.strokeStyle = CARD; ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawShot(s) {
+    const ctx = G.ctx;
+    for (const p of s.trail) {
+      ctx.globalAlpha = Math.max(0, p.a) * 0.55;
+      ctx.fillStyle = s.hot ? SUN : D.fruits[s.type].colors[0];
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * Math.max(0.2, p.a), 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    Draw.fruit(s.type, s.x, s.y, M.fr * s.s, s.rot);
+  }
+  function drawCoins() {
+    const hx = 40, hy = 33;
+    for (const c of coinsFly) {
+      if (c.t < 0) continue;
+      const k = c.t / COIN_SECONDS, up = Math.min(1, k * 3), e = Math.max(0, (k - 0.3) / 0.7), ee = e * e;
+      const x0 = c.x + (c.sx - c.x) * up, y0 = c.y + (c.sy - c.y) * up;
+      Draw.coin(x0 + (hx - x0) * ee, y0 + (hy - y0) * ee, 9);
+    }
+  }
+  function drawStreak() {
+    if (streak < 2) return;
+    const ctx = G.ctx, s = 1 + streakBump * 0.3, w = 112;
+    ctx.save(); ctx.translate(G.W / 2, 33); ctx.scale(s, s);
+    Draw.rr(-w / 2, -19, w, 38, 19); Draw.fillStroke(streak >= 5 ? '#ff9a1f' : CARD, 3);
+    ctx.font = `800 18px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = INK;
+    ctx.fillText('Streak ' + streak, 0, 1); ctx.textBaseline = 'alphabetic';
+    ctx.restore();
+  }
+  function drawHint() {
+    if (hits || drag || !loaded) return;
+    const ctx = G.ctx, k = (G.clock * 0.8) % 1, y = M.ay + 16 + k * 50, tx = Math.min(G.W - 80, M.ax + 118);
+    ctx.save(); ctx.globalAlpha = 1 - k * 0.7;
+    ctx.beginPath(); ctx.arc(M.ax, y, 15, 0, TAU); ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.restore();
+    ctx.font = `800 22px ${FONT}`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
+    ctx.strokeText('Pull back!', tx, M.slingY + 8); ctx.fillStyle = SUN; ctx.fillText('Pull back!', tx, M.slingY + 8);
+  }
 
   Market.draw = () => {
-    const ctx = G.ctx, S = FF.scenery, sc = FF.scene();
+    const ctx = G.ctx, S = FF.scenery, sc = FF.scene(), sk = G.reduce ? 0 : shake * 7;
+    ctx.save();
+    if (sk) ctx.translate(Math.sin(G.clock * 70) * sk, Math.cos(G.clock * 57) * sk);
     S.sky(M.horizon);
     S.stalls(M.horizon);
     S.plaza(M.horizon);
-
-    const guide = drawAimTargetOnly();
-    for (let r = 0; r < ROWS; r++) {
-      drawShelf(M.rows[r], sc);
-      barrels.filter(b => b.r === r).forEach(b => drawBarrel(b, guide && guide.target === b));
-    }
+    Layouts[active].draw(M, targets, aim && aim.target, sc);
+    if (revealT > 0) Layouts.wall.drawCloth(M, clamp(1 - revealT, 0, 1), sc);
     drawTray();
-
-    // slingshot standing on the tray
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = INK; ctx.lineWidth = 16;
-    ctx.beginPath();
-    ctx.moveTo(M.ax, M.trayY + 4); ctx.lineTo(M.ax, M.slingY + 34);
-    ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(M.ax - 34, M.slingY - 10);
-    ctx.moveTo(M.ax, M.slingY + 40); ctx.lineTo(M.ax + 34, M.slingY - 10);
-    ctx.stroke();
-    ctx.strokeStyle = '#a8692c'; ctx.lineWidth = 10; ctx.stroke();
-
-    const g2 = drawAimGuide();
-    if (g2 && g2.power !== null) drawPowerMeter(g2.power);
-
-    const p = pouchPos();
-    const band = back => { ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(back ? M.ax + 34 : M.ax - 34, M.slingY - 10); ctx.lineTo(p.x + (back ? 8 : -8), p.y); ctx.stroke(); };
-    band(true);
-    if (loaded) Draw.fruit(loaded, p.x, p.y, M.fr);
-    band(false);
-    ctx.beginPath(); ctx.ellipse(p.x, p.y + M.fr * 0.55, M.fr * 0.8, M.fr * 0.35, 0, 0, Math.PI); ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 7; ctx.stroke();
-
-    for (const s of shots) {
-      const a = s.phase === 'drop' ? Math.max(0, 1 - s.t / 0.18) : 1;
-      if (s.phase === 'fly') {
-        ctx.fillStyle = 'rgba(43,35,80,0.15)';
-        const gx = M.ax + (s.lx - M.ax) * s.t, gy = M.ay + (s.ly - M.ay) * s.t;
-        ctx.beginPath(); ctx.ellipse(gx, gy, M.fr * s.s * 0.8, M.fr * s.s * 0.3, 0, 0, TAU); ctx.fill();
-      }
-      Draw.fruit(s.type, s.x, s.y, M.fr * s.s, s.rot, a);
+    drawSling();
+    drawAim();
+    for (const r of rings) {
+      ctx.globalAlpha = 1 - r.t; ctx.lineWidth = 8 * (1 - r.t) + 1; ctx.strokeStyle = SUN;
+      const q = r.r * (1 + r.t * 1.5);
+      ctx.beginPath(); ctx.ellipse(r.x, r.y, q, q * r.ry, 0, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 1;
     }
+    shots.forEach(drawShot);
     S.weather();
     FX.draw();
-
-    // coaching for new players
-    let msg = null;
-    if (loaded && !drag) {
-      if (shotsFired < 2) msg = phase === 'aim' ? 'Tap to aim!' : 'Tap to throw!';
-      else if (shotsFired < 5 && FF.save.trips < 3) msg = 'Or pull back the slingshot!';
-    }
-    if (msg) {
-      const pulse = 1 + 0.05 * Math.sin(G.clock * 6) + hintPulse * 0.1;
-      // beside the slingshot on wide screens, above it on phones
-      const front = M.rows[ROWS - 1].bottom, wide = G.W >= 640;
-      const mx = wide ? M.ax - 190 : G.W / 2, my = wide ? M.slingY + 10 : front + (M.ay - M.fr - front) * 0.5;
-      ctx.save(); ctx.translate(mx, my); ctx.scale(pulse, pulse);
-      ctx.font = '800 21px "Baloo 2", "Trebuchet MS", sans-serif'; ctx.textAlign = 'center';
-      ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
-      ctx.strokeText(msg, 0, 0); ctx.fillStyle = SUN; ctx.fillText(msg, 0, 0);
-      ctx.restore();
-    }
+    drawCoins();
+    drawStreak();
+    drawHint();
+    ctx.restore();
+    ctx.textAlign = 'left';
   };
 
-  // Which barrel the landing ring is over right now (for the highlight), without drawing anything.
-  function drawAimTargetOnly() {
-    if (!loaded || (drag && drag.mode === 'flick')) return null;
-    let angle, power;
-    if (drag && drag.mode === 'pull') { const a = dragAim(drag); if (!a) return null; angle = a.angle; power = a.power; }
-    else if (phase === 'power') { angle = lockedAngle; power = currentPower(); }
-    else return null;
-    const L = landing(angle, power), b = barrelAt(L.x, L.y);
-    return { target: wantsFruit(b, loaded) ? b : null };
-  }
+  Layouts.env.takes = t => takes(t, loaded);
+  Layouts.env.look = (x, y) => {
+    const f = shots[0] || aim || { x: M.ax, y: M.ay }, dx = f.x - x, dy = f.y - y, n = Math.hypot(dx, dy) || 1;
+    return { x: dx / n, y: dy / n };
+  };
 })();

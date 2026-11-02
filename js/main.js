@@ -172,8 +172,13 @@
       if (isLeft(k)) { G.input.keys.left = true; e.preventDefault(); }
       else if (isRight(k)) { G.input.keys.right = true; e.preventDefault(); }
       else if (k === 'p' || k === 'P' || k === 'Escape') Screens.pause();
-    } else if (G.state === 'market' && !G.overlay && (k === ' ' || k === 'Enter') && !e.repeat) {
-      FF.sound.ensure(); FF.market.tap(); e.preventDefault();
+    } else if (G.state === 'market' && !G.overlay && (k === ' ' || k === 'Enter')) {
+      if (!e.repeat) { FF.sound.ensure(); FF.market.keyThrow(); }
+      e.preventDefault();
+    } else if (G.state === 'market' && !G.overlay && (isLeft(k) || isRight(k) || k === 'ArrowUp' || k === 'ArrowDown')) {
+      FF.sound.ensure();
+      FF.market.nudge(isLeft(k) ? -1 : isRight(k) ? 1 : 0, k === 'ArrowUp' ? -1 : k === 'ArrowDown' ? 1 : 0);
+      e.preventDefault();
     } else if (G.overlay === 'pause' && (k === 'p' || k === 'P' || k === 'Escape')) Screens.resume();
   });
   window.addEventListener('keyup', e => {

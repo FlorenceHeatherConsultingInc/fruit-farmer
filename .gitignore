@@ -5,3 +5,6 @@ Desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Local app settings
+.claude/

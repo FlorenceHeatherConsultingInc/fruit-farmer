@@ -128,14 +128,36 @@ FF.data = {
       ambient: 'fireflies' }
   ],
 
-  // The market is a skee-ball wall: 3 shelves of 4 barrels. Rows are listed back, middle, front.
+  // The silly animals who shop at the market. New kinds also need drawing in animals.js.
+  animals: {
+    bunny: { color: '#f6f0e6', accent: '#ffb3c7' },
+    pig:   { color: '#ffb0c0', accent: '#ff8fa8' },
+    bear:  { color: '#b9804a', accent: '#e8c79a' },
+    frog:  { color: '#7ed35f', accent: '#5cb044' },
+    cat:   { color: '#ffb65c', accent: '#ffe0b0' },
+    duck:  { color: '#ffe066', accent: '#ff9a1f' }
+  },
+
+  // The market has two layouts. Rows are listed back to front.
+  //   rowBonus: extra coins per fruit on each row (back rows are harder, so they pay more)
+  //   maxAsk: most fruit one animal asks for, by row
+  //   mixChance: chance a row bonus is nudged up or down by 1, so it's not always the same
   market: {
-    rowBonus: [2, 1, 0],  // extra coins per fruit on each row (back rows are harder, so they pay more)
-    mixChance: 0.25,      // chance a barrel's bonus is nudged up or down by 1, so it's not always the same
-    anyChance: 0.15,      // chance a barrel takes any fruit (1 coin plus the row bonus)
-    maxAsk: [4, 3, 2],    // most fruit one barrel asks for, by row
-    tipPerFruit: 1,       // bonus when a barrel is filled, per fruit it held
-    aimSeconds: 2.6,      // time for the aim arrow to swing left, right and back
-    powerSeconds: 2.0     // time for the power ring to slide out and back
+    friends: { rowBonus: [2, 0], maxAsk: [3, 2], mixChance: 0.25 },
+    wall:    { rowBonus: [2, 1, 0], maxAsk: [4, 3, 2], mixChance: 0.25 },
+    newFriendTier: 2,     // carrier number that brings the third animal (2 = Big basket)
+    anyChance: 0.15,      // chance an animal takes any fruit (1 coin plus the row bonus)
+    tipPerFruit: 1,       // bonus when a basket or barrel is filled, per fruit it held
+    perfectBonus: 2,      // extra coins for a center shot
+    streakEvery: 3,       // every this many hits in a row adds 1 coin per fruit...
+    streakBonusMax: 3,    // ...up to this many
+    aim: {
+      pull: 0.24, pullMin: 92, pullMax: 170,  // full pull, as a fraction of the screen's short side, in pixels
+      reachX: 0.62,       // how far sideways a full pull reaches, as a fraction of screen width
+      snap: 1.3,          // how close to an opening (in opening sizes) a shot starts to drift in
+      assist: 0.4,        // how much of the way it drifts
+      perfect: 0.38,      // closer to the center than this is a Perfect
+      rim: 0.74           // farther out than this rattles around the rim
+    }
   }
 };

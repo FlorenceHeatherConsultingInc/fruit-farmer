@@ -33,7 +33,8 @@
       coins: 0, crate: {}, tier: 0, up: {}, trips: 0, speed: 'slow',
       trees: D.trees.filter(t => !t.cost).map(t => t.type),
       skins: [D.skins[0].id], skin: D.skins[0].id,
-      scenes: [D.scenes[0].id], scene: D.scenes[0].id
+      scenes: [D.scenes[0].id], scene: D.scenes[0].id,
+      marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0
     };
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -58,6 +59,10 @@
     if (s.scenes.includes(raw.scene)) s.scene = raw.scene;
     s.trips = n(raw.trips);
     if (D.speeds[raw.speed]) s.speed = raw.speed;
+    s.wallOwned = raw.wallOwned === true;
+    s.wallRevealed = raw.wallRevealed === true;
+    if (s.wallOwned && raw.marketLayout === 'wall') s.marketLayout = 'wall';
+    s.filled = n(raw.filled);
     return s;
   }
 
