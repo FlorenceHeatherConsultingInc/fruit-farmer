@@ -47,7 +47,7 @@ FF.data = {
     { id: 'small',  look: 'basket', name: 'Little basket', full: 'Basket full!',      cap: 5,  width: 0.25, min: 108, max: 165, cost: 5 },
     { id: 'big',    look: 'handle', name: 'Big basket',    full: 'Basket full!',      cap: 10, width: 0.30, min: 128, max: 205, cost: 30 },
     { id: 'barrow', look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', cap: 20, width: 0.34, min: 148, max: 235, cost: 100 },
-    { id: 'cart',   look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        cap: 40, width: 0.39, min: 165, max: 275, cost: 250 }
+    { id: 'cart',   look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        cap: 40, width: 0.39, min: 165, max: 275, cost: 330 }
   ],
 
   // Orchard trees. The apple tree is free. spot = where it stands (0 = left edge, 1 = right edge).
@@ -62,9 +62,9 @@ FF.data = {
 
   // Upgrades with one price per level. The ids are used by the game: speed, magnet, luck.
   upgrades: [
-    { id: 'speed',  icon: 'speed',  name: 'Zippy wheels', desc: 'Zip across the orchard faster and smoother.', costs: [20, 60, 140] },
-    { id: 'magnet', icon: 'magnet', name: 'Fruit magnet', desc: 'Pulls nearby fruit into what you carry.',    costs: [60, 180] },
-    { id: 'luck',   icon: 'luck',   name: 'Lucky stars',  desc: 'More gold stars fall. Stars sell for 10!',   costs: [40, 120] }
+    { id: 'speed',  icon: 'speed',  name: 'Zippy wheels', desc: 'Zip across the orchard faster and smoother.', costs: [20, 60, 190] },
+    { id: 'magnet', icon: 'magnet', name: 'Fruit magnet', desc: 'Pulls nearby fruit into what you carry.',    costs: [60, 240] },
+    { id: 'luck',   icon: 'luck',   name: 'Lucky stars',  desc: 'More gold stars fall. Stars sell for 10!',   costs: [40, 160] }
   ],
 
   // Basket colors. body = main color, rim = top band, weave = the woven lines.
@@ -74,7 +74,7 @@ FF.data = {
     { id: 'ocean',   name: 'Ocean',   cost: 20,  body: '#5bb4f0', rim: '#2f86c6', weave: '#3a93d2' },
     { id: 'mint',    name: 'Mint',    cost: 30,  body: '#6fd39b', rim: '#3fa56c', weave: '#4cb67b' },
     { id: 'gold',    name: 'Gold',    cost: 120, body: '#ffd23f', rim: '#d9a400', weave: '#e8b800' },
-    { id: 'rainbow', name: 'Rainbow', cost: 250, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
+    { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
   ],
   rainbow: ['#ff4d4d', '#ff9a1f', '#ffd93b', '#5cc24a', '#4aa3e8', '#8a4bd6'],
 
@@ -143,14 +143,14 @@ FF.data = {
   //   maxAsk: most fruit one animal asks for, by row
   //   mixChance: chance a row bonus is nudged up or down by 1, so it's not always the same
   market: {
-    friends: { rowBonus: [2, 0], maxAsk: [3, 2], mixChance: 0.25 },
+    friends: { rowBonus: [1, 0], maxAsk: [3, 2], mixChance: 0 },
     wall:    { rowBonus: [2, 1, 0], maxAsk: [4, 3, 2], mixChance: 0.25 },
     newFriendTier: 2,     // carrier number that brings the third animal (2 = Big basket)
     anyChance: 0.15,      // chance an animal takes any fruit (1 coin plus the row bonus)
     tipPerFruit: 1,       // bonus when a basket or barrel is filled, per fruit it held
-    perfectBonus: 2,      // extra coins for a center shot
+    perfectBonus: 1,      // extra coins for a center shot
     streakEvery: 3,       // every this many hits in a row adds 1 coin per fruit...
-    streakBonusMax: 3,    // ...up to this many
+    streakBonusMax: 1,    // ...up to this many (keep these small: the sparkle is the reward)
     aim: {
       pull: 0.24, pullMin: 92, pullMax: 170,  // full pull, as a fraction of the screen's short side, in pixels
       reachX: 0.62,       // how far sideways a full pull reaches, as a fraction of screen width
