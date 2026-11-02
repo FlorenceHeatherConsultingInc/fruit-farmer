@@ -267,16 +267,16 @@ FF.data = {
   friendship: { hearts: [10, 30, 60, 100, 150], favoriteCounts: 2, favoriteAt: 2, homeAt: 3, hatAt: 4 },
   // Cost of each home, in the order you build them.
   homeCosts: [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800],
-  // Village decorations. x and y place them in the picture, as fractions of its size.
+  // Village decorations. x and y are their spots in the village picture (360 by 300).
   decorations: [
-    { id: 'flowers',  name: 'Flowers',  cost: 50,  x: 0.16, y: 0.97 },
-    { id: 'fence',    name: 'Fence',    cost: 80,  x: 0.5,  y: 0.985 },
-    { id: 'bench',    name: 'Bench',    cost: 100, x: 0.84, y: 0.96 },
-    { id: 'lamp',     name: 'Lamp',     cost: 120, x: 0.04, y: 0.5 },
-    { id: 'well',     name: 'Well',     cost: 150, x: 0.97, y: 0.3 },
-    { id: 'pond',     name: 'Pond',     cost: 200, x: 0.17, y: 0.2 },
-    { id: 'windmill', name: 'Windmill', cost: 400, x: 0.5,  y: 0.25 },
-    { id: 'fountain', name: 'Fountain', cost: 500, x: 0.8,  y: 0.2 }
+    { id: 'flowers',  name: 'Flowers',  cost: 50,  x: 180, y: 293 },
+    { id: 'fence',    name: 'Fence',    cost: 80,  x: 0,   y: 118 },
+    { id: 'bench',    name: 'Bench',    cost: 100, x: 154, y: 246 },
+    { id: 'lamp',     name: 'Lamps',    cost: 120, x: 128, y: 185 },
+    { id: 'well',     name: 'Well',     cost: 150, x: 180, y: 162 },
+    { id: 'pond',     name: 'Pond',     cost: 200, x: 300, y: 104 },
+    { id: 'windmill', name: 'Windmill', cost: 400, x: 90,  y: 80 },
+    { id: 'fountain', name: 'Fountain', cost: 500, x: 180, y: 203 }
   ],
 
   // The market has two layouts. Rows are listed back to front.

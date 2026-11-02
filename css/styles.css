@@ -283,7 +283,7 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .code { letter-spacing: 2px; font-size: 22px; -webkit-user-select: text; user-select: text; }
 .crown { color: #c98a00; font-size: 20px; line-height: 1; }
 .ribbon { font-size: 13px; font-weight: 800; background: #b6f2a4; border: 2px solid var(--ink); border-radius: 999px; padding: 0 6px; }
-.villageart { width: 100%; aspect-ratio: 4 / 3; display: block; border: 3px solid var(--ink); border-radius: 16px; box-sizing: border-box; flex: none; }
+.villageart { width: 100%; aspect-ratio: 6 / 5; display: block; border: 3px solid var(--ink); border-radius: 16px; box-sizing: border-box; flex: none; }
 .hearts { color: #ff3b5c; font-size: 16px; letter-spacing: 1px; line-height: 1.1; display: block; }
 .hearts i { color: #ddd6e8; font-style: normal; }
 .tag { font-weight: 800; font-size: 14px; padding: 2px 8px; border: 2px solid var(--ink); border-radius: 999px; background: var(--grass); color: var(--paper); }

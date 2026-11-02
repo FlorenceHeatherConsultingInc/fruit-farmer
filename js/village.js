@@ -4,10 +4,13 @@
 (() => {
   const FF = window.FF, G = FF.G, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui, F = FF.friends;
   const Draw = FF.draw, Animals = FF.animals, { TAU } = FF.util;
-  const COLS = 4, ROWS = 3, W = 360, H = 270, DPR = 2;
+  const W = 360, H = 300, DPR = 2;
+  // Two rows of cottages face a main street, with a gap in the middle for the village square.
+  const BACK_Y = 170, FRONT_Y = 272, STREET_Y = 197, SQUARE_X = 180;
+  const LOT_X = [26, 72, 118, 242, 288, 334];
   let from = 'title', spots = [];
 
-  const homeSpot = i => ({ x: W * (0.5 + i % COLS) / COLS, y: H * (0.42 + 0.26 * Math.floor(i / COLS)) });
+  const lot = i => ({ x: LOT_X[i % LOT_X.length], y: i < LOT_X.length ? BACK_Y : FRONT_Y });
 
   /* ---------- Decorations, each in its own fixed spot ---------- */
   const DECOR = {
@@ -40,47 +43,80 @@
       });
     },
     fence(ctx, x, y) {
-      for (let i = 0; i < 8; i++) { Draw.rr(x - 66 + i * 19, y - 12, 7, 15, 2); Draw.fillStroke('#fff0d0', 2); }
-      Draw.rr(x - 68, y - 7, 138, 4, 2); Draw.fillStroke('#fff0d0', 1.5);
+      for (let px = 6; px < W; px += 17) { Draw.rr(px, y - 11, 6, 13, 2); Draw.fillStroke('#fff0d0', 1.5); }
+      Draw.rr(-4, y - 7, W + 8, 3, 1.5); Draw.fillStroke('#fff0d0', 1.2);
     }
   };
 
+  function tree(ctx, x, y, sc) {
+    ctx.fillStyle = sc.trunk === 'candy' ? '#fff0f4' : sc.trunk; ctx.fillRect(x - 3, y - 16, 6, 16);
+    Draw.blob([[x - 9, y - 22, 10], [x + 9, y - 22, 10], [x, y - 32, 13]], sc.foliage[0], 2);
+  }
+  function emptyLot(ctx, x, y) {
+    ctx.fillStyle = 'rgba(43,35,80,0.1)'; ctx.beginPath(); ctx.ellipse(x, y - 2, 19, 5, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#8a5a32'; ctx.fillRect(x - 1.5, y - 15, 3, 14);
+    Draw.rr(x - 9, y - 21, 18, 10, 2); Draw.fillStroke('#e9c79a', 1.5);
+  }
+  function cottage(ctx, x, y, roof, kind, i) {
+    const w = 38, h = 24;
+    ctx.fillStyle = 'rgba(43,35,80,0.14)'; ctx.beginPath(); ctx.ellipse(x, y, w * 0.62, 4, 0, 0, TAU); ctx.fill();
+    Draw.rr(x + 9, y - h - 23, 7, 14, 1); Draw.fillStroke('#b05a44', 2);
+    Draw.rr(x - w / 2, y - h, w, h, 2); Draw.fillStroke('#fff0d0', 2);
+    ctx.beginPath(); ctx.moveTo(x - w / 2 - 5, y - h + 1); ctx.lineTo(x - w / 2 + 5, y - h - 17); ctx.lineTo(x + w / 2 - 5, y - h - 17); ctx.lineTo(x + w / 2 + 5, y - h + 1); ctx.closePath();
+    Draw.fillStroke(roof, 2);
+    ctx.beginPath(); ctx.moveTo(x - 11, y); ctx.lineTo(x - 11, y - 11); ctx.arc(x - 6, y - 11, 5, Math.PI, 0); ctx.lineTo(x - 1, y); ctx.closePath(); Draw.fillStroke('#a8692c', 1.5);
+    Draw.rr(x + 3, y - 18, 11, 10, 1.5); Draw.fillStroke('#bfe6fb', 1.5);
+    // the friend stands out front, by the door
+    const bob = Math.abs(Math.sin(G.clock * 2 + i)) * 1.5;
+    Animals.drawHead(kind, x + 14, y - 4 - bob, 9, 'idle', G.clock + i, { x: Math.sin(G.clock + i) * 0.5, y: 0.3 });
+  }
+  function row(ctx, from, to, living, sc) {
+    for (let i = from; i < to; i++) {
+      const { x, y } = lot(i), kind = living[i];
+      if (!kind) { emptyLot(ctx, x, y); continue; }
+      cottage(ctx, x, y, sc.awnings[i % sc.awnings.length], kind, i);
+      spots.push({ kind, x, y: y - 18 });
+    }
+  }
+
   function paint() {
-    const ctx = G.ctx, sc = FF.scene();
-    const g = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+    const ctx = G.ctx, sc = FF.scene(), has = id => FF.save.decor.includes(id);
+    const place = id => { const d = D.decorations.find(x => x.id === id); DECOR[id](ctx, d.x, d.y); };
+    const g = ctx.createLinearGradient(0, 0, 0, 86);
     g.addColorStop(0, sc.sky[0]); g.addColorStop(1, sc.sky[1]);
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = sc.hills[0]; ctx.beginPath(); ctx.ellipse(W * 0.25, H * 0.42, W * 0.5, H * 0.18, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = sc.hills[1]; ctx.beginPath(); ctx.ellipse(W * 0.8, H * 0.44, W * 0.5, H * 0.18, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = sc.ground.top; ctx.fillRect(0, H * 0.32, W, H * 0.68);
-    ctx.fillStyle = sc.ground.deep; ctx.fillRect(0, H * 0.93, W, H * 0.07);
-
+    ctx.fillStyle = sc.hills[0]; ctx.beginPath(); ctx.ellipse(90, 92, 190, 34, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = sc.hills[1]; ctx.beginPath(); ctx.ellipse(300, 94, 170, 28, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = sc.ground.top; ctx.fillRect(0, 84, W, H - 84);
     if (FF.stickers.hasReward('party')) {
       ctx.strokeStyle = D.colors.ink; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(0, 18); ctx.quadraticCurveTo(W / 2, 44, W, 18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, 8); ctx.quadraticCurveTo(W / 2, 34, W, 8); ctx.stroke();
       for (let i = 1; i < 12; i++) {
-        const k = i / 12, x = W * k, y = 18 + 52 * k * (1 - k);
+        const k = i / 12, x = W * k, y = 8 + 52 * k * (1 - k);
         ctx.beginPath(); ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 13); ctx.closePath(); Draw.fillStroke(sc.awnings[i % sc.awnings.length], 1.5);
       }
     }
-    D.decorations.forEach(d => { if (FF.save.decor.includes(d.id)) DECOR[d.id](ctx, W * d.x, H * d.y); });
+    if (has('windmill')) place('windmill');
+    if (has('pond')) place('pond');
+    tree(ctx, 16, 112, sc); tree(ctx, 214, 110, sc);
+    if (has('fence')) place('fence');
+
+    // street and square, with a lane to the front of the village
+    ctx.fillStyle = sc.plaza[0]; ctx.strokeStyle = sc.plaza[1]; ctx.lineWidth = 2;
+    ctx.fillRect(0, STREET_Y - 11, W, 22); ctx.strokeRect(-4, STREET_Y - 11, W + 8, 22);
+    ctx.fillRect(SQUARE_X - 11, STREET_Y, 22, H - STREET_Y);
+    ctx.beginPath(); ctx.ellipse(SQUARE_X, STREET_Y, 44, 24, 0, 0, TAU); ctx.fill(); ctx.stroke();
 
     spots = [];
-    const living = Object.keys(D.animals).filter(F.hasHome), s = 36;
-    for (let i = 0; i < COLS * ROWS; i++) {
-      const { x, y } = homeSpot(i), kind = living[i];
-      if (!kind) {
-        ctx.setLineDash([5, 5]); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(43,35,80,0.35)';
-        Draw.rr(x - 26, y - 34, 52, 40, 8); ctx.stroke(); ctx.setLineDash([]);
-        continue;
-      }
-      Draw.rr(x - s * 0.72, y - s * 0.85, s * 1.44, s * 1, 5); Draw.fillStroke('#fff0d0', 2.5);
-      ctx.beginPath(); ctx.moveTo(x - s * 0.92, y - s * 0.78); ctx.lineTo(x, y - s * 1.45); ctx.lineTo(x + s * 0.92, y - s * 0.78); ctx.closePath();
-      Draw.fillStroke(sc.awnings[i % sc.awnings.length], 2.5);
-      const bob = Math.abs(Math.sin(G.clock * 2 + i)) * 2;
-      Animals.drawHead(kind, x, y - s * 0.22 - bob, s * 0.42, 'idle', G.clock + i, { x: Math.sin(G.clock + i) * 0.5, y: 0.3 });
-      spots.push({ kind, x, y: y - 14 });
-    }
+    const living = Object.keys(D.animals).filter(F.hasHome);
+    row(ctx, 0, LOT_X.length, living, sc);
+    if (has('well')) place('well');
+    if (has('lamp')) { DECOR.lamp(ctx, SQUARE_X - 34, STREET_Y - 14); DECOR.lamp(ctx, SQUARE_X + 34, STREET_Y - 14); }
+    if (has('fountain')) place('fountain');
+    if (has('bench')) place('bench');
+    row(ctx, LOT_X.length, LOT_X.length * 2, living, sc);
+    ctx.fillStyle = sc.ground.deep; ctx.fillRect(0, H - 12, W, 12);
+    if (has('flowers')) [46, 118, 242, 314].forEach(x => DECOR.flowers(ctx, x, 293));
   }
   function drawPicture() {
     const cv = $('villageArt'), prev = G.ctx, ctx = cv.getContext('2d');
