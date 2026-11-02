@@ -20,7 +20,7 @@
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book'];
+  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village'];
   FF.ui = {
     show(id) { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = o !== id; }); G.overlay = id; },
     hideAll() { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = true; }); G.overlay = null; },
@@ -31,7 +31,7 @@
       $('marketHud').hidden = which !== 'market';
     },
     specialText() {
-      const sp = FF.special(), name = FF.data.fruits[sp.fruit].name.toLowerCase(), who = sp.animal[0].toUpperCase() + sp.animal.slice(1);
+      const sp = FF.special(), name = FF.data.fruits[sp.fruit].name.toLowerCase(), who = FF.friends.name(sp.animal);
       return who + ' is craving ' + name + '! Double pay today.';
     },
     bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); },

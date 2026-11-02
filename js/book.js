@@ -57,7 +57,7 @@
     return `<article class="page"><h3>${title}</h3>` +
       (sp ? `<div class="row">${animalPic(sp.animal)}<span>craved</span>${fruitPic(sp.fruit)}</div>` : '') +
       (fruit.length ? `<div class="row"><span>Picked</span>${fruit.map(([t, n]) => `<span class="item">${fruitPic(t)}×${n}</span>`).join('')}</div>` : '') +
-      sales.map(x => `<div class="row">${animalPic(x.animal)}<span>bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
+      sales.map(x => `<div class="row">${animalPic(x.animal)}<span>${FF.friends.name(x.animal)} bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
       (p.perfect ? `<div class="row"><span>${p.perfect} Perfect ${p.perfect > 1 ? 'shots' : 'shot'}!</span></div>` : '') +
       (p.bought.length ? `<div class="row"><span>Got: ${p.bought.join(', ')}</span></div>` : '') +
       (p.earned ? `<div class="row total"><span>Earned</span><span class="pay">${I.coin}${p.earned}</span></div>` : '') +

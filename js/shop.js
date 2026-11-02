@@ -75,7 +75,7 @@
         (max ? ownedBtn('Max') : buyBtn('up', u.id, u.costs[lvl], 'Buy ' + u.name)) + `</div>`;
     }).join('');
 
-    $('shopSkins').innerHTML = D.skins.map(s => {
+    $('shopSkins').innerHTML = D.skins.filter(s => !s.reward || save.skins.includes(s.id)).map(s => {
       const owned = save.skins.includes(s.id), on = save.skin === s.id;
       const bg = s.rainbow ? `linear-gradient(${D.rainbow.join(',')})` : s.body;
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="skin" data-id="${s.id}" ${owned || save.coins >= s.cost ? '' : 'disabled'} aria-pressed="${on}">` +

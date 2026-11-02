@@ -82,6 +82,7 @@ FF.data = {
     { id: 'gold',    name: 'Gold',    cost: 120, body: '#ffd23f', rim: '#d9a400', weave: '#e8b800' },
     { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
   ],
+  // skins for best friends are added below, one per animal
   rainbow: ['#ff4d4d', '#ff9a1f', '#ffd93b', '#5cc24a', '#4aa3e8', '#8a4bd6'],
 
   // Scenery changes everything around you: sky, hills, tree leaves and trunks, the ground,
@@ -152,14 +153,37 @@ FF.data = {
   ],
 
   // The silly animals who shop at the market. New kinds also need drawing in animals.js.
+  // arrive = total hearts earned before this animal shows up at the market.
   animals: {
-    bunny: { color: '#f6f0e6', accent: '#ffb3c7' },
-    pig:   { color: '#ffb0c0', accent: '#ff8fa8' },
-    bear:  { color: '#b9804a', accent: '#e8c79a' },
-    frog:  { color: '#7ed35f', accent: '#5cb044' },
-    cat:   { color: '#ffb65c', accent: '#ffe0b0' },
-    duck:  { color: '#ffe066', accent: '#ff9a1f' }
+    bunny:    { name: 'Bun',       fav: 'strawberry', color: '#f6f0e6', accent: '#ffb3c7' },
+    pig:      { name: 'Sir Oink',  fav: 'apple',      color: '#ffb0c0', accent: '#ff8fa8' },
+    bear:     { name: 'Honey',     fav: 'grapes',     color: '#b9804a', accent: '#e8c79a' },
+    frog:     { name: 'Hopper',    fav: 'orange',     color: '#7ed35f', accent: '#5cb044' },
+    cat:      { name: 'Whiskers',  fav: 'banana',     color: '#ffb65c', accent: '#ffe0b0' },
+    duck:     { name: 'Waddles',   fav: 'apple',      color: '#ffe066', accent: '#ff9a1f' },
+    owl:      { name: 'Hoot',      fav: 'grapes',     color: '#a98565', accent: '#ffb238', arrive: 3 },
+    fox:      { name: 'Rusty',     fav: 'strawberry', color: '#ff8a3c', accent: '#fff3e0', arrive: 6 },
+    goat:     { name: 'Nibbles',   fav: 'orange',     color: '#e8e0d0', accent: '#b8a890', arrive: 9 },
+    sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff', arrive: 12 },
+    hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230', arrive: 15 },
+    turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c', arrive: 18 }
   },
+
+  // Fruit sold to reach each heart. A favorite fruit counts this many times.
+  friendship: { hearts: [10, 30, 60, 100, 150], favoriteCounts: 2, favoriteAt: 2, homeAt: 3, hatAt: 4 },
+  // Cost of each home, in the order you build them.
+  homeCosts: [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800],
+  // Village decorations. x and y place them in the picture, as fractions of its size.
+  decorations: [
+    { id: 'flowers',  name: 'Flowers',  cost: 50,  x: 0.16, y: 0.97 },
+    { id: 'fence',    name: 'Fence',    cost: 80,  x: 0.5,  y: 0.985 },
+    { id: 'bench',    name: 'Bench',    cost: 100, x: 0.84, y: 0.96 },
+    { id: 'lamp',     name: 'Lamp',     cost: 120, x: 0.04, y: 0.5 },
+    { id: 'well',     name: 'Well',     cost: 150, x: 0.97, y: 0.3 },
+    { id: 'pond',     name: 'Pond',     cost: 200, x: 0.17, y: 0.2 },
+    { id: 'windmill', name: 'Windmill', cost: 400, x: 0.5,  y: 0.25 },
+    { id: 'fountain', name: 'Fountain', cost: 500, x: 0.8,  y: 0.2 }
+  ],
 
   // The market has two layouts. Rows are listed back to front.
   //   rowBonus: extra coins per fruit on each row (back rows are harder, so they pay more)
@@ -186,3 +210,8 @@ FF.data = {
     }
   }
 };
+
+// Best friends each give a basket color you can't buy.
+Object.entries(FF.data.animals).forEach(([kind, a]) => {
+  FF.data.skins.push({ id: 'friend-' + kind, name: a.name, cost: 1e9, reward: true, body: a.color, rim: '#2b2350', weave: a.accent });
+});

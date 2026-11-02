@@ -31,7 +31,7 @@
         ctx.beginPath(); ctx.arc(d * r * 0.72, -r * 0.72, r * 0.34, 0, TAU); Draw.fillStroke(a.color, lw);
         ctx.beginPath(); ctx.arc(d * r * 0.72, -r * 0.72, r * 0.16, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
       }
-    } else if (kind === 'cat' || kind === 'pig') {
+    } else if (kind === 'cat' || kind === 'pig' || kind === 'fox') {
       for (const d of [-1, 1]) {
         ctx.beginPath(); ctx.moveTo(d * r * 0.86, -r * 0.34); ctx.lineTo(d * r * 0.72, -r * 1.16); ctx.lineTo(d * r * 0.16, -r * 0.86); ctx.closePath();
         Draw.fillStroke(a.color, lw);
@@ -41,7 +41,39 @@
     } else if (kind === 'duck') {
       ctx.beginPath(); ctx.moveTo(-r * 0.1, -r * 0.9); ctx.quadraticCurveTo(-r * 0.3, -r * 1.35, r * 0.05, -r * 1.3); ctx.quadraticCurveTo(r * 0.02, -r * 1.1, r * 0.2, -r * 0.9);
       Draw.fillStroke(a.color, lw);
+    } else if (kind === 'owl') {
+      for (const d of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(d * r * 0.8, -r * 0.5); ctx.lineTo(d * r * 0.9, -r * 1.2); ctx.lineTo(d * r * 0.26, -r * 0.82); ctx.closePath();
+        Draw.fillStroke(a.color, lw);
+      }
+    } else if (kind === 'goat') {
+      for (const d of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(d * r * 0.3, -r * 0.8); ctx.quadraticCurveTo(d * r * 0.4, -r * 1.4, d * r * 0.95, -r * 1.3); ctx.quadraticCurveTo(d * r * 0.65, -r * 1.05, d * r * 0.62, -r * 0.65); ctx.closePath();
+        Draw.fillStroke(a.accent, lw);
+        ctx.beginPath(); ctx.ellipse(d * r * 1.06, -r * 0.2, r * 0.3, r * 0.15, d * 0.35, 0, TAU); Draw.fillStroke(a.color, lw);
+      }
+    } else if (kind === 'sheep') {
+      const wool = [];
+      for (let i = 0; i < 10; i++) { const t = i / 10 * TAU; wool.push([Math.cos(t) * r * 0.92, Math.sin(t) * r * 0.86 - r * 0.08, r * 0.42]); }
+      Draw.blob(wool, a.accent, lw);
+    } else if (kind === 'hedgehog') {
+      ctx.beginPath();
+      for (let i = 0; i <= 18; i++) { const t = Math.PI * 0.85 + i / 18 * Math.PI * 1.3, rad = i % 2 ? r * 1.5 : r * 1.02; ctx.lineTo(Math.cos(t) * rad, Math.sin(t) * rad); }
+      ctx.closePath(); Draw.fillStroke(a.accent, lw);
+    } else if (kind === 'turtle') {
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.55, r * 1.2, r * 0.8, 0, Math.PI, 0); ctx.closePath(); Draw.fillStroke(a.accent, lw);
+      ctx.strokeStyle = 'rgba(43,35,80,0.35)'; ctx.lineWidth = lw * 0.7;
+      ctx.beginPath(); ctx.moveTo(-r * 0.5, -r * 0.6); ctx.lineTo(-r * 0.3, -r * 1.2); ctx.moveTo(r * 0.5, -r * 0.6); ctx.lineTo(r * 0.3, -r * 1.2); ctx.stroke();
     }
+  }
+
+  // A party hat for friends with four hearts.
+  function hat(r, lw) {
+    const ctx = G.ctx;
+    ctx.save(); ctx.translate(r * 0.42, -r * 0.72); ctx.rotate(0.3);
+    ctx.beginPath(); ctx.moveTo(-r * 0.3, 0); ctx.lineTo(0, -r * 0.72); ctx.lineTo(r * 0.3, 0); ctx.closePath(); Draw.fillStroke('#c77dff', lw);
+    ctx.beginPath(); ctx.arc(0, -r * 0.72, r * 0.11, 0, TAU); Draw.fillStroke(D.colors.sun, lw * 0.7);
+    ctx.restore();
   }
 
   function snout(kind, a, r, lw) {
@@ -50,17 +82,21 @@
       ctx.beginPath(); ctx.ellipse(0, r * 0.2, r * 0.36, r * 0.25, 0, 0, TAU); Draw.fillStroke(a.accent, lw * 0.8);
       ctx.fillStyle = INK;
       Draw.circlesPath([[-r * 0.13, r * 0.2, r * 0.05], [r * 0.13, r * 0.2, r * 0.05]]); ctx.fill();
-    } else if (kind === 'bear') {
-      ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.4, r * 0.3, 0, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
+    } else if (kind === 'bear' || kind === 'fox' || kind === 'goat') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.4, r * 0.3, 0, 0, TAU); ctx.fillStyle = kind === 'goat' ? '#ffffff' : a.accent; ctx.fill();
       ctx.beginPath(); ctx.ellipse(0, r * 0.17, r * 0.12, r * 0.08, 0, 0, TAU); ctx.fillStyle = INK; ctx.fill();
     } else if (kind === 'duck') {
       ctx.beginPath(); ctx.ellipse(0, r * 0.36, r * 0.52, r * 0.2, 0, 0, TAU); Draw.fillStroke(a.accent, lw * 0.8);
+    } else if (kind === 'owl') {
+      ctx.beginPath(); ctx.moveTo(-r * 0.16, r * 0.12); ctx.lineTo(r * 0.16, r * 0.12); ctx.lineTo(0, r * 0.42); ctx.closePath(); Draw.fillStroke(a.accent, lw * 0.8);
+    } else if (kind === 'hedgehog') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.2, r * 0.11, r * 0.08, 0, 0, TAU); ctx.fillStyle = INK; ctx.fill();
     }
   }
 
   function mouth(kind, r, lw, mood) {
-    if (kind === 'duck') return;
-    const ctx = G.ctx, y = kind === 'pig' ? r * 0.56 : kind === 'bear' ? r * 0.42 : r * 0.36;
+    if (kind === 'duck' || kind === 'owl') return;
+    const ctx = G.ctx, y = kind === 'pig' ? r * 0.56 : kind === 'bear' || kind === 'fox' || kind === 'goat' ? r * 0.42 : r * 0.36;
     ctx.strokeStyle = INK; ctx.lineWidth = lw; ctx.lineCap = 'round';
     if (mood === 'happy') {
       ctx.beginPath(); ctx.arc(0, y - r * 0.06, r * 0.3, 0.05 * Math.PI, 0.95 * Math.PI); ctx.closePath(); Draw.fillStroke('#a0263f', lw * 0.8);
@@ -101,6 +137,7 @@
       }
       snout(kind, a, r, lw);
       mouth(kind, r, lw, mood);
+      if (FF.friends && FF.friends.wearsHat(kind)) hat(r, lw);
       ctx.restore();
     }
   };

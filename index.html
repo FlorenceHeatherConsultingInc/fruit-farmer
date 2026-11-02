@@ -66,6 +66,7 @@
       <button class="btn yellow" id="titleMarketBtn" type="button" hidden>Market</button>
       <button class="btn secondary" id="titleShopBtn" type="button">Shop</button>
       <button class="btn secondary" id="titleBookBtn" type="button">Farm book</button>
+      <button class="btn secondary" id="titleVillageBtn" type="button">Village</button>
     </div>
     <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
   </div>
@@ -100,6 +101,7 @@
     <p id="soldMsg"></p>
     <div class="stats" id="soldStats"></div>
     <button class="btn primary" id="soldShopBtn" type="button">Shop</button>
+    <button class="btn secondary" id="soldVillageBtn" type="button">Village</button>
     <button class="btn secondary" id="soldBookBtn" type="button">Farm book</button>
     <button class="btn secondary" id="soldFarmBtn" type="button">Back to the farm</button>
   </div>
@@ -137,6 +139,20 @@
   </div>
 </div>
 
+<!-- Village -->
+<div class="overlay" id="villageOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="villageTitle">
+    <div class="shop-head">
+      <h2 id="villageTitle">Village</h2>
+      <div class="coins" id="villageCoins" aria-live="polite"></div>
+    </div>
+    <canvas class="villageart" id="villageArt" aria-label="Your village, with a home for each animal friend. Tap a home to see that friend."></canvas>
+    <section class="msec"><div class="label">Friends</div><div class="rows" id="villageFriends"></div><p class="note" id="villageNext"></p></section>
+    <section class="msec"><div class="label">Decorations</div><div class="grid3" id="villageDecor"></div></section>
+    <button class="btn primary done" type="button" data-act="villagedone" id="villageDone">Done</button>
+  </div>
+</div>
+
 <!-- Load order matters: each file adds to the shared FF object that later files use. -->
 <script src="js/data.js"></script>
 <script src="js/core.js"></script>
@@ -145,11 +161,13 @@
 <script src="js/ui.js"></script>
 <script src="js/farm.js"></script>
 <script src="js/animals.js"></script>
+<script src="js/friends.js"></script>
 <script src="js/market-layouts.js"></script>
 <script src="js/market.js"></script>
 <script src="js/shop.js"></script>
 <script src="js/board.js"></script>
 <script src="js/book.js"></script>
+<script src="js/village.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

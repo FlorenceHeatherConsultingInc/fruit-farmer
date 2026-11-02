@@ -28,6 +28,8 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/book.js` | The Farm Book (`FF.book`): days, diary, Farm Score, totals by date, new farms. |
 | `js/board.js` | Family leaderboards (`FF.board`), the Family tab. Off until `board` in `data.js` has a url and key. |
 | `supabase/schema.sql` | The online side of the leaderboards. Its name word lists must match `boardWords` in `data.js`. |
+| `js/friends.js` | Hearts and friendship (`FF.friends`). Kept across farms. |
+| `js/village.js` | The Village screen: homes, decorations and the friends list. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Add to Home Screen and offline play on the hosted site. A new game file must also go in `FILES` in `sw.js`. |
 
@@ -36,7 +38,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
 - Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
-  animals → market-layouts → market → shop → board → book → main.
+  animals → friends → market-layouts → market → shop → board → book → village → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans
@@ -55,7 +57,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - **Market pay and aim feel:** edit `market` in `data.js`. Each layout has its own `rowBonus`,
   `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
   and price.
-- **New animal:** add it to `animals` in `data.js`, then add its ears and snout in `animals.js`.
+- **New animal:** add it to `animals` in `data.js` with a name, favorite and `arrive`, then add its ears and snout in `animals.js`.
 
 ## Art rules
 

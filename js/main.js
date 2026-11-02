@@ -124,6 +124,8 @@
   on('harvestBtn', Screens.farm);
   on('titleShopBtn', () => FF.shop.open('title'));
   on('titleBookBtn', () => FF.book.open('title'));
+  on('titleVillageBtn', () => FF.village.open('title'));
+  on('soldVillageBtn', () => FF.village.open('sold'));
   on('soldBookBtn', () => FF.book.open('sold'));
   on('titleMarketBtn', Screens.market);
   on('toMarketBtn', Screens.market);
@@ -207,6 +209,7 @@
     if (G.state === 'title') FF.farm.update(dt, true);
     else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
     else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
+    if (G.overlay === 'village') FF.village.tick();
     if (G.state === 'market') FF.market.draw(); else FF.farm.draw(G.state === 'title');
     requestAnimationFrame(frame);
   }

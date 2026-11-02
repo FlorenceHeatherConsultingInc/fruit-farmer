@@ -55,9 +55,11 @@
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
-    t.kind = pick(Animals.kinds.filter(k => k !== t.kind));
+    const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k));
+    t.kind = pick(unused.length ? unused : pool);
     const sp = FF.special().fruit;
-    t.wants = force || (spare.includes(sp) && Math.random() < 0.4 ? sp : Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
+    const fav = D.animals[t.kind].fav;
+    t.wants = force || (spare.includes(sp) && Math.random() < 0.4 ? sp : spare.includes(fav) && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
     t.special = t.wants === sp;
     t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
     let bonus = pay().rowBonus[t.row];
@@ -141,6 +143,14 @@
     FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
     FF.save.coins += coins; earned += coins;
     FF.book.sale(t.kind, s.type, coins, perfect);
+    const pal = FF.friends.sell(t.kind, s.type), who = FF.friends.name(t.kind);
+    if (pal.hearts) {
+      setTimeout(() => FX.text(G.W / 2, M.horizon + 30, who + ': ' + pal.hearts + (pal.hearts === 1 ? ' heart!' : ' hearts!'), true), 500);
+      FX.burst(t.x, t.y - t.R, ['#ff3b5c', '#ff7a9c'], 16, 'heart');
+      setTimeout(FF.sfx.buy, 200);
+      if (pal.hearts === D.friendship.homeAt) setTimeout(() => FX.text(G.W / 2, M.horizon + 80, who + ' wants a home!', false), 1100);
+    }
+    pal.arrived.forEach((k, i) => setTimeout(() => FX.text(G.W / 2, M.horizon + 130, 'New friend: ' + FF.friends.name(k) + '!', true), 1700 + i * 800));
     coinShower(t, clamp(coins, 3, 10), 0);
     t.mood = 'happy'; t.moodT = 0.9;
     FX.burst(t.x, t.y, [SUN, '#fff3a8'], perfect ? 22 : 10, 'star');
