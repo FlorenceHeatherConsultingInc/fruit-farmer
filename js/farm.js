@@ -61,7 +61,10 @@
     const fromX = prev ? prev.x : basket.x;
     const d = demo ? G.W : reach(prev ? arrive - prev.arrive : arrive - G.clock);
     const lo = Math.max(r + 8, fromX - d), hi = Math.min(G.W - r - 8, fromX + d);
-    fruits.push({ x: rand(lo, Math.max(lo, hi)), y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false });
+    // Fruit falls near its own tree, as far as staying catchable allows. Stars can come from anywhere.
+    const tree = D.trees.find(t => t.type === type);
+    const x = tree ? clamp(G.W * (tree.spot + rand(-0.09, 0.09)), lo, Math.max(lo, hi)) : rand(lo, Math.max(lo, hi));
+    fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false });
     return true;
   }
 
@@ -102,6 +105,7 @@
     fullT = FF.carried() >= FF.cap() ? 0.4 : -1;
   };
   Farm.reset = () => { fruits = []; pile = []; };
+  Farm.falling = () => fruits.filter(f => !f.landed);
   Farm.nextFruitX = () => { let n = null; for (const f of fruits) if (!f.landed && (!n || f.y > n.y)) n = f; return n ? n.x : null; };
 
   Farm.update = (dt, demo) => {
