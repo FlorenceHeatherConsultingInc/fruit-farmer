@@ -128,6 +128,14 @@ FF.data = {
       ambient: 'fireflies' }
   ],
 
+  // Family leaderboards. Empty url and key turn them off. The key is the public one, safe to ship.
+  board: { url: '', key: '' },
+  // Farm names are built from these lists only. They must match valid_farm_name in supabase/schema.sql.
+  boardWords: {
+    first: ['Sunny', 'Happy', 'Silly', 'Jolly', 'Lucky', 'Golden', 'Bouncy', 'Sleepy', 'Rainbow', 'Sparkly', 'Cozy', 'Giggly', 'Mighty', 'Tiny', 'Windy', 'Starry'],
+    second: ['Pig', 'Bunny', 'Bear', 'Frog', 'Cat', 'Duck', 'Apple', 'Berry', 'Banana', 'Grape', 'Orange', 'Barrel', 'Basket', 'Sprout', 'Acorn', 'Clover']
+  },
+
   // Farm Score ranks. score = coins earned across all farms.
   ranks: [
     { name: 'Sprout', score: 0 },

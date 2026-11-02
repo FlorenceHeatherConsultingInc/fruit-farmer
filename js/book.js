@@ -85,8 +85,7 @@
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
-    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : farmsHTML();
-    $('bookOv').querySelector('.card').scrollTop = 0;
+    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : farmsHTML();
   }
 
   /* ---------- New farm ---------- */
@@ -103,7 +102,13 @@
     const b = e.target.closest('button');
     if (!b) return;
     FF.sound.ensure();
-    if (b.dataset.tab) { tab = b.dataset.tab; shown = PAGE_STEP; confirmNew = false; FF.sfx.tick(); render(); return; }
+    if (b.dataset.tab) {
+      tab = b.dataset.tab; shown = PAGE_STEP; confirmNew = false; FF.sfx.tick(); render();
+      $('bookOv').querySelector('.card').scrollTop = 0;
+      if (tab === 'family') FF.board.opened();
+      return;
+    }
+    if (b.dataset.board) { FF.board.act(b.dataset.board); return; }
     switch (b.dataset.book) {
       case 'done': FF.book.close(); break;
       case 'more': shown += PAGE_STEP; render(); break;
@@ -114,6 +119,9 @@
   });
 
   FF.book = {
+    dateKey,
+    refresh: () => render(),
+    esc: t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
     harvest(type) { const t = today(); t.harvest[type] = (t.harvest[type] || 0) + 1; },
     sale(animal, fruit, coins, perfect) {
       const t = today(), key = animal + '|' + fruit, row = t.sales[key] || (t.sales[key] = { animal, fruit, n: 0, coins: 0 });
@@ -123,11 +131,12 @@
     },
     bonus: earn,
     bought(name) { today().bought.push(name); },
-    sold() { today().sold = true; FF.persist(); },
+    sold() { today().sold = true; FF.persist(); FF.board.sync(); },
     startDay() { if (today().sold) { closeDay(); FF.persist(); } },
     open(origin) {
       FF.sound.ensure();
       from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false;
+      $('familyTab').hidden = !FF.board.enabled();
       render();
       UI.show('book');
       $('bookDone').focus({ preventScroll: true });

@@ -16,6 +16,8 @@ browser on that computer.
 - **Slingshot:** start your drag on the fruit. Tap a fruit in the tray to swap it in.
 - **Farm book:** see your Farm Score, your totals for today, this week and this month, a diary of
   every day, and your farms. You can start a new farm and keep your colors and scenery.
+- **Family:** in the Farm book, start a family or join one with a code to compare scores for today,
+  this week, this month and all time. Farm names are made up by the game, and there's no chat.
 - **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery. Reach the
   goals on the Barrel wall card to unlock a bigger market with 12 barrels.
 
