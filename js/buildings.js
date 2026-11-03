@@ -19,7 +19,7 @@
     out.push({ text: b.cost + ' coins', done: s.coins >= b.cost });
     (b.needs.trees || []).forEach(t => out.push({ text: D.trees.find(x => x.type === t).name, done: s.trees.includes(t) }));
     (b.needs.buildings || []).forEach(x => out.push({ text: def(x).name, done: owned(x) }));
-    if (b.needs.fields) out.push({ text: 'Fields', done: FF.fields ? FF.fields.open() : false });
+    if (b.needs.fields) out.push({ text: 'Fields (farm level ' + D.fields.level + ')', done: FF.fields ? FF.fields.open() : false });
     Object.entries(b.deliver || {}).forEach(([t, n]) => out.push({ text: `Deliver ${n} ${D.fruits[t].name.toLowerCase()}`, done: s.barn[t] >= n }));
     return out;
   }

@@ -186,6 +186,17 @@
     for (let i = 0; i < 4; i++) for (let j = -1; j <= 1; j++) { ctx.beginPath(); ctx.arc(s * (0.5 + j * 0.07), s * (0.32 + i * 0.12), s * 0.025, 0, TAU); ctx.fill(); }
     for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * 0.5, s * 0.86); ctx.quadraticCurveTo(s * (0.5 + d * 0.32), s * 0.6, s * (0.5 + d * 0.16), s * 0.3); ctx.quadraticCurveTo(s * (0.5 + d * 0.12), s * 0.62, s * 0.5, s * 0.86); Draw.fillStroke('#5cc24a', s * 0.04); }
   };
+  GOODS.egg = (ctx, s) => {
+    ctx.beginPath(); ctx.ellipse(s * 0.5, s * 0.66, s * 0.36, s * 0.16, 0, 0, TAU); Draw.fillStroke('#c9a06a', s * 0.04);
+    for (const [x, rot] of [[0.38, -0.25], [0.62, 0.25], [0.5, 0]]) { ctx.beginPath(); ctx.ellipse(s * x, s * (x === 0.5 ? 0.5 : 0.56), s * 0.14, s * 0.19, rot, 0, TAU); Draw.fillStroke('#fff6e0', s * 0.04); }
+    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.ellipse(s * 0.46, s * 0.44, s * 0.03, s * 0.05, -0.3, 0, TAU); ctx.fill();
+  };
+  GOODS.milk = (ctx, s) => {
+    ctx.beginPath(); ctx.moveTo(s * 0.32, s * 0.36); ctx.lineTo(s * 0.5, s * 0.16); ctx.lineTo(s * 0.68, s * 0.36); ctx.closePath(); Draw.fillStroke('#4aa3e8', s * 0.05);
+    Draw.rr(s * 0.32, s * 0.36, s * 0.36, s * 0.52, s * 0.04); Draw.fillStroke('#ffffff', s * 0.05);
+    Draw.rr(s * 0.32, s * 0.5, s * 0.36, s * 0.16, 0); Draw.fillStroke('#4aa3e8', s * 0.04);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s * 0.5, s * 0.58, s * 0.05, 0, TAU); ctx.fill();
+  };
   // Goods draw through the same call as fruit, centered on the spot and about 2r across.
   Draw.goodsArt = GOODS;
   for (const name of Object.keys(GOODS)) FRUIT_ART[name] = r => { const ctx = G.ctx; ctx.save(); ctx.translate(-r * 1.5, -r * 1.55); GOODS[name](ctx, r * 3); ctx.restore(); };

@@ -253,9 +253,86 @@
     ctx.font = `800 24px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff0d0';
     ctx.fillText('Barn', x0 + 290, STREET - 118);
     target(x0 + 160, STREET - 290, x0 + 420, STREET, () => { FF.sfx.tick(); FF.fx.text(x0 + 290, STREET - 300, FF.inBarn() + ' fruit in the barn', false); showBarn(); });
-    fenceRun(x0 + 480, x0 + 720, STREET + 4);
-    sign(x0 + 600, STREET - 50, 'Cow barn\ncoming soon', true);
-    lot(x0 + 860, STREET - 10, 200, 'Chicken coop\ncoming soon');
+    for (const [id, x] of [['cows', x0 + 600], ['coop', x0 + 860]]) {
+      const b = FF.buildings.def(id), y = STREET - 10;
+      if (FF.buildings.owned(id)) (id === 'cows' ? cowPen : chickenYard)(x, y, b);
+      else lot(x, y, 200, b.name + '\n' + (FF.buildings.canBuild(id) ? 'tap to build' : 'build here'));
+      target(x - 120, y - 230, x + 120, y + 20, () => { FF.sfx.tick(); FF.buildings.open(id); });
+    }
+  }
+  // A green badge with how many goods are ready to collect.
+  function readyBadge(x, y, n) {
+    if (!n) return;
+    const ctx = G.ctx;
+    ctx.beginPath(); ctx.arc(x, y, 18, 0, TAU); Draw.fillStroke('#5cc24a', 3);
+    ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.textAlign = 'center'; ctx.fillText(n, x, y + 7);
+  }
+  /* ---------- Farm animals, from the design page ---------- */
+  function cow(x, y, s, flip = 1) {
+    const c = G.ctx, lw = 4;
+    c.save(); c.translate(x, y); c.scale(flip, 1);
+    for (const lx of [-0.55, -0.25, 0.25, 0.55]) { Draw.rr(lx * s - s * 0.09, s * 0.25, s * 0.18, s * 0.45, s * 0.05); Draw.fillStroke('#ffffff', lw); }
+    c.beginPath(); c.moveTo(-s * 0.8, -s * 0.05); c.quadraticCurveTo(-s * 1.05, s * 0.1, -s * 0.98, s * 0.38); c.strokeStyle = INK; c.lineWidth = lw; c.stroke();
+    c.beginPath(); c.ellipse(0, 0, s * 0.82, s * 0.46, 0, 0, TAU); Draw.fillStroke('#ffffff', lw);
+    c.save(); c.beginPath(); c.ellipse(0, 0, s * 0.8, s * 0.44, 0, 0, TAU); c.clip();
+    Draw.blob([[-s * 0.35, -s * 0.15, s * 0.2], [-s * 0.2, -s * 0.05, s * 0.16]], INK); Draw.blob([[s * 0.3, s * 0.12, s * 0.22], [s * 0.45, -s * 0.05, s * 0.14]], INK);
+    c.restore();
+    c.beginPath(); c.ellipse(0, 0, s * 0.82, s * 0.46, 0, 0, TAU); c.lineWidth = lw; c.strokeStyle = INK; c.stroke();
+    c.beginPath(); c.ellipse(-s * 0.1, s * 0.42, s * 0.14, s * 0.09, 0, 0, TAU); Draw.fillStroke('#ffb0c0', lw * 0.7);
+    const hx = s * 0.88, hy = -s * 0.3;
+    for (const d of [-1, 1]) { c.beginPath(); c.ellipse(hx + d * s * 0.3, hy - s * 0.18, s * 0.16, s * 0.07, d * 0.4, 0, TAU); Draw.fillStroke('#ffffff', lw * 0.8); }
+    for (const d of [-1, 1]) { c.beginPath(); c.moveTo(hx + d * s * 0.12, hy - s * 0.25); c.quadraticCurveTo(hx + d * s * 0.18, hy - s * 0.48, hx + d * s * 0.26, hy - s * 0.44); c.lineWidth = s * 0.08; c.strokeStyle = INK; c.lineCap = 'round'; c.stroke(); c.lineWidth = s * 0.04; c.strokeStyle = '#fff0d0'; c.stroke(); }
+    c.beginPath(); c.ellipse(hx, hy, s * 0.3, s * 0.32, 0, 0, TAU); Draw.fillStroke('#ffffff', lw);
+    c.beginPath(); c.ellipse(hx, hy + s * 0.2, s * 0.26, s * 0.17, 0, 0, TAU); Draw.fillStroke('#ffb0c0', lw);
+    c.fillStyle = INK; Draw.circlesPath([[hx - s * 0.09, hy + s * 0.2, s * 0.035], [hx + s * 0.09, hy + s * 0.2, s * 0.035], [hx - s * 0.11, hy - s * 0.08, s * 0.05], [hx + s * 0.11, hy - s * 0.08, s * 0.05]]); c.fill();
+    c.restore();
+  }
+  function chicken(x, y, s, flip = 1) {
+    const c = G.ctx, lw = 4;
+    c.save(); c.translate(x, y); c.scale(flip, 1);
+    c.strokeStyle = '#ff9a1f'; c.lineWidth = s * 0.08; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-s * 0.1, s * 0.3); c.lineTo(-s * 0.1, s * 0.55); c.moveTo(s * 0.12, s * 0.3); c.lineTo(s * 0.12, s * 0.55); c.stroke();
+    Draw.blob([[-s * 0.42, -s * 0.18, s * 0.16], [-s * 0.5, -s * 0.02, s * 0.14]], '#ffffff', lw * 0.6);
+    c.beginPath(); c.ellipse(0, s * 0.05, s * 0.42, s * 0.32, 0, 0, TAU); Draw.fillStroke('#ffffff', lw * 0.9);
+    Draw.blob([[s * 0.22, -s * 0.5, s * 0.08], [s * 0.32, -s * 0.54, s * 0.09], [s * 0.42, -s * 0.5, s * 0.08]], '#ff3b5c', lw * 0.5);
+    c.beginPath(); c.arc(s * 0.32, -s * 0.3, s * 0.22, 0, TAU); Draw.fillStroke('#ffffff', lw * 0.9);
+    c.beginPath(); c.moveTo(s * 0.5, -s * 0.33); c.lineTo(s * 0.66, -s * 0.27); c.lineTo(s * 0.5, -s * 0.21); c.closePath(); Draw.fillStroke('#ff9a1f', lw * 0.5);
+    c.fillStyle = INK; c.beginPath(); c.arc(s * 0.38, -s * 0.34, s * 0.04, 0, TAU); c.fill();
+    c.beginPath(); c.ellipse(-s * 0.05, s * 0.05, s * 0.2, s * 0.12, -0.3, 0, TAU); c.strokeStyle = '#d8d0e8'; c.lineWidth = s * 0.05; c.stroke();
+    c.restore();
+  }
+  function coop(x, y, s) {
+    const c = G.ctx, lw = 4;
+    for (const d of [-1, 1]) { Draw.rr(x + d * s * 0.4 - 5, y - s * 0.35, 10, s * 0.35, 2); Draw.fillStroke('#8a5a32', 3); }
+    Draw.rr(x - s * 0.55, y - s * 1.0, s * 1.1, s * 0.66, 4); Draw.fillStroke('#e9b26a', lw);
+    c.strokeStyle = 'rgba(43,35,80,0.2)'; c.lineWidth = 2; for (let i = 1; i < 5; i++) { c.beginPath(); c.moveTo(x - s * 0.53, y - s * 1.0 + i * s * 0.13); c.lineTo(x + s * 0.53, y - s * 1.0 + i * s * 0.13); c.stroke(); }
+    c.beginPath(); c.moveTo(x - s * 0.7, y - s * 0.96); c.lineTo(x, y - s * 1.4); c.lineTo(x + s * 0.7, y - s * 0.96); c.closePath(); Draw.fillStroke('#c84a3c', lw);
+    c.beginPath(); c.arc(x, y - s * 0.6, s * 0.16, Math.PI, 0); c.lineTo(x + s * 0.16, y - s * 0.36); c.lineTo(x - s * 0.16, y - s * 0.36); c.closePath(); Draw.fillStroke('#3d2412', 3);
+    c.beginPath(); c.moveTo(x - s * 0.16, y - s * 0.36); c.lineTo(x - s * 0.62, y); c.lineTo(x - s * 0.42, y); c.lineTo(x, y - s * 0.36); c.closePath(); Draw.fillStroke('#a8723f', 3);
+  }
+  function trough(x, y, s, full) {
+    Draw.rr(x - s * 0.6, y - s * 0.3, s * 1.2, s * 0.3, 6); Draw.fillStroke('#a8723f', 3);
+    if (full) { Draw.rr(x - s * 0.52, y - s * 0.32, s * 1.04, s * 0.1, 3); Draw.fillStroke('#e8c25a', 2); }
+  }
+  // One cow per slot, in a fenced pen with a trough. Milk waits on the fence post when ready.
+  function cowPen(x, y, b) {
+    const n = FF.buildings.slots(b.id), st = FF.save.buildings[b.id], t = performance.now() / 1000;
+    const spots = [[x - 60, y - 44, 48, 1], [x + 62, y - 44, 48, 1], [x + 4, y - 84, 38, -1]].slice(0, n);
+    for (let i = spots.length - 1; i >= 0; i--) { const [cx, cy, sz, f] = spots[i]; cow(cx, cy + Math.sin(t * 1.5 + i) * 1.5, sz, f); }
+    fenceRun(x - 130, x + 130, y + 14);
+    trough(x - 60, y + 20, 70, st.queue.length > 0);
+    const ready = FF.buildings.ready(b.id);
+    for (let i = 0; i < Math.min(ready, 3); i++) Draw.fruit('milk', x + 50 + i * 26, y + 8, 16);
+    readyBadge(x + 120, y - 130, ready);
+  }
+  // A coop with one chicken per slot pecking about, and eggs in the straw when ready.
+  function chickenYard(x, y, b) {
+    const n = FF.buildings.slots(b.id), t = performance.now() / 1000;
+    coop(x - 30, y + 6, 120);
+    for (let i = 0; i < n; i++) chicken(x + 30 + (i % 2) * 50, y - 6 - Math.floor(i / 2) * 36 + Math.abs(Math.sin(t * 3 + i)) * -4, 34, i % 2 ? -1 : 1);
+    const ready = FF.buildings.ready(b.id);
+    for (let i = 0; i < Math.min(ready, 3); i++) Draw.fruit('egg', x - 80 + i * 22, y + 4, 12);
+    readyBadge(x + 90, y - 170, ready);
   }
   /* ---------- Fields: crops grow taller each day ---------- */
   function sprout(x, y, k) {

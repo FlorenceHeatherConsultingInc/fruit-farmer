@@ -22,7 +22,10 @@ FF.data = {
     jam:        { name: 'Jam jars',     price: 18, colors: ['#e8323f', '#fffaf0'], kind: 'good' },
     // Crops grown in fields.
     hay:        { name: 'Hay',          price: 2,  colors: ['#e8c25a', '#fff3a8'], kind: 'crop' },
-    corn:       { name: 'Corn',         price: 2,  colors: ['#ffd23f', '#5cc24a'], kind: 'crop' }
+    corn:       { name: 'Corn',         price: 2,  colors: ['#ffd23f', '#5cc24a'], kind: 'crop' },
+    // Goods from farm animals.
+    egg:        { name: 'Eggs',         price: 8,  colors: ['#fff6e0', '#f2d9a8'], kind: 'good' },
+    milk:       { name: 'Milk',         price: 12, colors: ['#ffffff', '#4aa3e8'], kind: 'good' }
   },
   // Fields open at farm `level`, with `start` plots; each extra plot costs the next price in plotCosts.
   // days: how many days a crop takes. yield: how many you pick from one plot.
@@ -35,7 +38,10 @@ FF.data = {
   buildings: [
     { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4], upgrade: [200, 500] },
     { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4], upgrade: [250, 600] },
-    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4], upgrade: [300, 700] }
+    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4], upgrade: [300, 700] },
+    // Farm animals live in the barnyard. More slots means more animals.
+    { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4], upgrade: [300, 700] },
+    { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 600, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4], upgrade: [400, 900] }
   ],
 
   // Harvest speed picked on the title screen.
