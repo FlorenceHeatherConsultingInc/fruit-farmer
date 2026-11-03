@@ -16,6 +16,14 @@
     soundOn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>',
     soundOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3a8.5 8.5 0 1 0 6 13.5A7 7 0 0 1 15 3z" fill="#ffe680" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/><circle cx="19" cy="5" r="1.2" fill="#2b2350"/></svg>',
+    orders: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="18" rx="2" fill="#fffaf0" stroke="#2b2350" stroke-width="2"/><rect x="8" y="2" width="8" height="4" rx="1.5" fill="#cf8f4e" stroke="#2b2350" stroke-width="1.8"/><path d="M8 11l2 2 4-4M8 17h8" stroke="#3f9530" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z" fill="#ff5e7a" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/></svg>',
+    book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7a2 2 0 0 1 2 2v15a2 2 0 0 0-2-2H4z" fill="#4aa3e8" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/><path d="M20 4h-7a2 2 0 0 0-2 2v15a2 2 0 0 1 2-2h7z" fill="#7fc0f0" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/></svg>',
+    field: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="15" width="20" height="7" rx="2" fill="#9a6a3a" stroke="#2b2350" stroke-width="2"/><path d="M7 15V7M12 15V4M17 15V7" stroke="#2b2350" stroke-width="2" stroke-linecap="round"/><ellipse cx="7" cy="7" rx="2" ry="3" fill="#e8c25a" stroke="#2b2350" stroke-width="1.6"/><ellipse cx="12" cy="5" rx="2" ry="3" fill="#ffd23f" stroke="#2b2350" stroke-width="1.6"/><ellipse cx="17" cy="7" rx="2" ry="3" fill="#e8c25a" stroke="#2b2350" stroke-width="1.6"/></svg>',
+    barn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 11l3-5 7-3 7 3 3 5z" fill="#6e2a2a" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/><rect x="3" y="11" width="18" height="10" fill="#d9443c" stroke="#2b2350" stroke-width="2"/><rect x="8" y="14" width="8" height="7" fill="#fff0d0" stroke="#2b2350" stroke-width="1.6"/><path d="M8 14l8 7M16 14l-8 7" stroke="#d9443c" stroke-width="1.6"/></svg>',
+    pot: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6c0-2 1-3 2-3M12 6c0-2 1-3 2-3" stroke="#9aa6b8" stroke-width="1.8" fill="none" stroke-linecap="round"/><rect x="3" y="9" width="18" height="3" rx="1.5" fill="#ff9a1f" stroke="#2b2350" stroke-width="2"/><path d="M4.5 12h15l-1.5 8a2 2 0 0 1-2 1.5H8a2 2 0 0 1-2-1.5z" fill="#ff6b6b" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/></svg>',
+    house: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12l10-8 10 8z" fill="#ff6b6b" stroke="#2b2350" stroke-width="2" stroke-linejoin="round"/><rect x="5" y="12" width="14" height="9" fill="#fff0d0" stroke="#2b2350" stroke-width="2"/><rect x="10" y="15" width="4" height="6" fill="#a8692c" stroke="#2b2350" stroke-width="1.6"/></svg>',
     left: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
@@ -59,6 +67,9 @@
 
   // Static icons in the markup
   $('loadIcon').innerHTML = FF.icons.apple;
+  [['mapSleepBtn', 'moon'], ['mapMarketBtn', 'stall'], ['mapShopBtn', 'bag'], ['mapOrdersBtn', 'orders'], ['mapFriendsBtn', 'heart'], ['mapBookBtn', 'book']].forEach(([id, ic]) => { $(id).innerHTML = FF.icons[ic]; });
+  const AREA_ICONS = { groves: 'tree', fields: 'field', barnyard: 'barn', kitchen: 'pot', friends: 'house' };
+  document.querySelectorAll('#mapJump [data-jump]').forEach(b => { b.innerHTML = FF.icons[AREA_ICONS[b.dataset.jump]]; });
   $('pauseBtn').innerHTML = FF.icons.pause;
   $('shopBtn').innerHTML = FF.icons.bag;
   $('padL').innerHTML = FF.icons.left;

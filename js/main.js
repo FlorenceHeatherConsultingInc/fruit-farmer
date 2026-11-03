@@ -118,7 +118,10 @@
       UI.hud('village');
       Screens.backToMap();
     },
-    backToMap() { $('mapCoins').innerHTML = `<span class="day">Day ${FF.save.day}</span>` + UI.coinHTML(FF.save.coins); },
+    backToMap() {
+      $('mapCoins').innerHTML = `<span class="day">Day ${FF.save.day}</span>` + UI.coinHTML(FF.save.coins);
+      $('mapBasketBtn').innerHTML = I.basket + '<span>' + FF.cap() + '</span>';
+    },
     // Bedtime: tell the player what tomorrow brings, then start the next day.
     sleep() {
       const s = FF.save, list = [];
@@ -128,10 +131,6 @@
       if (D.buildings.some(b => FF.buildings.owned(b.id) && s.buildings[b.id].queue.length)) list.push('Your kitchens finish cooking.');
       $('sleepMsg').textContent = 'Tomorrow is Day ' + (s.day + 1) + '. ' + (list.join(' ') || 'A brand-new day on the farm.');
       UI.show('sleep'); $('sleepYes').focus();
-    },
-    leaveMap() {
-      if (mapFrom === 'sold') { G.state = 'market'; UI.hud('market'); $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
-      else Screens.title();
     },
     toMarket() {
       FF.sound.ensure();
@@ -217,7 +216,8 @@
       else { renderTitle(); UI.show('title'); }
     },
     afterBook(from) {
-      if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
+      if (from === 'map') { UI.hideAll(); Screens.backToMap(); }
+      else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else Screens.title();
     }
   };
@@ -243,7 +243,8 @@
   on('fullVillageBtn', () => Screens.village('title', 'groves'));
   on('titleBookBtn', () => FF.book.open('title'));
   on('soldVillageBtn', () => Screens.village('sold'));
-  on('mapBackBtn', () => Screens.leaveMap());
+  on('mapBasketBtn', () => FF.basketPath.open('map'));
+  on('mapBookBtn', () => FF.book.open('map'));
   on('mapFriendsBtn', () => FF.village.open());
   on('mapOrdersBtn', () => FF.orders.open('map'));
   on('mapSleepBtn', Screens.sleep);

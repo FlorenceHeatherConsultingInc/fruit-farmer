@@ -1,5 +1,5 @@
 /* Fruit Farmer: the village map. A wide world you drag left and right, in five areas listed in
-   D.map.areas: groves, friends' homes, the kitchen row, the barnyard and the fields. Art is drawn
+   D.map.areas: groves, fields and the barnyard (where you gather), then the kitchen row and friends' homes. Art is drawn
    in world units 700 tall and scaled to fit between the top bar and the jump buttons. Areas that
    arrive in later steps show wooden "coming soon" signs. Everything restyles with the scene. */
 (() => {

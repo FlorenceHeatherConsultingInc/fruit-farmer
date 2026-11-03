@@ -44,24 +44,25 @@
 
 <!-- Village map top bar and jump buttons -->
 <div class="hud" id="mapHud" hidden>
-  <button class="iconbtn" id="mapBackBtn" type="button" aria-label="Back">Back</button>
   <div class="chip" id="mapCoins" aria-live="polite"></div>
+  <button class="chip basketchip" id="mapBasketBtn" type="button" aria-label="Basket path"></button>
   <div class="hud-right">
-    <button class="iconbtn" id="mapSleepBtn" type="button" aria-label="Go to bed">Sleep</button>
+    <button class="iconbtn icon" id="mapSleepBtn" type="button" aria-label="Sleep" title="Sleep"></button>
   </div>
   <div class="maptools">
-    <button class="iconbtn" id="mapMarketBtn" type="button">Market</button>
-    <button class="iconbtn" id="mapShopBtn" type="button">Shop</button>
-    <button class="iconbtn" id="mapOrdersBtn" type="button" aria-label="Order board">Orders</button>
-    <button class="iconbtn" id="mapFriendsBtn" type="button" aria-label="Friends list">Friends</button>
+    <button class="iconbtn icon" id="mapMarketBtn" type="button" aria-label="Market" title="Market"></button>
+    <button class="iconbtn icon" id="mapShopBtn" type="button" aria-label="Shop" title="Shop"></button>
+    <button class="iconbtn icon" id="mapOrdersBtn" type="button" aria-label="Orders" title="Orders"></button>
+    <button class="iconbtn icon" id="mapFriendsBtn" type="button" aria-label="Friends list" title="Friends"></button>
+    <button class="iconbtn icon" id="mapBookBtn" type="button" aria-label="Farm book" title="Farm book"></button>
   </div>
 </div>
 <nav class="mapjump" id="mapJump" hidden aria-label="Village areas">
-  <button type="button" data-jump="groves">Groves</button>
-  <button type="button" data-jump="friends">Friends</button>
-  <button type="button" data-jump="kitchen">Kitchen</button>
-  <button type="button" data-jump="barnyard">Barnyard</button>
-  <button type="button" data-jump="fields">Fields</button>
+  <button type="button" data-jump="groves" aria-label="Groves" title="Groves"></button>
+  <button type="button" data-jump="fields" aria-label="Fields" title="Fields"></button>
+  <button type="button" data-jump="barnyard" aria-label="Barnyard" title="Barnyard"></button>
+  <button type="button" data-jump="kitchen" aria-label="Kitchen" title="Kitchen"></button>
+  <button type="button" data-jump="friends" aria-label="Friends" title="Friends"></button>
 </nav>
 
 <div class="toast" id="stickerToast" hidden role="status"></div>

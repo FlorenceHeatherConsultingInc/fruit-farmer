@@ -418,10 +418,10 @@ FF.data = {
   map: {
     areas: [
       { id: 'groves',   name: 'Groves',   w: 900 },
-      { id: 'friends',  name: 'Friends',  w: 2560 },
-      { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
+      { id: 'fields',   name: 'Fields',   w: 1500 },
       { id: 'barnyard', name: 'Barnyard', w: 1220 },
-      { id: 'fields',   name: 'Fields',   w: 1500 }
+      { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
+      { id: 'friends',  name: 'Friends',  w: 2560 }
     ],
     homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470, 1590, 1710, 1830, 1950, 2070, 2190, 2310, 2430],
     square: 780

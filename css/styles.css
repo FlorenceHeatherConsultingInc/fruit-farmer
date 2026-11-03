@@ -332,11 +332,17 @@ button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; 
 #doneBtn { font-size: 18px; padding: 0 12px; }
 .mapjump { position: fixed; z-index: 2; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;
   padding-block: 8px max(10px, env(safe-area-inset-bottom, 0px)); padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
+.mapjump button svg { width: 34px; height: 34px; display: block; margin: 0 auto; }
 .mapjump button { font: inherit; font-weight: 800; font-size: clamp(13px, 3.4vw, 18px); min-height: 52px; padding: 0 2px; border: 3px solid var(--ink); border-radius: 16px; background: var(--card); color: var(--ink); box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
 .mapjump button[aria-pressed="true"] { background: var(--sun); }
 .mapjump button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 #mapHud .chip { font-size: clamp(18px, 5vw, 26px); }
-#mapBackBtn, #mapFriendsBtn, #mapSleepBtn, #mapMarketBtn, #mapShopBtn { font-size: 17px; padding: 0 12px; }
+.iconbtn.icon { min-width: 46px; width: 46px; height: 46px; padding: 0; }
+.iconbtn.icon svg { width: 30px; height: 30px; }
+.basketchip { pointer-events: auto; cursor: pointer; font: inherit; font-weight: 800; color: var(--ink); display: inline-flex; align-items: center; gap: 4px; font-size: clamp(18px, 5vw, 24px); }
+.basketchip svg { width: 28px; height: 28px; }
+#mapHud .hud-right { margin-left: auto; }
+#mapHud { justify-content: flex-start; }
 .order { border: 3px solid var(--ink); border-radius: 18px; background: var(--paper); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
 .order.pinned { background: #fff6cc; }
 .order .row { display: flex; align-items: center; gap: 10px; }
