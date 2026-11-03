@@ -63,12 +63,12 @@ FF.data = {
     medium: { fall: 0.23, gap: 0.9,  shakeEvery: 9,  shakeSize: 4 },
     fast:   { fall: 0.31, gap: 0.7,  shakeEvery: 8,  shakeSize: 5 }
   },
-  // How much of the fruit in a grove round is the grove's own. The rest comes from nearby trees.
-  groveMix: 0.7,
+  // How much of the fruit in a grove round is the grove's own. The rest are sparkly bonus fruit from your other trees.
+  groveMix: 0.9,
   // The order board. Orders pay payBonus times what the items sell for, plus base, and give farm points per item.
   orders: { count: 3, payBonus: 1.4, base: 5, pointsPerItem: 2 },
-  // Filters: sold in bundles, priced per fruit.
-  filters: { bundle: 3, cost: { apple: 6, orange: 8, banana: 10, strawberry: 12, grapes: 15 } },
+  // Filters are gone. Saves that still had some get back what they paid: cost per bundle of `bundle`.
+  oldFilters: { bundle: 3, cost: { apple: 6, orange: 8, banana: 10, strawberry: 12, grapes: 15 } },
 
   // How the basket feels when you hold the arrows. Speeds are fractions of screen width per second.
   movement: {
@@ -297,7 +297,7 @@ FF.data = {
   seeds: { per: 100, challengePay: 2, tinyCap: 5 },
   challenges: [
     { id: 'apples',   name: 'Apples Only', desc: 'One tree, forever' },
-    { id: 'nomagnet', name: 'No Filters',  desc: 'Catch everything yourself' },
+    { id: 'noups',    name: 'No Upgrades', desc: 'No Zippy wheels or Lucky stars' },
     { id: 'tiny',     name: 'Tiny Hands',  desc: 'Carry 5 fruit at most' },
     { id: 'wallrush', name: 'Wall Rush',   desc: 'The Barrel wall from day one' }
   ],

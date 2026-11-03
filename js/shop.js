@@ -1,11 +1,11 @@
 /* Fruit Farmer: the shop card, built from the tables in data.js. It opens in one of four modes:
    looks (the Shop: basket looks and colors, scenery, hats, decorations, the market), shed (the
-   barnyard's Tool shed: upgrades, filters, a bigger barn), tree (planting from the groves) and barn. */
+   barnyard's Tool shed: upgrades and a bigger barn), tree (planting from the groves) and barn. */
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui;
   let from = 'title', mode = 'looks';
   const TITLES = { looks: 'Shop', shed: 'Tool shed', tree: 'Plant a tree', barn: 'Barn' };
-  const NOTES = { looks: 'Looks for your farm and your friends.', shed: 'Tools that make harvesting easier.', tree: 'Each tree is a new grove in the village.', barn: 'Everything you catch waits here until you sell it.' };
+  const NOTES = { looks: 'Looks for your farm and your friends.', shed: 'Tools that make harvesting easier, and a bigger barn.', tree: 'Each tree is a new grove in the village.', barn: 'Everything you catch waits here until you sell it.' };
 
   const buyBtn = (act, id, cost, label) =>
     `<button class="mini" type="button" data-act="${act}" data-id="${id}" ${FF.save.coins >= cost ? '' : 'disabled'} aria-label="${label} for ${cost} coins">${I.coin}${cost}</button>`;
@@ -100,13 +100,11 @@
       const on = save.decor.includes(d.id);
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="decor" data-id="${d.id}" ${on || save.coins >= d.cost ? '' : 'disabled'} aria-pressed="${on}"><b>${d.name}</b><small>${on ? 'Built' : I.coin + d.cost}</small></button>`;
     }).join('');
-    $('shopFilters').innerHTML = FF.groves.shopHTML(buyBtn, closedBtn);
-    save.trees.forEach(t => { const b = $('shopFilters').querySelector(`[data-fruit="${t}"]`); if (b) b.appendChild(FF.draw.fruitIcon(t)); });
 
     $('shopUps').innerHTML = D.upgrades.map(u => {
       const lvl = save.up[u.id], max = lvl >= u.costs.length;
       return `<div class="up"><div class="badge">${I[u.icon]}</div><div><h3>${u.name}</h3><p>${u.desc}</p>${pips(lvl, u.costs.length)}</div>` +
-        (max ? ownedBtn('Max') : u.id === 'magnet' && save.challenge === 'nomagnet' ? closedBtn() : buyBtn('up', u.id, u.costs[lvl], 'Buy ' + u.name)) + `</div>`;
+        (max ? ownedBtn('Max') : save.challenge === 'noups' ? closedBtn() : buyBtn('up', u.id, u.costs[lvl], 'Buy ' + u.name)) + `</div>`;
     }).join('');
 
     $('shopSkins').innerHTML = D.skins.filter(s => !s.reward || save.skins.includes(s.id)).map(s => {
@@ -161,7 +159,6 @@
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
       case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
-      case 'filter': if (FF.groves.filtersAllowed() && spend(D.filters.cost[id])) { save.filters[id] = (save.filters[id] || 0) + D.filters.bundle; FF.book.bought(D.fruits[id].name + ' filters'); } break;
       case 'skin': wear('skins', 'skin', D.skins.find(x => x.id === id)); break;
       case 'hat': wear('hats', 'hat', D.hats.find(x => x.id === id)); break;
       case 'decor': { const d = D.decorations.find(x => x.id === id); if (d && !save.decor.includes(id) && spend(d.cost)) { save.decor.push(id); FF.book.bought(d.name); FF.stickers.best('decor', save.decor.length); } break; }

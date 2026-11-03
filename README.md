@@ -9,8 +9,8 @@ browser on that computer.
 
 - **Groves:** tap Go harvest, then pick a grove on the village map. Each grove holds a set amount
   of fruit and refills over days. Fruit falls in a steady stream, with a quick shake now and then.
-  Tap an arrow to scoot, hold it to zip, or drag your basket. Filters from the shop let only one
-  kind of fruit into your basket for a round.
+  Tap an arrow to scoot, hold it to zip, or drag your basket. A grove drops its own fruit, with a
+  sparkly bonus fruit from your other trees now and then.
 - **Market:** press on the fruit, drag down to pull back the slingshot, and let go. The dotted arc
   shows where your fruit will land. On a keyboard, use the arrow keys to aim and Space to throw.
   Give each animal the fruit it asks for. The tag shows what the whole basket still pays, and
@@ -42,7 +42,7 @@ browser on that computer.
 - **Farms:** the Farms tab in the Farm book lists every farm. Play any of them again, remove one, or start a
   new one. Start over from nothing (press and hold) wipes everything for a brand-new game.
 - **Shop and Tool shed:** the Shop sells looks: basket looks and colors, scenery, friend hats and village
-  decorations. Upgrades, filters and a bigger barn are in the Tool shed in the barnyard. Plant new trees
+  decorations. Upgrades and a bigger barn are in the Tool shed in the barnyard. Plant new trees
   by tapping their sign in the groves; tap the barn to see what's inside. Golden Seeds have their own tab
   in the Farm book once you start a second farm.
 - **Friends:** 18 animals arrive one by one as you collect hearts (the last six are a panda, a penguin, a

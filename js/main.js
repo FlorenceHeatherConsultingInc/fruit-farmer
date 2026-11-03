@@ -163,8 +163,8 @@
       UI.show('title');
       $('harvestBtn').focus();
     },
-    // A harvest round in one grove, with an optional filter.
-    farm(grove, filter) {
+    // A harvest round in one grove.
+    farm(grove) {
       FF.sound.ensure();
       FF.book.startDay();
       const sel = document.querySelector('input[name="speed"]:checked');
@@ -174,7 +174,7 @@
       FF.layout();
       clearInput();
       FF.holdLevel();
-      FF.farm.start(grove, filter);
+      FF.farm.start(grove);
       UI.hud('farm');
       FF.hud.load(); FF.hud.pin();
     },

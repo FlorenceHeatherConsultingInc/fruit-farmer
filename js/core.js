@@ -45,7 +45,7 @@
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [],
-      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, filters: {}, orders: [], pin: null, buildings: {}, plots: []
+      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, orders: [], pin: null, buildings: {}, plots: []
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -109,13 +109,15 @@
       const v = raw.buildings[b.id];
       if (v && typeof v === 'object') s.buildings[b.id] = { level: U.clamp(n(v.level), 1, b.slots.length), queue: Array.isArray(v.queue) ? v.queue.filter(q => q && D.fruits[q.out]) : [] };
     }
-    if (raw.filters && typeof raw.filters === 'object') FF.FRUIT_TYPES.forEach(t => { if (raw.filters[t]) s.filters[t] = n(raw.filters[t]); });
+    // Filters are gone: any left over come back as the coins they cost.
+    if (raw.filters && typeof raw.filters === 'object') Object.entries(D.oldFilters.cost).forEach(([t, c]) => { s.coins += Math.round(n(raw.filters[t]) * c / D.oldFilters.bundle); });
     // the Fruit magnet became filters: anyone who bought it gets those coins back
     const magnet = U.clamp(n(raw.up && raw.up.magnet), 0, 2);
     s.coins += [60, 240].slice(0, magnet).reduce((a, b) => a + b, 0);
     s.legend = raw.legend === true; s.legendSeen = raw.legendSeen === true;
     if (Array.isArray(raw.seedBuys)) s.seedBuys = raw.seedBuys;
-    if (D.challenges.some(c => c.id === raw.challenge)) s.challenge = raw.challenge;
+    const ch = raw.challenge === 'nomagnet' ? 'noups' : raw.challenge;
+    if (D.challenges.some(c => c.id === ch)) s.challenge = ch;
     if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;
     return s;
   }

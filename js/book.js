@@ -7,7 +7,7 @@
   const PAGE_STEP = 15, MAX_PAGES = 500;
   let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null, confirmRemove = null, confirmWipe = false;
   // Everything that belongs to one farm. The rest (score, friends, stickers, looks, seeds) is shared.
-  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'buildings', 'plots', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid'];
+  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'orders', 'pin', 'buildings', 'plots', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid'];
 
   const dateKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const blankDay = () => ({ date: dateKey(), harvest: {}, sales: {}, bought: [], perfect: 0, earned: 0, sold: false });

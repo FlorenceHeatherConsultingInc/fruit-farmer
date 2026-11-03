@@ -257,7 +257,7 @@
       target(x - 120, y - 230, x + 120, y + 20, () => { FF.sfx.tick(); FF.buildings.open(id); });
     }
   }
-  // The Tool shed: upgrades, filters and the barn's next size.
+  // The Tool shed: upgrades and the barn's next size.
   function shed(x, y) {
     const ctx = G.ctx;
     ctx.beginPath(); ctx.moveTo(x - 100, y - 120); ctx.lineTo(x, y - 180); ctx.lineTo(x + 100, y - 120); ctx.closePath(); Draw.fillStroke('#5a7ab8', 4);

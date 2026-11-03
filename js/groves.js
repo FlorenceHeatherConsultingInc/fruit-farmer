@@ -1,10 +1,9 @@
-/* Fruit Farmer: groves and filters. Each planted tree is a grove holding a set amount of fruit.
+/* Fruit Farmer: groves. Each planted tree is a grove holding a set amount of fruit.
    Catching takes fruit out; groves refill over days of play (a day ends when you come back from market).
-   Tapping a grove on the map opens its card: how much is on the tree, a filter to apply, and Go.
-   Filters are single-use: only that fruit goes into your basket for one round. */
+   Tapping a grove on the map opens its card: how much is on the tree, the harvest speed, and Go. */
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui;
-  let open = null, chosen = null;
+  let open = null;
 
   const tree = type => D.trees.find(t => t.type === type);
   const holds = type => { const t = tree(type); return t.holds + Math.floor(FF.level() * t.perLevel); };
@@ -15,21 +14,11 @@
     return Math.min(g.stock, holds(type));
   }
   const take = type => { if (!tree(type)) return; stock(type); FF.save.groves[type].stock = Math.max(0, FF.save.groves[type].stock - 1); };
-  const filtersAllowed = () => FF.save.challenge !== 'nomagnet';
 
   function render() {
     const s = FF.save, n = stock(open), f = D.fruits[open];
     $('groveTitle').textContent = tree(open).name.replace(' tree', ' grove');
-    $('groveStock').textContent = n ? `${n} ${f.name.toLowerCase()} on the tree. Some fruit from nearby trees falls too.` : `The grove is bare. It refills in ${tree(open).refill === 1 ? 'a day' : tree(open).refill + ' days'}.`;
-    const owned = (s.filters[open] || 0) > 0 ? [open] : [];
-    $('groveFilterSec').hidden = !filtersAllowed();
-    $('groveFilters').innerHTML = [null, ...owned].map(t => {
-      const on = chosen === t;
-      return `<button class="pick${on ? ' on' : ''}" type="button" data-filter="${t || ''}" aria-pressed="${on}">${t ? '' : '<b>No filter</b>'}${t ? `<b>${D.fruits[t].name}</b><small>${s.filters[t]} left</small>` : '<small>Catch a mix</small>'}</button>`;
-    }).join('');
-    owned.forEach(t => $('groveFilters').querySelector(`[data-filter="${t}"]`).prepend(FF.draw.fruitIcon(t, 48)));
-    $('groveFilterNote').innerHTML = (owned.length ? `Only ${f.name.toLowerCase()} go in your basket. Other fruit falls past.` : `A filter lets only ${f.name.toLowerCase()} into your basket.`) +
-      (filtersAllowed() && D.filters.cost[open] ? ` <button class="mini" type="button" data-buyfilter="${open}" ${s.coins >= D.filters.cost[open] ? '' : 'disabled'}>Buy ${D.filters.bundle}: ${I.coin}${D.filters.cost[open]}</button>` : '');
+    $('groveStock').textContent = n ? `${n} ${f.name.toLowerCase()} on the tree.` + (s.trees.length > 1 ? ' Watch for sparkly bonus fruit from your other trees!' : '') : `The grove is bare. It refills in ${tree(open).refill === 1 ? 'a day' : tree(open).refill + ' days'}.`;
     $('grovePin').innerHTML = FF.orders ? FF.orders.pinLine(open) : '';
     $('groveGo').disabled = n === 0;
   }
@@ -37,36 +26,20 @@
   $('groveOv').addEventListener('click', e => {
     const b = e.target.closest('button');
     if (!b) return;
-    if (b.dataset.filter !== undefined) { chosen = b.dataset.filter || null; FF.sfx.tick(); render(); return; }
-    if (b.dataset.buyfilter) {
-      const t = b.dataset.buyfilter, cost = D.filters.cost[t], s = FF.save;
-      if (s.coins >= cost) { s.coins -= cost; s.filters[t] = (s.filters[t] || 0) + D.filters.bundle; FF.book.bought(D.fruits[t].name + ' filters'); FF.sfx.buy(); FF.persist(); chosen = t; }
-      render(); return;
-    }
     if (b.id === 'groveGo') {
-      if (chosen) { FF.save.filters[chosen]--; FF.persist(); }
-      const type = open, f = chosen; open = null;
-      FF.screens.farm(type, f);
+      const type = open; open = null;
+      FF.screens.farm(type);
     } else if (b.id === 'groveBack') { UI.hideAll(); FF.screens.backToMap(); }
   });
 
   FF.groves = {
-    holds, stock, take, filtersAllowed,
+    holds, stock, take,
     open(type) {
       FF.sound.ensure();
-      open = type; chosen = null;
+      open = type;
       render();
       UI.show('grove');
       $('groveGo').focus({ preventScroll: true });
-    },
-    // Filter bundles in the shop: one row per fruit you grow.
-    shopHTML(buyBtn, closedBtn) {
-      const s = FF.save;
-      return s.trees.map(t => {
-        const cost = D.filters.cost[t];
-        return `<div class="up"><div class="badge" data-fruit="${t}"></div><div><h3>${D.fruits[t].name} filter</h3><p>Only ${D.fruits[t].name.toLowerCase()} go in your basket for one round. You have ${s.filters[t] || 0}.</p></div>` +
-          (filtersAllowed() ? buyBtn('filter', t, cost, `Buy ${D.filters.bundle} ${D.fruits[t].name.toLowerCase()} filters`) : closedBtn()) + `</div>`;
-      }).join('');
     }
   };
 })();

@@ -20,15 +20,15 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/draw.js` | Drawing toolkit (`FF.draw`): outlines, `blob()`, fruit art, small icon canvases. Particle effects (`FF.fx`). |
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
-| `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, catching, filters, carrier drawing. |
+| `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, bonus fruit, catching, carrier drawing. |
 | `js/buildings.js` | Production buildings (`FF.buildings`): building, making, collecting, upgrading, and the building card. Rows in `buildings` in `data.js`. |
 | `js/fields.js` | Fields (`FF.fields`): planting hay and corn, growing over days, picking, buying plots. Numbers in `fields` in `data.js`. |
 | `js/orders.js` | The order board (`FF.orders`): making orders, delivering, pinning, the harvest counter. Numbers in `orders` in `data.js`. |
-| `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, the grove card, and filters. |
+| `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, and the grove card. `groveMix` in `data.js` sets how much is bonus fruit. |
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
 | `js/market-layouts.js` | The two market layouts (`FF.marketLayouts`): animal friends and the barrel wall, including the covered wall and its reveal. Tags and request bubbles. |
 | `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
-| `js/shop.js` | The shop card, built from the tables in `data.js`. Opens as the Shop (looks only), the Tool shed (upgrades, filters, barn), tree planting, or the barn. |
+| `js/shop.js` | The shop card, built from the tables in `data.js`. Opens as the Shop (looks only), the Tool shed (upgrades, barn), tree planting, or the barn. |
 | `js/book.js` | The Farm Book (`FF.book`): days, diary, Farm Score, totals by date, new farms. |
 | `js/board.js` | Family leaderboards (`FF.board`), the Family tab. Off until `board` in `data.js` has a url and key. |
 | `supabase/schema.sql` | The online side of the leaderboards. Its name word lists must match `boardWords` in `data.js`. |

@@ -6,7 +6,7 @@
   const Draw = FF.draw, FX = FF.fx, INK = D.colors.ink;
 
   const basket = { x: 0, tx: 0, y: 0, w: 100, h: 50, bounce: 0, vel: 0, wheel: 0 };
-  let fruits = [], pile = [], spawnT = 0.5, combo = 0, fullT = -1, grove = null, filter = null, shakeT = 0, bareT = -1;
+  let fruits = [], pile = [], spawnT = 0.5, combo = 0, fullT = -1, grove = null, shakeT = 0, bareT = -1;
   let moveHold = 0, moveDir = 0, zipping = false, drag = null, groundY = 0;
 
   const Farm = FF.farm = { basket };
@@ -69,7 +69,7 @@
     if (shake) {
       // a shake drops fruit across the whole width: you choose which to chase
       const x = clamp(edge + (G.W - 2 * edge) * (shake.i + 0.5) / shake.n + rand(-0.04, 0.04) * G.W, edge, G.W - edge);
-      fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false, shake: true });
+      fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false, shake: true, bonus: !demo && type !== grove && type !== 'star' });
       return true;
     }
     let prev = null;
@@ -81,7 +81,7 @@
     // Fruit falls near its own tree, as far as staying catchable allows. Stars can come from anywhere.
     const tree = D.trees.find(t => t.type === type);
     const x = tree ? clamp(G.W * (tree.spot + rand(-0.09, 0.09)), lo, Math.max(lo, hi)) : rand(lo, Math.max(lo, hi));
-    fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false });
+    fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false, bonus: !demo && type !== grove && type !== 'star' });
     return true;
   }
 
@@ -109,15 +109,17 @@
     combo++;
     FF.persist();
     FF.hud.load(true);
+    if (f.bonus) { FX.text(f.x, basket.y - 50, 'Bonus!', true); FX.burst(f.x, basket.y, ['#ffd23f', '#ffffff'], 14, 'star'); Farm.bonus[f.type] = (Farm.bonus[f.type] || 0) + 1; }
     FX.text(f.x, basket.y - 18, FF.carried() + '/' + FF.cap(), f.type === 'star');
     if (f.type === 'star') FF.sfx.star(); else FF.sfx.catch(combo - 1);
     if (FF.carried() >= FF.cap()) { fullT = 0.8; FX.confetti(); setTimeout(FF.sfx.party, 150); }
   }
 
   /* ---------- Start / update ---------- */
-  // g: which grove to pick from. f: a filter fruit for this round, if one was applied.
-  Farm.start = (g, f) => {
-    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; filter = f || null; Farm.startPoints = FF.save.points;
+  // g: which grove to pick from.
+  Farm.bonus = {};
+  Farm.start = g => {
+    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; Farm.startPoints = FF.save.points; Farm.bonus = {};
     shakeT = D.speeds[FF.save.speed].shakeEvery * 0.6; bareT = -1;
     fruits = []; FX.clear();
     pile = [];
@@ -129,7 +131,6 @@
   };
   Farm.reset = () => { fruits = []; pile = []; };
   Farm.grove = () => grove;
-  Farm.filter = () => filter;
   Farm.falling = () => fruits.filter(f => !f.landed);
   Farm.nextFruitX = () => { let n = null; for (const f of fruits) if (!f.landed && (!n || f.y > n.y)) n = f; return n ? n.x : null; };
 
@@ -197,13 +198,7 @@
     for (const f of fruits) {
       if (f.landed) { f.life -= dt * 1.4; continue; }
       f.y += f.vy * dt; f.rot += f.vr * dt;
-      // a filter gently pulls its fruit in and lets everything else fall past
-      const blocked = filter && !demo && f.type !== filter && f.type !== 'star';
-      if (filter && !demo && f.type === filter) {
-        const dx = basket.x - f.x, dy = basket.y - f.y;
-        if (dy > -f.r && dy < basket.h * 3.2 && Math.abs(dx) < basket.w * 0.95) f.x += Math.sign(dx) * Math.min(Math.abs(dx), G.W * 0.3 * dt);
-      }
-      if (!blocked && touches(f)) { f.caught = true; onCatch(f, demo); continue; }
+      if (touches(f)) { f.caught = true; onCatch(f, demo); continue; }
       if (f.y + f.r * 0.75 >= groundY) {
         f.landed = true; f.y = groundY - f.r * 0.75;
         if (!demo) { combo = 0; FX.burst(f.x, groundY, ['#8bd16a', '#b98a5a'], 6); FF.sfx.miss(); }
@@ -295,17 +290,6 @@
       ctx.beginPath(); ctx.ellipse(0, groundY - y + 2, w * 0.45, 7, 0, 0, TAU); ctx.fill();
     }
 
-    if (filter && !demo && !preview) {
-      // the filter shows as a glowing ring with its fruit on a badge
-      ctx.save();
-      ctx.globalAlpha = 0.22 + 0.1 * Math.sin(G.clock * 5);
-      ctx.strokeStyle = D.fruits[filter].colors[0]; ctx.lineWidth = 4; ctx.setLineDash([8, 10]);
-      ctx.beginPath(); ctx.ellipse(0, 0, w * 0.95, h * 1.6, 0, Math.PI, TAU); ctx.stroke();
-      ctx.restore();
-      ctx.beginPath(); ctx.arc(-w * 0.5 - 6, -h * 0.4, 15, 0, TAU); Draw.fillStroke(D.colors.card, 3);
-      Draw.fruit(filter, -w * 0.5 - 6, -h * 0.4, 9);
-    }
-
     if (look === 'handle') {
       ctx.beginPath(); ctx.ellipse(0, 0, w * 0.36, h * 0.8, 0, Math.PI, TAU);
       ctx.lineWidth = 9; ctx.strokeStyle = INK; ctx.stroke();
@@ -395,6 +379,12 @@
     for (const f of fruits) if (f.landed) Draw.fruit(f.type, f.x, f.y, f.r, f.rot, Math.max(0, f.life), 0.85);
     if (!demo) drawSpeedLines();
     drawCarrier(demo);
+    for (const f of fruits) {
+      if (f.landed || !f.bonus) continue;
+      const tw = 0.5 + 0.5 * Math.sin(G.clock * 9 + f.x);
+      ctx.save(); ctx.globalAlpha = 0.35 + 0.35 * tw; ctx.fillStyle = '#fff6a8';
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (1.45 + 0.15 * tw), 0, TAU); ctx.fill(); ctx.restore();
+    }
     for (const f of fruits) if (!f.landed) Draw.fruit(f.type, f.x, f.y, f.r, f.rot);
     S.weather();
     FX.draw();
