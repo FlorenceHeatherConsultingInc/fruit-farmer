@@ -1,5 +1,5 @@
 /* Fruit Farmer: the Farm Book. Each trip is a day: everything you harvest, sell and buy goes on
-   today's page, and the page closes when you head back out to harvest after selling.
+   today's page, and the page closes when you come back to the village after selling.
    Score adds up coins earned, which never goes down, so spending doesn't hurt it. Today, this week
    and this month add up across all farms. Starting a new farm keeps old pages and cosmetics. */
 (() => {

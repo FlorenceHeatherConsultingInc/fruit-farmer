@@ -72,6 +72,7 @@
       FF.sound.ensure();
       FF.unloadBasket();
       if (G.state === 'farm') FF.farm.reset();
+      FF.book.startDay();
       mapFrom = from === 'sold' ? 'sold' : 'title';
       G.state = 'village';
       UI.hideAll(); clearInput();

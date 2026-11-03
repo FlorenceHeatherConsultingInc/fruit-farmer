@@ -1,5 +1,5 @@
 /* Fruit Farmer: groves and filters. Each planted tree is a grove holding a set amount of fruit.
-   Catching takes fruit out; groves refill over days of play (a day ends when you go to market).
+   Catching takes fruit out; groves refill over days of play (a day ends when you come back from market).
    Tapping a grove on the map opens its card: how much is on the tree, a filter to apply, and Go.
    Filters are single-use: only that fruit goes into your basket for one round. */
 (() => {
