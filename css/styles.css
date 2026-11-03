@@ -91,7 +91,7 @@ canvas#game {
 button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var(--pop); outline-offset: 3px; }
 @media (max-width: 420px) { .iconbtn.go .txt { display: none; } }
 
-/* ---------- Daily special ---------- */
+/* ---------- Order pin during a harvest ---------- */
 .special { background: var(--sun); border: 3px solid var(--ink); border-radius: 14px; padding: 2px 12px; font-weight: 700; font-size: 16px; line-height: 1.25; text-wrap: balance; }
 .special.farm { position: fixed; z-index: 2; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 66px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); text-align: center; pointer-events: none; }
 
@@ -320,7 +320,7 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .order .pill svg { width: 18px; height: 18px; }
 .orderbtns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .orderbtns .mini { padding: 0 4px; font-size: 16px; justify-content: center; }
-.special.farm.pin { top: calc(max(12px, env(safe-area-inset-top, 0px)) + 104px); background: var(--card); }
+.special.farm.pin { background: var(--card); }
 #farmDoneBtn.glow { background: var(--sun); animation: bump .9s ease-in-out infinite; }
 #mapOrdersBtn { font-size: 17px; padding: 0 12px; }
 .recipes { display: flex; flex-direction: column; gap: 6px; }

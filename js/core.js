@@ -119,13 +119,6 @@
   FF.save = loadSave();
   FF.persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(FF.save)); } catch (e) {} };
 
-  // Today's special: one fruit you grow, chosen from the game day so it never depends on the calendar.
-  FF.special = () => {
-    const s = FF.save, kinds = FF.friends.available();
-    const fruit = s.trees[(s.day * 7 + s.farmNo * 3) % s.trees.length], animal = kinds[(s.day * 5 + s.farmNo) % kinds.length];
-    return { fruit, animal };
-  };
-
   // Handy lookups for the current progress
   FF.pointsFor = pointsFor;
   FF.level = () => levelOf(FF.save.points);

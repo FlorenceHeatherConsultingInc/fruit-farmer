@@ -32,7 +32,6 @@
       stat(I.basket, 'Level ' + FF.level() + ' · ' + c.name + ' ' + '★'.repeat(Math.min(c.tier, 5)) + ' · holds ' + FF.cap()) +
       stat(I.stall, 'Barn: ' + n + (n === 1 ? ' fruit' : ' fruit')) +
       stat(I.tree, s.trees.length + (s.trees.length > 1 ? ' trees' : ' tree'));
-    $('titleSpecial').textContent = UI.specialText();
     $('titleMarketBtn').hidden = n === 0;
     $('titleMarketBtn').innerHTML = I.stall + ' Go to market';
   }
@@ -116,7 +115,6 @@
       clearInput();
       FF.farm.start(grove, filter);
       UI.hud('farm');
-      $('farmSpecial').textContent = UI.specialText();
       FF.hud.load(); FF.hud.pin();
     },
     market(chosen) {

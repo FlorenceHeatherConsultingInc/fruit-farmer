@@ -23,7 +23,6 @@
     const s = FF.save, t = today();
     if (!hasEntries(t)) return;
     delete t.sold;
-    t.special = FF.special();
     s.diary = s.diary.concat({ day: s.day, ...t }).slice(-MAX_PAGES);
     s.bestDay = Math.max(s.bestDay, t.earned);
     const fruits = new Set(Object.values(t.sales).map(x => x.fruit));
@@ -56,9 +55,7 @@
   /* ---------- Pages ---------- */
   function pageHTML(p, title) {
     const fruit = Object.entries(p.harvest), sales = Object.values(p.sales);
-    const sp = p.special;
     return `<article class="page"><h3>${title}</h3>` +
-      (sp ? `<div class="row">${animalPic(sp.animal)}<span>craved</span>${fruitPic(sp.fruit)}</div>` : '') +
       (fruit.length ? `<div class="row"><span>Picked</span>${fruit.map(([t, n]) => `<span class="item">${fruitPic(t)}×${n}</span>`).join('')}</div>` : '') +
       sales.map(x => `<div class="row">${animalPic(x.animal)}<span>${FF.friends.name(x.animal)} bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
       (p.perfect ? `<div class="row"><span>${p.perfect} Perfect ${p.perfect > 1 ? 'shots' : 'shot'}!</span></div>` : '') +

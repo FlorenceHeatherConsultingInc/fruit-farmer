@@ -80,9 +80,6 @@ FF.data = {
     wheels: { top: 0.22, tap: 0.03, ramp: -0.07 }  // added for each Zippy wheels level
   },
 
-  // Each game day one fruit pays this many times its price.
-  specialPay: 2,
-
   // Gold star chance for each fruit: base + perLevel × Lucky stars level.
   stars: { base: 0.04, perLevel: 0.05 },
 
@@ -283,7 +280,7 @@ FF.data = {
       { id: 'boss4', name: '100 strawberries sold', stat: 'soldStrawberry', n: 100, icon: 'strawberry' },
       { id: 'boss5', name: '100 grapes sold', stat: 'soldGrapes', n: 100, icon: 'grapes' },
       { id: 'boss6', name: '10 gold stars sold', stat: 'soldStar', n: 10, icon: 'star' },
-      { id: 'boss7', name: '25 special fruit sold', stat: 'soldSpecial', n: 25, icon: 'star' },
+      { id: 'boss7', name: '50 goods sold', stat: 'soldGoods', n: 50, icon: 'juice' },
       { id: 'boss8', name: 'One fruit for a day', stat: 'oneFruitDay', n: 1, icon: 'grapes' },
       { id: 'boss9', name: '500 fruit sold', stat: 'sold', n: 500, icon: 'apple' },
       { id: 'boss10', name: '2,000 fruit sold', stat: 'sold', n: 2000, icon: 'banana' }

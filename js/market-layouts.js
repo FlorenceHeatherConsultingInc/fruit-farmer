@@ -41,7 +41,7 @@
     const ctx = G.ctx, ts = Math.round(clamp(17 * s, 12, 17)), left = String(L.leftToEarn(t));
     ctx.font = `800 ${ts}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     const pW = ctx.measureText(left).width, tw = ts * 1.15 + pW + ts * 0.6, th = ts * 1.5, tx = x - tw / 2, ty = bottom - th;
-    Draw.rr(tx, ty, tw, th, 6); Draw.fillStroke(t.special ? '#ff9a1f' : SUN, 2.5);
+    Draw.rr(tx, ty, tw, th, 6); Draw.fillStroke(SUN, 2.5);
     Draw.coin(tx + ts * 0.62, ty + th / 2, ts * 0.38);
     ctx.fillStyle = INK; ctx.fillText(left, tx + ts * 1.15, ty + th / 2 + 1);
     ctx.textBaseline = 'alphabetic';

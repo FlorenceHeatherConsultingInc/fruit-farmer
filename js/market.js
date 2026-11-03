@@ -55,22 +55,14 @@
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
-    // Today's special animal is always at the market asking for its fruit, as long as you have some.
-    const special = FF.special(), sp = special.fruit;
-    const specialHere = targets.some(x => x !== t && x.special && x.state !== 'closed');
-    const pool = FF.friends.available().filter(k => k !== special.animal), unused = pool.filter(k => !targets.some(x => x.kind === k));
-    if ((force ? force === sp : stock.includes(sp)) && !specialHere) {
-      t.kind = special.animal; t.wants = sp;
-    } else {
-      t.kind = pick(unused.length ? unused : pool);
-      const fav = D.animals[t.kind].fav, plain = (spare.length ? spare : stock).filter(f => f !== sp);
-      t.wants = force || (spare.includes(fav) && fav !== sp && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(plain.length ? plain : stock));
-    }
-    t.special = t.kind === special.animal && t.wants === sp;
+    const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k));
+    t.kind = pick(unused.length ? unused : pool);
+    const fav = D.animals[t.kind].fav, plain = spare.length ? spare : stock;
+    t.wants = force || (spare.includes(fav) && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(plain));
     t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
     let bonus = pay().rowBonus[t.row];
     if (Math.random() < pay().mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
-    t.price = (t.wants === 'any' ? 1 : D.fruits[t.wants].price * (t.special ? D.specialPay : 1)) + bonus;
+    t.price = (t.wants === 'any' ? 1 : D.fruits[t.wants].price) + bonus;
     t.state = 'open';
   }
   // A request can outgrow the fruit left in play. Shrink it, or finish it if it's already started.
@@ -155,7 +147,7 @@
     St.add('sold'); St.add('sold' + fruitName); St.best('bestStreak', streak);
     if (perfect) St.add('perfect');
     if (s.rim) St.add('lucky');
-    if (t.special) St.add('soldSpecial');
+    if (D.fruits[s.type].kind === 'good') St.add('soldGoods');
     const pal = FF.friends.sell(t.kind, s.type), who = FF.friends.name(t.kind);
     if (pal.hearts) {
       setTimeout(() => FX.text(G.W / 2, M.horizon + 30, who + ': ' + pal.hearts + (pal.hearts === 1 ? ' heart!' : ' hearts!'), true), 500);
