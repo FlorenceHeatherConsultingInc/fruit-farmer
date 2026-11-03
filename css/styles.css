@@ -263,6 +263,8 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .tile small { font-size: 14px; font-weight: 700; opacity: .75; }
 button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .tile.on { background: var(--sun); }
+#shopHats canvas { width: 72px; height: 72px; }
+#groveFilterNote .mini { margin-left: 6px; vertical-align: middle; }
 .farms { display: flex; flex-direction: column; gap: 6px; }
 .farmcard { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 8px 10px; }
 .farmcard.on { background: var(--sun); }

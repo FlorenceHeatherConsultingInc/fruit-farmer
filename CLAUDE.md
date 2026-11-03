@@ -28,7 +28,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
 | `js/market-layouts.js` | The two market layouts (`FF.marketLayouts`): animal friends and the barrel wall, including the covered wall and its reveal. Tags and request bubbles. |
 | `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
-| `js/shop.js` | Shop overlay, built from the tables in `data.js`. |
+| `js/shop.js` | The shop card, built from the tables in `data.js`. Opens as the Shop (looks only), the Tool shed (upgrades, filters, barn), tree planting, or the barn. |
 | `js/book.js` | The Farm Book (`FF.book`): days, diary, Farm Score, totals by date, new farms. |
 | `js/board.js` | Family leaderboards (`FF.board`), the Family tab. Off until `board` in `data.js` has a url and key. |
 | `supabase/schema.sql` | The online side of the leaderboards. Its name word lists must match `boardWords` in `data.js`. |

@@ -209,14 +209,17 @@
       <h2 id="shopTitle">Shop</h2>
       <div class="coins" id="shopCoins" aria-live="polite"></div>
     </div>
-    <section class="msec"><div class="label">Your basket</div><div class="rows" id="shopCarry"></div></section>
-    <section class="msec"><div class="label">Plant fruit trees</div><div class="rows" id="shopTrees"></div></section>
-    <section class="msec"><div class="label">Market</div><div id="shopMarket"></div></section>
-    <section class="msec" id="shopSeedsSec" hidden><div class="label" id="shopSeedsLabel"></div><div class="rows" id="shopSeeds"></div></section>
-    <section class="msec" id="shopFiltersSec"><div class="label">Filters</div><div class="rows" id="shopFilters"></div></section>
-    <section class="msec"><div class="label">Upgrades</div><div class="rows" id="shopUps"></div></section>
-    <section class="msec"><div class="label">Basket colors</div><div class="grid3" id="shopSkins"></div></section>
-    <section class="msec"><div class="label">Farm scenery</div><div class="grid3" id="shopScenes"></div></section>
+    <p class="note" id="shopNote"></p>
+    <section class="msec" data-modes="tree"><div class="label">Plant fruit trees</div><div class="rows" id="shopTrees"></div></section>
+    <section class="msec" data-modes="barn shed"><div class="label">Barn</div><div class="rows" id="shopBarn"></div></section>
+    <section class="msec" data-modes="shed"><div class="label">Upgrades</div><div class="rows" id="shopUps"></div></section>
+    <section class="msec" id="shopFiltersSec" data-modes="shed"><div class="label">Filters</div><div class="rows" id="shopFilters"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Basket looks</div><div class="rows" id="shopCarry"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Basket colors</div><div class="grid3" id="shopSkins"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Farm scenery</div><div class="grid3" id="shopScenes"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Friend hats</div><p class="note">Friends with 4 hearts wear it.</p><div class="grid3" id="shopHats"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Village decorations</div><div class="grid3" id="shopDecor"></div></section>
+    <section class="msec" data-modes="looks"><div class="label">Market</div><div id="shopMarket"></div></section>
     <button class="btn primary done" type="button" data-act="done" id="shopDone">Done</button>
   </div>
 </div>
@@ -230,6 +233,7 @@
       <button type="button" data-tab="diary" aria-pressed="false">Diary</button>
       <button type="button" data-tab="stickers" aria-pressed="false">Stickers</button>
       <button type="button" data-tab="farms" aria-pressed="false">Farms</button>
+      <button type="button" data-tab="seeds" aria-pressed="false" id="seedsTab" hidden>Seeds</button>
       <button type="button" data-tab="family" aria-pressed="false" id="familyTab" hidden>Family</button>
     </div>
     <div class="bookbody" id="bookBody"></div>

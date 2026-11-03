@@ -211,7 +211,7 @@
     },
     resume() { FF.sound.ensure(); UI.hideAll(); last = performance.now(); },
     afterShop(from) {
-      if (from === 'map') { UI.hideAll(); Screens.backToMap(); }
+      if (from === 'map') { UI.hideAll(); Screens.backToMap(); FF.layout(); }
       else if (from === 'market') { UI.hideAll(); FF.market.refresh(); FF.hud.coins(); }
       else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else { renderTitle(); UI.show('title'); }

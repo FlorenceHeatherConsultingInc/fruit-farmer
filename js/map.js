@@ -93,7 +93,11 @@
     label(x0 + 450, 'Groves');
     D.trees.forEach((t, i) => {
       const x = x0 + 95 + i * 178, y = STREET - 10, planted = FF.save.trees.includes(t.type);
-      if (!planted) { sign(x, y, D.fruits[t.type].name + '\nin the shop', true); return; }
+      if (!planted) {
+        sign(x, y, 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + (FF.save.challenge === 'apples' ? 'not on this farm' : t.cost + ' coins'), true);
+        target(x - 80, y - 150, x + 80, y + 10, () => { FF.sfx.tick(); FF.shop.open('map', 'tree'); });
+        return;
+      }
       Draw.rr(x - 11, y - 96, 22, 96, 4); Draw.fillStroke(trunkColor(sc), 3);
       Draw.blob([[x - 40, y - 120, 40], [x + 40, y - 120, 40], [x, y - 164, 52]], sc.foliage[i % sc.foliage.length], 4);
       // the tree looks as full as the grove is
@@ -252,13 +256,30 @@
     // the barn is real now: it holds what you've caught
     ctx.font = `800 24px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff0d0';
     ctx.fillText('Barn', x0 + 290, STREET - 118);
-    target(x0 + 160, STREET - 290, x0 + 420, STREET, () => { FF.sfx.tick(); FF.fx.text(x0 + 290, STREET - 300, FF.inBarn() + ' fruit in the barn', false); showBarn(); });
+    target(x0 + 160, STREET - 290, x0 + 420, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'barn'); });
+    shed(x0 + 1100, STREET - 6);
+    target(x0 + 1000, STREET - 190, x0 + 1200, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'shed'); });
     for (const [id, x] of [['cows', x0 + 600], ['coop', x0 + 860]]) {
       const b = FF.buildings.def(id), y = STREET - 10;
       if (FF.buildings.owned(id)) (id === 'cows' ? cowPen : chickenYard)(x, y, b);
       else lot(x, y, 200, b.name + '\n' + (FF.buildings.canBuild(id) ? 'tap to build' : 'build here'));
       target(x - 120, y - 230, x + 120, y + 20, () => { FF.sfx.tick(); FF.buildings.open(id); });
     }
+  }
+  // The Tool shed: upgrades, filters and the barn's next size.
+  function shed(x, y) {
+    const ctx = G.ctx;
+    ctx.beginPath(); ctx.moveTo(x - 100, y - 120); ctx.lineTo(x, y - 180); ctx.lineTo(x + 100, y - 120); ctx.closePath(); Draw.fillStroke('#5a7ab8', 4);
+    Draw.rr(x - 86, y - 122, 172, 122, 4); Draw.fillStroke('#7fb0d8', 4);
+    ctx.strokeStyle = 'rgba(43,35,80,0.2)'; ctx.lineWidth = 2;
+    for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x - 86 + i * 28.6, y - 120); ctx.lineTo(x - 86 + i * 28.6, y - 2); ctx.stroke(); }
+    Draw.rr(x - 30, y - 82, 60, 82, 4); Draw.fillStroke('#fff0d0', 4);
+    // a rake and a watering can by the door
+    ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + 58, y - 4); ctx.lineTo(x + 70, y - 100); ctx.stroke();
+    ctx.strokeStyle = '#c9874a'; ctx.lineWidth = 3; ctx.stroke();
+    Draw.rr(x + 54, y - 112, 32, 10, 3); Draw.fillStroke('#9aa6b8', 3);
+    Draw.rr(x - 74, y - 30, 30, 26, 6); Draw.fillStroke('#5cc24a', 3);
+    ctx.font = `800 20px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText('Tool shed', x, y - 136);
   }
   // A green badge with how many goods are ready to collect.
   function readyBadge(x, y, n) {
@@ -392,10 +413,6 @@
       if (open && i === list.length && FF.fields.nextPlotCost() != null) sign(x, y - 40, 'New field\n' + FF.fields.nextPlotCost() + ' coins', true);
       if (owned || (open && i === list.length) || (!open && i === 2)) target(x - 100, y - 110, x + 100, y + 8, () => { FF.sfx.tick(); FF.fields.tap(i, x, y - 130); });
     }
-  }
-  function showBarn() {
-    const s = FF.save, list = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0).map(t => s.barn[t] + ' ' + D.fruits[t].name.toLowerCase());
-    FF.fx.text(G.W / 2, M.top + 120, list.length ? list.slice(0, 3).join(', ') : 'Empty! Go catch some fruit.', false);
   }
 
   Map.draw = () => {

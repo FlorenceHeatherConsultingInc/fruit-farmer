@@ -28,7 +28,8 @@
       return `<button class="pick${on ? ' on' : ''}" type="button" data-filter="${t || ''}" aria-pressed="${on}">${t ? '' : '<b>No filter</b>'}${t ? `<b>${D.fruits[t].name}</b><small>${s.filters[t]} left</small>` : '<small>Catch a mix</small>'}</button>`;
     }).join('');
     owned.forEach(t => $('groveFilters').querySelector(`[data-filter="${t}"]`).prepend(FF.draw.fruitIcon(t, 48)));
-    $('groveFilterNote').textContent = owned.length ? `Only ${f.name.toLowerCase()} go in your basket. Other fruit falls past.` : `A ${f.name.toLowerCase().replace(/s$/, '')} filter lets only ${f.name.toLowerCase()} into your basket.`;
+    $('groveFilterNote').innerHTML = (owned.length ? `Only ${f.name.toLowerCase()} go in your basket. Other fruit falls past.` : `A filter lets only ${f.name.toLowerCase()} into your basket.`) +
+      (filtersAllowed() && D.filters.cost[open] ? ` <button class="mini" type="button" data-buyfilter="${open}" ${s.coins >= D.filters.cost[open] ? '' : 'disabled'}>Buy ${D.filters.bundle}: ${I.coin}${D.filters.cost[open]}</button>` : '');
     $('grovePin').innerHTML = FF.orders ? FF.orders.pinLine(open) : '';
     $('groveGo').disabled = n === 0;
   }
@@ -37,6 +38,11 @@
     const b = e.target.closest('button');
     if (!b) return;
     if (b.dataset.filter !== undefined) { chosen = b.dataset.filter || null; FF.sfx.tick(); render(); return; }
+    if (b.dataset.buyfilter) {
+      const t = b.dataset.buyfilter, cost = D.filters.cost[t], s = FF.save;
+      if (s.coins >= cost) { s.coins -= cost; s.filters[t] = (s.filters[t] || 0) + D.filters.bundle; FF.book.bought(D.fruits[t].name + ' filters'); FF.sfx.buy(); FF.persist(); chosen = t; }
+      render(); return;
+    }
     if (b.id === 'groveGo') {
       if (chosen) { FF.save.filters[chosen]--; FF.persist(); }
       const type = open, f = chosen; open = null;

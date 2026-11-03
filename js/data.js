@@ -130,7 +130,24 @@ FF.data = {
     { id: 'comet', name: 'Comet', cost: 1e9, reward: true, body: '#3a3a78', rim: '#ffd23f', weave: '#6a6ac0' },
     { id: 'goofy', name: 'Goofy', cost: 1e9, reward: true, body: '#ffffff', rim: '#ff5e7a', weave: '#d0c8e8' },
     { id: 'chef',  name: 'Chef',  cost: 1e9, reward: true, body: '#fffaf0', rim: '#e8323f', weave: '#f2b8b8' },
-    { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
+    { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true },
+    { id: 'lemon',   name: 'Lemon',   cost: 40,  body: '#fff06a', rim: '#e0c400', weave: '#e8d13a' },
+    { id: 'peach',   name: 'Peach',   cost: 40,  body: '#ffb38a', rim: '#e8855a', weave: '#f09a70' },
+    { id: 'grape',   name: 'Grape',   cost: 60,  body: '#a77de0', rim: '#7448b8', weave: '#8a5fcc' },
+    { id: 'lime',    name: 'Lime',    cost: 60,  body: '#b8e65a', rim: '#7fb52e', weave: '#9acc44' },
+    { id: 'cocoa',   name: 'Cocoa',   cost: 80,  body: '#9a6a48', rim: '#6a4228', weave: '#7e5234' },
+    { id: 'cherry',  name: 'Cherry',  cost: 100, body: '#e8323f', rim: '#a8141f', weave: '#c4222e' },
+    { id: 'cloud',   name: 'Cloud',   cost: 150, body: '#f4f8ff', rim: '#a8bcd8', weave: '#c8d6ea' },
+    { id: 'night',   name: 'Midnight', cost: 200, body: '#2f3a78', rim: '#ffd23f', weave: '#4a56a0' }
+  ],
+  // Hats your best friends wear (friends with enough hearts). Pick one in the shop.
+  hats: [
+    { id: 'party',  name: 'Party hat',    cost: 0 },
+    { id: 'flower', name: 'Flower crown', cost: 60 },
+    { id: 'bow',    name: 'Big bow',      cost: 80 },
+    { id: 'top',    name: 'Top hat',      cost: 120 },
+    { id: 'cowboy', name: 'Cowboy hat',   cost: 150 },
+    { id: 'chef',   name: 'Chef hat',     cost: 200 }
   ],
   // Rewards you can't buy. Best friends each add one more below.
   rainbow: ['#ff4d4d', '#ff9a1f', '#ffd93b', '#5cc24a', '#4aa3e8', '#8a4bd6'],
@@ -196,7 +213,35 @@ FF.data = {
       ground: { top: '#2f7a4a', edge: '#3c8c58', deep: '#1f5a36', bits: 'mushrooms' },
       foliage: ['#2b6a40', '#3d8a55', '#1f5232'], trunk: '#5a3d26',
       plaza: ['#8e86a8', '#6e6690'], awnings: ['#4a3f8a', '#2f6a8a', '#6a3f8a', '#2f8a6a'], lights: true,
-      ambient: 'fireflies' }
+      ambient: 'fireflies' },
+    { id: 'blossom', name: 'Cherry blossom', cost: 70,
+      sky: ['#a8dcff', '#fff4fa'], sun: '#ffe07a', cloud: 'rgba(255,255,255,0.95)',
+      hills: ['#b8e6a0', '#a2d98a'],
+      ground: { top: '#86d066', edge: '#9cdc7c', deep: '#6cb84e', bits: 'flowers' },
+      foliage: ['#ffb6d0', '#ffd6e6', '#f48fb5'], trunk: '#6e4a3a',
+      plaza: ['#f6e6dc', '#e2c4b4'], awnings: ['#ff8fb1', '#ffffff', '#9ad0ff', '#ffb6d0'],
+      ambient: 'butterflies' },
+    { id: 'beach', name: 'Sunny beach', cost: 80,
+      sky: ['#3fb8f0', '#c8f0ff'], sun: '#ffd23f', cloud: 'rgba(255,255,255,0.95)',
+      hills: ['#5ad0d8', '#3fbcc6'],
+      ground: { top: '#f2d99a', edge: '#ffe8b8', deep: '#e0c27e', bits: 'tufts' },
+      foliage: ['#3fae5a', '#5cc874', '#2f9248'], trunk: '#a8784a',
+      plaza: ['#fff3d6', '#ecd3a0'], awnings: ['#ff6b6b', '#3fb8f0', '#ffd23f', '#ff9a1f'],
+      ambient: 'birds' },
+    { id: 'lavender', name: 'Lavender fields', cost: 110,
+      sky: ['#b9a8f0', '#f4ecff'], sun: '#fff0a8', cloud: 'rgba(255,255,255,0.9)',
+      hills: ['#a68ae0', '#9278d0'],
+      ground: { top: '#7cb85a', edge: '#94c870', deep: '#5e9a42', bits: 'flowers' },
+      foliage: ['#9c7cd8', '#b89ae8', '#7c5cc0'], trunk: '#6a4a3a',
+      plaza: ['#ece4f6', '#cbbde4'], awnings: ['#9c7cd8', '#ffd23f', '#ff8fb1', '#7cb85a'],
+      ambient: 'butterflies' },
+    { id: 'jungle', name: 'Jungle', cost: 140,
+      sky: ['#5cc8b8', '#e0fff4'], sun: '#ffe066', cloud: 'rgba(255,255,255,0.85)',
+      hills: ['#2f8a5a', '#267a4e'],
+      ground: { top: '#3f9a42', edge: '#52ae54', deep: '#2c7a32', bits: 'tufts' },
+      foliage: ['#1f7a3a', '#2f9a4a', '#16602c'], trunk: '#5a3a22',
+      plaza: ['#dccfa8', '#b8a478'], awnings: ['#ff9a1f', '#e8323f', '#ffd23f', '#2f9a4a'],
+      ambient: 'birds' }
   ],
 
   // Family leaderboards and save codes. Empty url and key turn them off. This key is the public one, safe to ship.
@@ -369,7 +414,7 @@ FF.data = {
       { id: 'groves',   name: 'Groves',   w: 900 },
       { id: 'friends',  name: 'Friends',  w: 1560 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
-      { id: 'barnyard', name: 'Barnyard', w: 1000 },
+      { id: 'barnyard', name: 'Barnyard', w: 1220 },
       { id: 'fields',   name: 'Fields',   w: 1500 }
     ],
     homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470],

@@ -1,7 +1,11 @@
-/* Fruit Farmer: the shop. Everything for sale comes from the tables in data.js. */
+/* Fruit Farmer: the shop card, built from the tables in data.js. It opens in one of four modes:
+   looks (the Shop: basket looks and colors, scenery, hats, decorations, the market), shed (the
+   barnyard's Tool shed: upgrades, filters, a bigger barn), tree (planting from the groves) and barn. */
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui;
-  let from = 'title';
+  let from = 'title', mode = 'looks';
+  const TITLES = { looks: 'Shop', shed: 'Tool shed', tree: 'Plant a tree', barn: 'Barn' };
+  const NOTES = { looks: 'Looks for your farm and your friends.', shed: 'Tools that make harvesting easier.', tree: 'Each tree is a new grove in the village.', barn: 'Everything you catch waits here until you sell it.' };
 
   const buyBtn = (act, id, cost, label) =>
     `<button class="mini" type="button" data-act="${act}" data-id="${id}" ${FF.save.coins >= cost ? '' : 'disabled'} aria-label="${label} for ${cost} coins">${I.coin}${cost}</button>`;
@@ -46,27 +50,19 @@
     box.appendChild(row);
   }
 
-  function renderSeeds() {
-    const save = FF.save, box = $('shopSeedsSec');
-    box.hidden = !save.seeds && !save.seedBuys.length && save.farmNo === 1;
-    $('shopSeedsLabel').textContent = 'Golden Seeds: ' + save.seeds;
-    $('shopSeeds').innerHTML = D.seedShop.map(x => {
-      const has = save.seedBuys.includes(x.id);
-      return `<div class="up"><div class="badge">${I.luck}</div><div><h3>${x.name}</h3><p>${x.desc}</p></div>` +
-        (has ? ownedBtn('Owned') : `<button class="mini" type="button" data-act="seed" data-id="${x.id}" ${save.seeds >= x.cost ? '' : 'disabled'} aria-label="Buy ${x.name} for ${x.cost} seeds">${x.cost} seeds</button>`) + `</div>`;
-    }).join('');
-  }
-
   function render() {
     const save = FF.save, fa = document.activeElement;
     const focusKey = fa && fa.dataset && fa.dataset.act ? fa.dataset.act + ':' + (fa.dataset.id || '') : '';
     $('shopCoins').innerHTML = UI.coinHTML(save.coins);
 
-    const cur = FF.carrier(), prog = FF.levelProgress(), size = FF.barnSize(), next = D.barn.sizes[save.barnLevel + 1];
+    $('shopTitle').textContent = TITLES[mode]; $('shopNote').textContent = NOTES[mode];
+    document.querySelectorAll('#shopOv [data-modes]').forEach(sec => { sec.hidden = !sec.dataset.modes.split(' ').includes(mode); });
+    const cur = FF.carrier(), size = FF.barnSize(), next = D.barn.sizes[save.barnLevel + 1];
+    const stored = FF.FRUIT_TYPES.filter(t => save.barn[t] > 0).map(t => save.barn[t] + ' ' + D.fruits[t].name.toLowerCase());
+    $('shopBarn').innerHTML = `<div class="up"><div class="badge">${I.stall}</div><div><h3>${FF.inBarn()} of ${size === Infinity ? 'any amount' : size}</h3><p>${stored.length ? stored.join(', ') + '.' : 'Empty. Go catch some fruit!'}${next ? ' A bigger barn holds ' + (next === Infinity ? 'as much as you like' : next) + '.' : ''}</p></div>` +
+      (next ? buyBtn('barn', 'next', D.barn.costs[save.barnLevel], 'Buy a bigger barn') : ownedBtn('Biggest')) + `</div>`;
     const carry = $('shopCarry');
-    carry.innerHTML = `<p class="note">Farm level ${prog.level}: ${cur.name} ${'★'.repeat(Math.min(cur.tier, 5))} holds ${FF.cap()}. ${prog.need - prog.into} more farm points to level ${prog.level + 1}.</p><div class="grid3" id="shopLooks"></div>` +
-      `<div class="up"><div class="badge">${I.stall}</div><div><h3>Barn</h3><p>${FF.inBarn()} fruit stored. ${size === Infinity ? 'Holds as much as you like.' : 'Holds ' + size + '.'}${next ? ' Next: ' + (next === Infinity ? 'no limit' : next) + '.' : ''}</p></div>` +
-      (next ? buyBtn('barn', 'next', D.barn.costs[save.barnLevel], 'Buy a bigger barn') : ownedBtn('Max')) + `</div>`;
+    carry.innerHTML = `<p class="note">Pick how your basket looks. It holds ${FF.cap()} whichever you pick.</p><div class="grid3" id="shopLooks"></div>`;
     FF.looksReached().forEach(l => {
       const on = cur.look === l.look, btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'pick' + (on ? ' on' : ''); btn.dataset.act = 'look'; btn.dataset.id = l.look;
@@ -88,7 +84,19 @@
     });
 
     renderMarket();
-    renderSeeds();
+    $('shopHats').innerHTML = D.hats.map(h => {
+      const owned = save.hats.includes(h.id), on = save.hat === h.id;
+      return `<button class="pick${on ? ' on' : ''}" type="button" data-act="hat" data-id="${h.id}" ${owned || save.coins >= h.cost ? '' : 'disabled'} aria-pressed="${on}"><span data-hat="${h.id}"></span><b>${h.name}</b><small>${pickStatus(on, owned, h.cost)}</small></button>`;
+    }).join('');
+    document.querySelectorAll('#shopHats [data-hat]').forEach(el => {
+      FF.animals.showHat = el.dataset.hat;
+      el.appendChild(FF.draw.toCanvas(72, 72, s => FF.animals.drawHead('bunny', s / 2, s * 0.62, s * 0.26, 'happy', 0, { x: 0, y: 0.3 })));
+      FF.animals.showHat = null;
+    });
+    $('shopDecor').innerHTML = D.decorations.map(d => {
+      const on = save.decor.includes(d.id);
+      return `<button class="pick${on ? ' on' : ''}" type="button" data-act="decor" data-id="${d.id}" ${on || save.coins >= d.cost ? '' : 'disabled'} aria-pressed="${on}"><b>${d.name}</b><small>${on ? 'Built' : I.coin + d.cost}</small></button>`;
+    }).join('');
     $('shopFilters').innerHTML = FF.groves.shopHTML(buyBtn, closedBtn);
     save.trees.forEach(t => { const b = $('shopFilters').querySelector(`[data-fruit="${t}"]`); if (b) b.appendChild(FF.draw.fruitIcon(t)); });
 
@@ -151,15 +159,9 @@
       case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
       case 'filter': if (FF.groves.filtersAllowed() && spend(D.filters.cost[id])) { save.filters[id] = (save.filters[id] || 0) + D.filters.bundle; FF.book.bought(D.fruits[id].name + ' filters'); } break;
-      case 'seed': {
-        const x = D.seedShop.find(i => i.id === id);
-        if (x && !save.seedBuys.includes(id) && save.seeds >= x.cost) {
-          save.seeds -= x.cost; save.seedBuys.push(id); FF.sfx.buy();
-          if (x.scene) save.scenes.push(x.scene);
-        }
-        break;
-      }
       case 'skin': wear('skins', 'skin', D.skins.find(x => x.id === id)); break;
+      case 'hat': wear('hats', 'hat', D.hats.find(x => x.id === id)); break;
+      case 'decor': { const d = D.decorations.find(x => x.id === id); if (d && !save.decor.includes(id) && spend(d.cost)) { save.decor.push(id); FF.book.bought(d.name); FF.stickers.best('decor', save.decor.length); } break; }
       case 'scene': wear('scenes', 'scene', D.scenes.find(x => x.id === id)); break;
       case 'done': FF.shop.close(); return;
     }
@@ -168,9 +170,9 @@
   });
 
   FF.shop = {
-    open(origin) {
+    open(origin, m) {
       FF.sound.ensure();
-      from = origin;
+      from = origin; mode = TITLES[m] ? m : 'looks';
       render();
       UI.show('shop');
       $('shopDone').focus({ preventScroll: true });

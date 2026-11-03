@@ -67,12 +67,39 @@
     }
   }
 
-  // A party hat for friends with four hearts.
-  function hat(r, lw) {
+  // The hat friends with four hearts wear: the one picked in the shop.
+  function hat(r, lw, style) {
     const ctx = G.ctx;
-    ctx.save(); ctx.translate(r * 0.42, -r * 0.72); ctx.rotate(0.3);
-    ctx.beginPath(); ctx.moveTo(-r * 0.3, 0); ctx.lineTo(0, -r * 0.72); ctx.lineTo(r * 0.3, 0); ctx.closePath(); Draw.fillStroke(FF.stickers && FF.stickers.hasReward('crown') ? D.colors.sun : '#c77dff', lw);
-    ctx.beginPath(); ctx.arc(0, -r * 0.72, r * 0.11, 0, TAU); Draw.fillStroke(D.colors.sun, lw * 0.7);
+    ctx.save();
+    if (style === 'flower') {
+      for (let i = 0; i < 5; i++) {
+        const a = -2.5 + i * 0.42, x = Math.cos(a) * r * 0.92, y = Math.sin(a) * r * 0.92;
+        Draw.blob([[x - r * 0.08, y, r * 0.09], [x + r * 0.08, y, r * 0.09], [x, y - r * 0.08, r * 0.09], [x, y + r * 0.08, r * 0.09]], ['#ff8fb1', '#ffd23f', '#ffffff', '#c9a6ff', '#ff8fb1'][i], lw * 0.6);
+        ctx.beginPath(); ctx.arc(x, y, r * 0.05, 0, TAU); ctx.fillStyle = '#ff9a1f'; ctx.fill();
+      }
+    } else if (style === 'bow') {
+      ctx.translate(r * 0.42, -r * 0.82); ctx.rotate(0.25);
+      for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d * r * 0.36, -r * 0.2); ctx.lineTo(d * r * 0.36, r * 0.2); ctx.closePath(); Draw.fillStroke('#ff5e7a', lw * 0.8); }
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.1, 0, TAU); Draw.fillStroke('#ff8fb1', lw * 0.7);
+    } else if (style === 'top') {
+      ctx.translate(r * 0.3, -r * 0.82); ctx.rotate(0.18);
+      Draw.rr(-r * 0.28, -r * 0.62, r * 0.56, r * 0.64, r * 0.05); Draw.fillStroke('#3a3a58', lw);
+      Draw.rr(-r * 0.28, -r * 0.2, r * 0.56, r * 0.12, 0); Draw.fillStroke('#ff5e7a', lw * 0.6);
+      Draw.rr(-r * 0.46, -r * 0.02, r * 0.92, r * 0.13, r * 0.06); Draw.fillStroke('#3a3a58', lw);
+    } else if (style === 'cowboy') {
+      ctx.translate(r * 0.15, -r * 0.86); ctx.rotate(0.12);
+      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.7, r * 0.14, 0, 0, TAU); Draw.fillStroke('#c9874a', lw);
+      ctx.beginPath(); ctx.moveTo(-r * 0.34, 0); ctx.quadraticCurveTo(-r * 0.36, -r * 0.5, 0, -r * 0.46); ctx.quadraticCurveTo(r * 0.36, -r * 0.5, r * 0.34, 0); ctx.closePath(); Draw.fillStroke('#c9874a', lw);
+      Draw.rr(-r * 0.34, -r * 0.14, r * 0.68, r * 0.1, 0); Draw.fillStroke('#8a5a32', lw * 0.6);
+    } else if (style === 'chef') {
+      ctx.translate(r * 0.2, -r * 0.86); ctx.rotate(0.15);
+      Draw.blob([[-r * 0.24, -r * 0.34, r * 0.22], [r * 0.24, -r * 0.34, r * 0.22], [0, -r * 0.48, r * 0.26]], '#ffffff', lw);
+      Draw.rr(-r * 0.32, -r * 0.2, r * 0.64, r * 0.24, r * 0.05); Draw.fillStroke('#ffffff', lw);
+    } else {
+      ctx.translate(r * 0.42, -r * 0.72); ctx.rotate(0.3);
+      ctx.beginPath(); ctx.moveTo(-r * 0.3, 0); ctx.lineTo(0, -r * 0.72); ctx.lineTo(r * 0.3, 0); ctx.closePath(); Draw.fillStroke(FF.stickers && FF.stickers.hasReward('crown') ? D.colors.sun : '#c77dff', lw);
+      ctx.beginPath(); ctx.arc(0, -r * 0.72, r * 0.11, 0, TAU); Draw.fillStroke(D.colors.sun, lw * 0.7);
+    }
     ctx.restore();
   }
 
@@ -138,7 +165,8 @@
       }
       snout(kind, a, r, lw);
       mouth(kind, r, lw, mood);
-      if (FF.friends && FF.friends.wearsHat(who)) hat(r, lw);
+      if (FF.animals.showHat) hat(r, lw, FF.animals.showHat);
+      else if (FF.friends && FF.friends.wearsHat(who)) hat(r, lw, FF.save.hat);
       ctx.restore();
     }
   };

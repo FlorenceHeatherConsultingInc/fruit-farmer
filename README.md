@@ -41,6 +41,10 @@ browser on that computer.
   or tap Sleep in the village to end the day whenever you like.
 - **Farms:** the Farms tab in the Farm book lists every farm. Play any of them again, remove one, or start a
   new one. Start over from nothing (press and hold) wipes everything for a brand-new game.
+- **Shop and Tool shed:** the Shop sells looks: basket looks and colors, scenery, friend hats and village
+  decorations. Upgrades, filters and a bigger barn are in the Tool shed in the barnyard. Plant new trees
+  by tapping their sign in the groves; tap the barn to see what's inside. Golden Seeds have their own tab
+  in the Farm book once you start a second farm.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

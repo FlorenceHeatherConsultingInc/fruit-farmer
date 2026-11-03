@@ -93,7 +93,7 @@
       (period ? periodHTML(period) : '<p class="note">Tap Today, This week or This month to see the days behind it. These count coins by the real date.</p>') +
       `<div class="label">What resets?</div><p class="note">Your Farm Score, stickers, friends and looks stay forever. Coins, trees, buildings, fields and orders belong to one farm and start over on a new farm.</p>` +
       (s.legend ? `<button class="btn secondary" type="button" data-book="parade">Watch the parade</button>` : '') +
-      `<p class="note">Farm ${s.farmNo}, day ${s.day}${s.challenge ? ' · ' + challengeName(s.challenge) : ''} · ${s.seeds} Golden Seeds</p>`;
+      `<p class="note">${esc(FF.farmName())}, day ${s.day}${s.challenge ? ' · ' + challengeName(s.challenge) : ''}</p>`;
   }
   function diaryHTML() {
     const s = FF.save, t = today(), pages = s.diary.slice().reverse();
@@ -130,7 +130,27 @@
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
-    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : tab === 'stickers' ? FF.stickers.html() : farmsHTML();
+    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : tab === 'stickers' ? FF.stickers.html() : tab === 'seeds' ? seedsHTML() : farmsHTML();
+  }
+
+  /* ---------- Golden Seeds: kept across all farms ---------- */
+  const seedsOpen = () => { const s = FF.save; return s.seeds > 0 || s.seedBuys.length > 0 || s.farmNo > 1 || s.otherFarms.length > 0; };
+  function seedsHTML() {
+    const s = FF.save;
+    return `<div class="score"><small>Golden Seeds</small><b>${s.seeds}</b></div>` +
+      `<p class="note">Starting a new farm turns what your old farm earned into Golden Seeds. Spend them on things that help every farm.</p>` +
+      `<div class="rows">${D.seedShop.map(x => {
+        const has = s.seedBuys.includes(x.id);
+        return `<div class="up"><div class="badge">${I.luck}</div><div><h3>${x.name}</h3><p>${x.desc}</p></div>` +
+          (has ? `<button class="mini owned" type="button" disabled>Owned</button>` : `<button class="mini" type="button" data-book="seed-${x.id}" ${s.seeds >= x.cost ? '' : 'disabled'} aria-label="Buy ${x.name} for ${x.cost} seeds">${x.cost} seeds</button>`) + `</div>`;
+      }).join('')}</div>`;
+  }
+  function buySeed(id) {
+    const s = FF.save, x = D.seedShop.find(i => i.id === id);
+    if (!x || s.seedBuys.includes(id) || s.seeds < x.cost) return;
+    s.seeds -= x.cost; s.seedBuys.push(id); FF.sfx.buy();
+    if (x.scene && !s.scenes.includes(x.scene)) s.scenes.push(x.scene);
+    FF.stickers.check(); FF.persist();
   }
 
   /* ---------- New farm ---------- */
@@ -216,6 +236,7 @@
       default: {
         const act = b.dataset.book || '';
         if (act.startsWith('ch-')) startOver(act.slice(3));
+        else if (act.startsWith('seed-')) { buySeed(act.slice(5)); render(); }
         else if (act.startsWith('switch-')) { if (switchFarm(act.slice(7))) { FF.sfx.party(); from = 'title'; FF.book.close(); } }
         else if (act.startsWith('removeyes-')) { removeFarm(act.slice(10)); FF.sfx.tick(); render(); }
         else if (act.startsWith('remove-')) { confirmRemove = act.slice(7); render(); }
@@ -246,6 +267,7 @@
       from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false; period = null; confirmRemove = null; confirmWipe = false;
       FF.stickers.check();
       $('familyTab').hidden = !FF.board.enabled();
+      $('seedsTab').hidden = !seedsOpen();
       render();
       UI.show('book');
       $('bookDone').focus({ preventScroll: true });
