@@ -5,7 +5,7 @@
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui;
   const PAGE_STEP = 15, MAX_PAGES = 500;
-  let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false;
+  let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null;
 
   const dateKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const blankDay = () => ({ date: dateKey(), harvest: {}, sales: {}, bought: [], perfect: 0, earned: 0, sold: false });
@@ -50,7 +50,9 @@
   }
   const fruitPic = t => picture('f' + t, () => FF.draw.fruitIcon(t, 48));
   const animalPic = k => picture('a' + k, () => FF.draw.toCanvas(56, 56, s => FF.animals.drawHead(k, s / 2, s * 0.58, s * 0.3, 'idle', 0, { x: 0, y: 0.3 })));
-  const stat = (label, n) => `<div class="tile"><small>${label}</small><b>${n}</b></div>`;
+  const stat = (label, n, id) => id
+    ? `<button type="button" class="tile${period === id ? ' on' : ''}" data-book="period-${id}" aria-pressed="${period === id}"><small>${label} ›</small><b>${n}</b></button>`
+    : `<div class="tile"><small>${label}</small><b>${n}</b></div>`;
 
   /* ---------- Pages ---------- */
   function pageHTML(p, title) {
@@ -65,11 +67,28 @@
       (p.earned ? `<div class="row total"><span>Earned</span><span class="pay">${I.coin}${p.earned}</span></div>` : '') +
       `</article>`;
   }
+  // The days behind a tile: one bar per calendar date, with the game days played on it.
+  function periodHTML(id) {
+    const now = new Date(), dates = [];
+    if (id === 'day') dates.push(new Date(now));
+    else if (id === 'week') { const mon = new Date(now); mon.setDate(now.getDate() - (now.getDay() + 6) % 7); for (let i = 0; i < 7; i++) { const d = new Date(mon); d.setDate(mon.getDate() + i); dates.push(d); } }
+    else for (let i = 1; i <= now.getDate(); i++) dates.push(new Date(now.getFullYear(), now.getMonth(), i));
+    const s = FF.save, pages = s.diary.concat(hasEntries(today()) ? [{ day: s.day, ...today() }] : []);
+    const rows = dates.map(d => { const k = dateKey(d); const days = pages.filter(p => p.date === k).map(p => p.day); return { d, coins: s.byDate[k] || 0, days }; });
+    const top = Math.max(1, ...rows.map(r => r.coins)), name = d => d.toLocaleDateString(undefined, id === 'month' ? { day: 'numeric' } : { weekday: 'short' });
+    const dayText = days => days.length ? 'Day' + (days.length > 1 ? 's ' + days[0] + '–' + days[days.length - 1] : ' ' + days[0]) : '';
+    return `<div class="period"><div class="pbars${id === 'month' ? ' many' : ''}">${rows.map(r => `<div class="pbar"><span style="height:${Math.round(100 * r.coins / top)}%"></span><small>${name(r.d)}</small></div>`).join('')}</div>` +
+      `<ul class="plist">${rows.filter(r => r.coins).reverse().map(r => `<li><span>${r.d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span><span>${dayText(r.days)}</span><span class="pay">${I.coin}${r.coins}</span></li>`).join('') || '<li>No coins earned yet.</li>'}</ul></div>`;
+  }
   function scoreHTML() {
     const s = FF.save, t = totals(), rank = rankOf(s.lifetime), next = D.ranks.find(r => r.score > s.lifetime);
     return `<div class="score"><small>Farm Score</small><b>${s.lifetime}</b><span class="rank">${rank.name}</span>` +
       (next ? `<small>${next.score - s.lifetime} more to ${next.name}</small>` : '') + `</div>` +
-      `<div class="tiles">${stat('Today', t.day)}${stat('This week', t.week)}${stat('This month', t.month)}${stat('All time', s.lifetime)}${stat('This farm', s.farmEarned)}${stat('Best day', s.bestDay)}</div>` +
+      `<p class="note">Your Farm Score is every coin you have ever earned, on all your farms. Spending never lowers it.</p>` +
+      `<ol class="ranks">${D.ranks.map(r => `<li class="${r === rank ? 'on' : s.lifetime >= r.score ? 'got' : ''}"><b>${r.name}</b><small>${r.score.toLocaleString()}</small></li>`).join('')}</ol>` +
+      `<div class="tiles">${stat('Today', t.day, 'day')}${stat('This week', t.week, 'week')}${stat('This month', t.month, 'month')}${stat('All time', s.lifetime)}${stat('This farm', s.farmEarned)}${stat('Best day', s.bestDay)}</div>` +
+      (period ? periodHTML(period) : '<p class="note">Tap Today, This week or This month to see the days behind it. These count coins by the real date.</p>') +
+      `<div class="label">What resets?</div><p class="note">Your Farm Score, stickers, friends and looks stay forever. Coins, trees, buildings, fields and orders belong to one farm and start over on a new farm.</p>` +
       (s.legend ? `<button class="btn secondary" type="button" data-book="parade">Watch the parade</button>` : '') +
       `<p class="note">Farm ${s.farmNo}, day ${s.day}${s.challenge ? ' · ' + challengeName(s.challenge) : ''} · ${s.seeds} Golden Seeds</p>`;
   }
@@ -137,6 +156,7 @@
     switch (b.dataset.book) {
       case 'done': FF.book.close(); break;
       case 'more': shown += PAGE_STEP; render(); break;
+      case 'period-day': case 'period-week': case 'period-month': { const id = b.dataset.book.slice(7); period = period === id ? null : id; FF.sfx.tick(); render(); break; }
       case 'new': confirmNew = true; render(); break;
       case 'newno': confirmNew = false; render(); break;
       case 'newyes': startOver(); break;
@@ -165,7 +185,7 @@
     sleep() { const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
     open(origin) {
       FF.sound.ensure();
-      from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false;
+      from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false; period = null;
       FF.stickers.check();
       $('familyTab').hidden = !FF.board.enabled();
       render();

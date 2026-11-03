@@ -67,6 +67,30 @@
       `<p class="note">${p.need - p.into} more points to level ${next}: ${gives}.</p>`;
   }
 
+  /* ---------- The Basket path ---------- */
+  let pathFrom = 'title';
+  FF.basketPath = {
+    open(origin) {
+      pathFrom = origin || 'title';
+      const p = FF.levelProgress(), lvl = p.level, looks = D.basketLooks, L = D.levels;
+      const holds = (l, i) => { const next = looks[i + 1]; return next ? FF.capAt(l.from) + '–' + FF.capAt(next.from - 1) : FF.capAt(l.from) + '+'; };
+      $('basketBody').innerHTML =
+        `<div class="summary"><div class="lvl"><span>Level ${lvl}</span><div class="meter"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></div><span>${lvl + 1}</span></div>` +
+        `<p class="note">${p.need - p.into} more points to level ${lvl + 1}. Your ${FF.carrier().name.toLowerCase()} holds ${FF.cap()}.</p></div>` +
+        `<div class="path">${looks.map((l, i) => {
+          const here = FF.lookFor(lvl) === l, got = lvl >= l.from;
+          return `<div class="pathrow${here ? ' on' : ''}${got ? '' : ' locked'}"><span data-look="${l.look}"></span><div><b>${l.name}</b><small>${l.from === 1 ? 'To start' : 'Level ' + l.from} · holds ${holds(l, i)}</small></div>${here ? '<span class="pill">You</span>' : got ? '<span class="pill tick">Got it</span>' : ''}</div>`;
+        }).join('')}</div>` +
+        `<div class="label">How to earn farm points</div><ul class="ways">` +
+        `<li>Catch a fruit: ${L.pointsPerCatch}</li><li>Sell a fruit: ${L.pointsPerSale}</li><li>Pick a crop: 1</li>` +
+        `<li>Deliver an order: ${D.orders.pointsPerItem} for each item</li><li>Collect goods from a kitchen: ${D.goodsPoints} each</li><li>Build a building: 10</li></ul>` +
+        `<p class="note">Your basket only changes at the end of a harvest.</p>`;
+      document.querySelectorAll('#basketBody [data-look]').forEach(el => el.appendChild(FF.farm.lookPreview(el.dataset.look)));
+      UI.show('basket'); $('basketDone').focus({ preventScroll: true });
+    },
+    close() { if (pathFrom === 'map') { UI.hideAll(); Screens.backToMap(); } else Screens.title(); }
+  };
+
   // Level-up cheers, wherever you are.
   FF.levelUp = (level, newLook) => {
     const c = FF.carrier(), fx = FF.fx;
@@ -223,6 +247,7 @@
   on('mapFriendsBtn', () => FF.village.open());
   on('mapOrdersBtn', () => FF.orders.open('map'));
   on('mapSleepBtn', Screens.sleep);
+  on('basketDone', () => FF.basketPath.close());
   on('sleepNo', () => { UI.hideAll(); Screens.backToMap(); });
   on('sleepYes', () => {
     FF.book.sleep(); UI.hideAll(); Screens.backToMap();
