@@ -94,7 +94,9 @@
     D.trees.forEach((t, i) => {
       const x = x0 + 150 + i * 178, y = STREET - 10, planted = FF.save.trees.includes(t.type);
       if (!planted) {
-        sign(x, y, 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + (FF.save.challenge === 'apples' ? 'not on this farm' : t.cost + ' coins'), true);
+        const lvl = FF.level() < (t.level || 1);
+        if (FF.save.challenge === 'apples') { sign(x, y, t.name + '\nnot on this farm', true); return; }
+        sign(x, y, lvl ? t.name + '\nlevel ' + t.level : 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + t.cost + ' coins', true);
         target(x - 80, y - 150, x + 80, y + 10, () => { FF.sfx.tick(); FF.shop.open('map', 'tree'); });
         return;
       }

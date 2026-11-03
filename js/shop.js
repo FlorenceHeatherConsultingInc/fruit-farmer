@@ -12,7 +12,9 @@
   const ownedBtn = text => `<button class="mini owned" type="button" disabled>${text}</button>`;
   const closedBtn = () => `<button class="mini" type="button" disabled>Not here</button>`;
   const pips = (on, total) => `<div class="pips" aria-label="Level ${on} of ${total}">${Array.from({ length: total }, (_, i) => `<span class="pip${i < on ? ' on' : ''}"></span>`).join('')}</div>`;
-  const pickStatus = (on, owned, cost) => on ? 'Using' : owned ? 'Use it' : I.coin + cost;
+  const pickStatus = (on, owned, cost) => on ? 'Using' : owned ? 'Use it' : cost >= 1e9 ? 'Reward' : I.coin + cost;
+  // Cheapest first; the sort is stable, so equal prices keep their order in data.js.
+  const byCost = (list, cost) => list.slice().sort((a, b) => cost(a) - cost(b));
 
   const wallGoals = () => {
     const save = FF.save, W = D.market.wallUnlock, kinds = save.trees.length;
@@ -77,17 +79,17 @@
     });
 
     const trees = $('shopTrees'); trees.innerHTML = '';
-    D.trees.filter(t => t.cost).forEach(t => {
+    byCost(D.trees.filter(t => t.cost), t => t.cost).forEach(t => {
       const row = document.createElement('div'); row.className = 'up';
       const badge = document.createElement('div'); badge.className = 'badge'; badge.appendChild(FF.draw.fruitIcon(t.type));
       row.appendChild(badge);
       row.insertAdjacentHTML('beforeend', `<div><h3>${t.name}</h3><p>${D.fruits[t.type].name} start falling in your orchard. They sell for ${D.fruits[t.type].price} coins each.</p></div>` +
-        (save.trees.includes(t.type) ? ownedBtn('Planted') : save.challenge === 'apples' ? closedBtn() : buyBtn('tree', t.type, t.cost, 'Plant ' + t.name)));
+        (save.trees.includes(t.type) ? ownedBtn('Planted') : save.challenge === 'apples' ? closedBtn() : FF.level() < (t.level || 1) ? `<button class="mini" type="button" disabled>Level ${t.level}</button>` : buyBtn('tree', t.type, t.cost, 'Plant ' + t.name)));
       trees.appendChild(row);
     });
 
     renderMarket();
-    $('shopHats').innerHTML = D.hats.map(h => {
+    $('shopHats').innerHTML = byCost(D.hats, h => h.cost).map(h => {
       const owned = save.hats.includes(h.id), on = save.hat === h.id;
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="hat" data-id="${h.id}" ${owned || save.coins >= h.cost ? '' : 'disabled'} aria-pressed="${on}"><span data-hat="${h.id}"></span><b>${h.name}</b><small>${pickStatus(on, owned, h.cost)}</small></button>`;
     }).join('');
@@ -96,18 +98,18 @@
       el.appendChild(FF.draw.toCanvas(72, 72, s => FF.animals.drawHead('bunny', s / 2, s * 0.62, s * 0.26, 'happy', 0, { x: 0, y: 0.3 })));
       FF.animals.showHat = null;
     });
-    $('shopDecor').innerHTML = D.decorations.map(d => {
+    $('shopDecor').innerHTML = byCost(D.decorations, d => d.cost).map(d => {
       const on = save.decor.includes(d.id);
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="decor" data-id="${d.id}" ${on || save.coins >= d.cost ? '' : 'disabled'} aria-pressed="${on}"><b>${d.name}</b><small>${on ? 'Built' : I.coin + d.cost}</small></button>`;
     }).join('');
 
-    $('shopUps').innerHTML = D.upgrades.map(u => {
+    $('shopUps').innerHTML = byCost(D.upgrades, u => u.costs[Math.min(save.up[u.id] || 0, u.costs.length - 1)]).map(u => {
       const lvl = save.up[u.id], max = lvl >= u.costs.length;
       return `<div class="up"><div class="badge">${I[u.icon]}</div><div><h3>${u.name}</h3><p>${u.desc}</p>${pips(lvl, u.costs.length)}</div>` +
         (max ? ownedBtn('Max') : save.challenge === 'noups' ? closedBtn() : buyBtn('up', u.id, u.costs[lvl], 'Buy ' + u.name)) + `</div>`;
     }).join('');
 
-    $('shopSkins').innerHTML = D.skins.filter(s => !s.reward || save.skins.includes(s.id)).map(s => {
+    $('shopSkins').innerHTML = byCost(D.skins.filter(s => !s.reward || save.skins.includes(s.id)), s => s.reward ? Infinity : s.cost).map(s => {
       const owned = save.skins.includes(s.id), on = save.skin === s.id;
       const bg = s.rainbow ? `linear-gradient(${D.rainbow.join(',')})` : s.body;
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="skin" data-id="${s.id}" ${owned || save.coins >= s.cost ? '' : 'disabled'} aria-pressed="${on}">` +
@@ -115,7 +117,7 @@
     }).join('');
 
     const scenes = $('shopScenes'); scenes.innerHTML = '';
-    D.scenes.filter(s => !s.reward || save.scenes.includes(s.id)).forEach(s => {
+    byCost(D.scenes.filter(s => !s.reward || save.scenes.includes(s.id)), s => s.reward ? Infinity : s.cost).forEach(s => {
       const owned = save.scenes.includes(s.id), on = save.scene === s.id;
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'pick' + (on ? ' on' : '');
@@ -155,7 +157,7 @@
     switch (b.dataset.act) {
       case 'look': if (FF.looksReached().some(l => l.look === id)) { save.basketLook = id; FF.sfx.coin(); FF.layout(); } break;
       case 'barn': { const cost = D.barn.costs[save.barnLevel]; if (cost != null && spend(cost)) { save.barnLevel++; FF.book.bought('Bigger barn'); } break; }
-      case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
+      case 'tree': { const t = D.trees.find(x => x.type === id); if (t && FF.treeReady(t) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
       case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;

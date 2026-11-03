@@ -25,7 +25,7 @@
     friends: metFriend
   };
   const bare = () => FF.save.trees.some(t => FF.groves.stock(t) === 0);
-  const cheapestTree = () => Math.min(...D.trees.filter(t => t.cost && !FF.save.trees.includes(t.type)).map(t => t.cost));
+  const cheapestTree = () => Math.min(...D.trees.filter(t => t.cost && FF.treeReady(t)).map(t => t.cost));
   // Tips, in order. go: an area to jump to, or a bar button to point at.
   const TIPS = [
     { id: 'barn', when: () => FF.inBarn() > 0 && !sold(), text: 'Your fruit went to the barn. Tap the barn at the top to see what’s inside.', go: { tool: 'mapBarnBtn' } },

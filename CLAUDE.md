@@ -63,6 +63,8 @@ It works offline except for the Google Font, which falls back to a system font.
   `barnyard()` in `map.js`. Collecting counts `made` plus `made<Good>` (such as `madePancakes`) for stickers.
 - **Fields:** `fields` in `data.js` (opening level, plots, plot prices, crop days and yields). A new crop needs
   a row in `fruits` with `kind: 'crop'`, art in `GOODS`, and a drawer in `plot()` in `map.js`.
+- **Tree prices and when they open:** `cost` and `level` on each row of `trees` in `data.js`.
+- **Shop order:** every shop section lists items cheapest first, rewards last. Order in `data.js` doesn't matter.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
 - **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in

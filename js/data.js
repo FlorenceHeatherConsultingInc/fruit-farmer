@@ -108,10 +108,10 @@ FF.data = {
   // shape picks the drawing in scenery.js: round, palm, bush or vine.
   trees: [
     { type: 'apple',      name: 'Apple tree',       cost: 0,   spot: 0.30, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
-    { type: 'orange',     name: 'Orange tree',      cost: 15,  spot: 0.70, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
-    { type: 'banana',     name: 'Banana tree',      cost: 35,  spot: 0.10, shape: 'palm', holds: 10, perLevel: 1.5, refill: 1 },
-    { type: 'strawberry', name: 'Strawberry patch', cost: 70,  spot: 0.50, shape: 'bush', holds: 10, perLevel: 1.5, refill: 2 },
-    { type: 'grapes',     name: 'Grape vine',       cost: 140, spot: 0.90, shape: 'vine', holds: 10, perLevel: 1, refill: 2 }
+    { type: 'orange',     name: 'Orange tree',      cost: 60,  level: 3,  spot: 0.70, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
+    { type: 'banana',     name: 'Banana tree',      cost: 150, level: 6,  spot: 0.10, shape: 'palm', holds: 10, perLevel: 1.5, refill: 1 },
+    { type: 'strawberry', name: 'Strawberry patch', cost: 350, level: 10, spot: 0.50, shape: 'bush', holds: 10, perLevel: 1.5, refill: 2 },
+    { type: 'grapes',     name: 'Grape vine',       cost: 800, level: 15, spot: 0.90, shape: 'vine', holds: 10, perLevel: 1, refill: 2 }
   ],
 
   // Upgrades with one price per level. The ids are used by the game: speed, luck.
