@@ -96,9 +96,13 @@
       if (!planted) { sign(x, y, D.fruits[t.type].name + '\nin the shop', true); return; }
       Draw.rr(x - 11, y - 96, 22, 96, 4); Draw.fillStroke(trunkColor(sc), 3);
       Draw.blob([[x - 40, y - 120, 40], [x + 40, y - 120, 40], [x, y - 164, 52]], sc.foliage[i % sc.foliage.length], 4);
-      for (let k = 0; k < 7; k++) Draw.fruit(t.type, x - 45 + (k % 4) * 30, y - 130 - Math.floor(k / 4) * 38 - (k % 2) * 7, 14);
+      // the tree looks as full as the grove is
+      const n = FF.groves.stock(t.type), shown = Math.ceil(7 * n / FF.groves.holds(t.type));
+      for (let k = 0; k < shown; k++) Draw.fruit(t.type, x - 45 + (k % 4) * 30, y - 130 - Math.floor(k / 4) * 38 - (k % 2) * 7, 14);
       ctx.fillStyle = 'rgba(43,35,80,0.15)'; ctx.beginPath(); ctx.ellipse(x, y + 4, 60, 10, 0, 0, TAU); ctx.fill();
-      target(x - 70, y - 240, x + 70, y + 10, () => { FF.sfx.tick(); FF.screens.farm(); });
+      ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
+      const tag = n ? n + ' left' : 'Bare'; ctx.strokeText(tag, x, y + 40); ctx.fillStyle = D.colors.card; ctx.fillText(tag, x, y + 40);
+      target(x - 70, y - 240, x + 70, y + 50, () => { FF.sfx.tick(); FF.groves.open(t.type); });
     });
   }
 

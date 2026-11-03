@@ -6,7 +6,7 @@
   const Draw = FF.draw, FX = FF.fx, INK = D.colors.ink;
 
   const basket = { x: 0, tx: 0, y: 0, w: 100, h: 50, bounce: 0, vel: 0, wheel: 0 };
-  let fruits = [], pile = [], spawnT = 0.5, combo = 0, fullT = -1;
+  let fruits = [], pile = [], spawnT = 0.5, combo = 0, fullT = -1, grove = null, filter = null, shakeT = 0, bareT = -1;
   let moveHold = 0, moveDir = 0, zipping = false, drag = null, groundY = 0;
 
   const Farm = FF.farm = { basket };
@@ -48,15 +48,32 @@
   }
 
   /* ---------- Fruit ---------- */
-  function spawnFruit(demo) {
+  // Mostly this grove's own fruit, some from nearby trees, and now and then a gold star.
+  // Fruit only falls while the grove still has some; a grove only loses fruit you catch.
+  const flying = t => fruits.filter(f => !f.landed && f.type === t).length;
+  const left = t => FF.groves.stock(t) - flying(t);
+  function pickType(demo) {
+    if (Math.random() < D.stars.base + D.stars.perLevel * (FF.save.up.luck || 0)) return 'star';
+    if (demo) return pick(FF.save.trees);
+    if (left(grove) <= 0) return null;
+    const others = FF.save.trees.filter(t => t !== grove && left(t) > 0);
+    return !others.length || Math.random() < D.groveMix ? grove : pick(others);
+  }
+  function spawnFruit(demo, shake) {
     const r = clamp(G.W * 0.055, 26, 42);
-    const star = Math.random() < D.stars.base + D.stars.perLevel * (FF.save.up.luck || 0);
-    const type = star ? 'star' : pick(FF.save.trees);
-    const vy = G.H * D.speeds[FF.save.speed].fall;
-    const y0 = -r * 1.5;
+    const type = pickType(demo);
+    if (!type) return false;
+    const vy = G.H * D.speeds[FF.save.speed].fall * (shake ? 1.12 : 1);
+    const y0 = -r * 1.5 - (shake ? shake.i * 26 : 0);
     const arrive = G.clock + (basket.y - y0) / vy;
+    if (shake) {
+      // a shake drops fruit across the whole width: you choose which to chase
+      const x = clamp(G.W * (shake.i + 0.5) / shake.n + rand(-0.05, 0.05) * G.W, r + 8, G.W - r - 8);
+      fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false, shake: true });
+      return true;
+    }
     let prev = null;
-    for (const f of fruits) if (!f.landed && (!prev || f.arrive > prev.arrive)) prev = f;
+    for (const f of fruits) if (!f.landed && !f.shake && (!prev || f.arrive > prev.arrive)) prev = f;
     if (prev && arrive < prev.arrive + 0.35) return false;
     const fromX = prev ? prev.x : basket.x;
     const d = demo ? G.W : reach(prev ? arrive - prev.arrive : arrive - G.clock);
@@ -85,6 +102,7 @@
     if (pile.length > 9) pile.shift();
     if (demo || FF.carried() >= FF.cap()) return;
     FF.save.crate[f.type]++;
+    if (f.type !== 'star') FF.groves.take(f.type);
     FF.book.harvest(f.type);
     FF.addPoints(D.levels.pointsPerCatch);
     combo++;
@@ -96,7 +114,10 @@
   }
 
   /* ---------- Start / update ---------- */
-  Farm.start = () => {
+  // g: which grove to pick from. f: a filter fruit for this round, if one was applied.
+  Farm.start = (g, f) => {
+    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; filter = f || null;
+    shakeT = D.speeds[FF.save.speed].shakeEvery * 0.6; bareT = -1;
     fruits = []; FX.clear();
     pile = [];
     FF.FRUIT_TYPES.forEach(t => { for (let i = 0; i < FF.save.crate[t]; i++) pile.push({ type: t, dx: rand(-1, 1), rot: rand(-0.5, 0.5) }); });
@@ -106,6 +127,8 @@
     fullT = FF.carried() >= FF.cap() ? 0.4 : -1;
   };
   Farm.reset = () => { fruits = []; pile = []; };
+  Farm.grove = () => grove;
+  Farm.filter = () => filter;
   Farm.falling = () => fruits.filter(f => !f.landed);
   Farm.nextFruitX = () => { let n = null; for (const f of fruits) if (!f.landed && (!n || f.y > n.y)) n = f; return n ? n.x : null; };
 
@@ -148,25 +171,38 @@
     if (fast && !demo && Math.random() < dt * 30) FX.dust(basket.x - Math.sign(basket.vel) * basket.w * 0.4, groundY - 4, Math.sign(basket.vel));
     basket.bounce = Math.max(0, basket.bounce - dt * 4);
 
+    const sp = D.speeds[FF.save.speed], falling = fruits.filter(f => !f.landed).length;
+    const full = !demo && FF.carried() + falling >= FF.cap();
     spawnT -= dt;
     if (spawnT <= 0) {
-      const falling = fruits.filter(f => !f.landed).length;
-      if (!demo && FF.carried() + falling >= FF.cap()) spawnT = 0.3;
-      else if (spawnFruit(demo)) spawnT = Math.min(D.speeds[FF.save.speed].gap, D.harvest.tripSeconds / FF.cap()) * rand(0.75, 1.25);
-      else spawnT = 0.1;
+      if (full) spawnT = 0.3;
+      else if (spawnFruit(demo)) spawnT = sp.gap * rand(0.75, 1.25);
+      else spawnT = 0.2;
+    }
+    // now and then the tree shakes and drops a clump; it waits while a pinned order is filled
+    if (!demo) {
+      shakeT -= dt;
+      if (shakeT <= 0 && !(FF.orders && FF.orders.pinFilled())) {
+        shakeT = sp.shakeEvery * rand(0.85, 1.15);
+        const n = Math.min(sp.shakeSize, FF.cap() - FF.carried() - falling);
+        for (let i = 0; i < n; i++) spawnFruit(false, { i, n });
+        if (n > 0) { FX.burst(G.W / 2, 4, ['#5cc24a', '#8bd16a'], 10, 'dot'); FF.sfx.zip(); }
+      }
+      // the grove is bare when it has nothing left and nothing is falling
+      if (bareT < 0 && fullT < 0 && left(grove) <= 0 && !fruits.some(f => !f.landed)) bareT = 0.8;
+      if (bareT > 0 && (bareT -= dt) <= 0) FF.screens.showFull(true);
     }
 
-    const mag = FF.save.up.magnet || 0;
     for (const f of fruits) {
       if (f.landed) { f.life -= dt * 1.4; continue; }
       f.y += f.vy * dt; f.rot += f.vr * dt;
-      if (mag && !demo && f.type !== 'star') {
+      // a filter gently pulls its fruit in and lets everything else fall past
+      const blocked = filter && !demo && f.type !== filter && f.type !== 'star';
+      if (filter && !demo && f.type === filter) {
         const dx = basket.x - f.x, dy = basket.y - f.y;
-        if (dy > -f.r && dy < basket.h * 3.2 && Math.abs(dx) < basket.w * (0.55 + 0.4 * mag)) {
-          f.x += Math.sign(dx) * Math.min(Math.abs(dx), G.W * (0.18 + 0.12 * mag) * dt);
-        }
+        if (dy > -f.r && dy < basket.h * 3.2 && Math.abs(dx) < basket.w * 0.95) f.x += Math.sign(dx) * Math.min(Math.abs(dx), G.W * 0.3 * dt);
       }
-      if (touches(f)) { f.caught = true; onCatch(f, demo); continue; }
+      if (!blocked && touches(f)) { f.caught = true; onCatch(f, demo); continue; }
       if (f.y + f.r * 0.75 >= groundY) {
         f.landed = true; f.y = groundY - f.r * 0.75;
         if (!demo) { combo = 0; FX.burst(f.x, groundY, ['#8bd16a', '#b98a5a'], 6); FF.sfx.miss(); }
@@ -258,12 +294,15 @@
       ctx.beginPath(); ctx.ellipse(0, groundY - y + 2, w * 0.45, 7, 0, 0, TAU); ctx.fill();
     }
 
-    if (FF.save.up.magnet && !demo) {
+    if (filter && !demo && !preview) {
+      // the filter shows as a glowing ring with its fruit on a badge
       ctx.save();
-      ctx.globalAlpha = 0.18 + 0.08 * Math.sin(G.clock * 5);
-      ctx.strokeStyle = '#ff3b5c'; ctx.lineWidth = 3; ctx.setLineDash([8, 10]);
-      ctx.beginPath(); ctx.ellipse(0, 0, w * (0.55 + 0.4 * FF.save.up.magnet), h * 1.6, 0, Math.PI, TAU); ctx.stroke();
+      ctx.globalAlpha = 0.22 + 0.1 * Math.sin(G.clock * 5);
+      ctx.strokeStyle = D.fruits[filter].colors[0]; ctx.lineWidth = 4; ctx.setLineDash([8, 10]);
+      ctx.beginPath(); ctx.ellipse(0, 0, w * 0.95, h * 1.6, 0, Math.PI, TAU); ctx.stroke();
       ctx.restore();
+      ctx.beginPath(); ctx.arc(-w * 0.5 - 6, -h * 0.4, 15, 0, TAU); Draw.fillStroke(D.colors.card, 3);
+      Draw.fruit(filter, -w * 0.5 - 6, -h * 0.4, 9);
     }
 
     if (look === 'handle') {

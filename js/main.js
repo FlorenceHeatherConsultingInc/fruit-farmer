@@ -69,12 +69,15 @@
 
   const Screens = FF.screens = {
     // The village map. Back returns to the title, or to the Sold card if that's where you came from.
-    village(from) {
+    village(from, area) {
       FF.sound.ensure();
+      FF.unloadBasket();
+      if (G.state === 'farm') FF.farm.reset();
       mapFrom = from === 'sold' ? 'sold' : 'title';
       G.state = 'village';
       UI.hideAll(); clearInput();
       FF.map.start(mapFrom);
+      if (area) FF.map.jump(area);
       UI.hud('village');
       $('mapCoins').innerHTML = UI.coinHTML(FF.save.coins);
     },
@@ -101,7 +104,8 @@
       UI.show('title');
       $('harvestBtn').focus();
     },
-    farm() {
+    // A harvest round in one grove, with an optional filter.
+    farm(grove, filter) {
       FF.sound.ensure();
       FF.book.startDay();
       const sel = document.querySelector('input[name="speed"]:checked');
@@ -110,7 +114,7 @@
       UI.hideAll();
       FF.layout();
       clearInput();
-      FF.farm.start();
+      FF.farm.start(grove, filter);
       UI.hud('farm');
       $('farmSpecial').textContent = UI.specialText();
       FF.hud.load();
@@ -126,9 +130,10 @@
       FF.save.trips++; FF.persist();
       FF.hud.coins();
     },
-    showFull() {
-      $('fullTitle').textContent = FF.carrier().full;
-      $('fullMsg').textContent = 'Take your ' + FF.carried() + ' fruit to the market and sell them!';
+    showFull(bare) {
+      const n = FF.carried();
+      $('fullTitle').textContent = bare ? 'All picked!' : FF.carrier().full;
+      $('fullMsg').textContent = bare ? (n ? 'You caught ' + n + ' fruit. This grove refills tomorrow.' : 'This grove is bare for today. It refills tomorrow.') : 'Take your ' + n + ' fruit to the market, or keep them in the barn.';
       UI.show('full');
       $('goMarketBtn').focus();
     },
@@ -178,7 +183,9 @@
     renderSoundBtns();
   }));
   const on = (id, fn) => $(id).addEventListener('click', fn);
-  on('harvestBtn', Screens.farm);
+  on('harvestBtn', () => Screens.village('title', 'groves'));
+  on('farmDoneBtn', () => Screens.village('title', 'groves'));
+  on('fullVillageBtn', () => Screens.village('title', 'groves'));
   on('titleShopBtn', () => FF.shop.open('title'));
   on('titleBookBtn', () => FF.book.open('title'));
   on('titleVillageBtn', () => Screens.village('title'));
@@ -205,7 +212,7 @@
   on('homeBtn', Screens.title);
   on('goMarketBtn', Screens.toMarket);
   on('soldShopBtn', () => FF.shop.open('sold'));
-  on('soldFarmBtn', Screens.farm);
+  on('soldFarmBtn', () => Screens.village('title', 'groves'));
   on('shopBtn', () => FF.shop.open('market'));
   document.addEventListener('visibilitychange', () => { if (document.hidden) Screens.pause(); });
 

@@ -89,6 +89,8 @@
 
     renderMarket();
     renderSeeds();
+    $('shopFilters').innerHTML = FF.groves.shopHTML(buyBtn, closedBtn);
+    save.trees.forEach(t => { const b = $('shopFilters').querySelector(`[data-fruit="${t}"]`); if (b) b.appendChild(FF.draw.fruitIcon(t)); });
 
     $('shopUps').innerHTML = D.upgrades.map(u => {
       const lvl = save.up[u.id], max = lvl >= u.costs.length;
@@ -148,6 +150,7 @@
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
       case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;
       case 'layout': if (save.wallOwned) { save.marketLayout = id; FF.sfx.coin(); } break;
+      case 'filter': if (FF.groves.filtersAllowed() && spend(D.filters.cost[id])) { save.filters[id] = (save.filters[id] || 0) + D.filters.bundle; FF.book.bought(D.fruits[id].name + ' filters'); } break;
       case 'seed': {
         const x = D.seedShop.find(i => i.id === id);
         if (x && !save.seedBuys.includes(id) && save.seeds >= x.cost) {

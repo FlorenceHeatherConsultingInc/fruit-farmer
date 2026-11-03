@@ -7,8 +7,10 @@ browser on that computer.
 
 ## How to play
 
-- **Orchard:** tap an arrow to scoot, or hold it to zip. You can also drag your basket.
-  You start with just your hands, which hold 2 fruit. When you're full, head to the market.
+- **Groves:** tap Go harvest, then pick a grove on the village map. Each grove holds a set amount
+  of fruit and refills over days. Fruit falls in a steady stream, with a quick shake now and then.
+  Tap an arrow to scoot, hold it to zip, or drag your basket. Filters from the shop let only one
+  kind of fruit into your basket for a round.
 - **Market:** press on the fruit, drag down to pull back the slingshot, and let go. The dotted arc
   shows where your fruit will land. On a keyboard, use the arrow keys to aim and Space to throw.
   Give each animal the fruit it asks for. The tag shows what the whole basket still pays, and

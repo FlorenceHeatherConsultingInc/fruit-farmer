@@ -20,11 +20,16 @@ FF.data = {
 
   // Harvest speed picked on the title screen.
   // fall: screen-heights per second. gap: seconds between fruit (before a little randomness).
+  // shakeEvery: seconds between tree shakes. shakeSize: how many fruit drop in a shake.
   speeds: {
-    slow:   { fall: 0.16, gap: 1.2 },
-    medium: { fall: 0.23, gap: 0.95 },
-    fast:   { fall: 0.31, gap: 0.72 }
+    slow:   { fall: 0.16, gap: 1.2,  shakeEvery: 10, shakeSize: 3 },
+    medium: { fall: 0.23, gap: 0.9,  shakeEvery: 9,  shakeSize: 4 },
+    fast:   { fall: 0.31, gap: 0.7,  shakeEvery: 8,  shakeSize: 5 }
   },
+  // How much of the fruit in a grove round is the grove's own. The rest comes from nearby trees.
+  groveMix: 0.7,
+  // Filters: sold in bundles, priced per fruit.
+  filters: { bundle: 3, cost: { apple: 6, orange: 8, banana: 10, strawberry: 12, grapes: 15 } },
 
   // How the basket feels when you hold the arrows. Speeds are fractions of screen width per second.
   movement: {
@@ -36,9 +41,6 @@ FF.data = {
     brake: 18,          // how quickly it stops when you let go
     wheels: { top: 0.22, tap: 0.03, ramp: -0.07 }  // added for each Zippy wheels level
   },
-
-  // Bigger carriers make fruit fall faster, so a full load takes about this many seconds at most.
-  harvest: { tripSeconds: 22 },
 
   // Each game day one fruit pays this many times its price.
   specialPay: 2,
@@ -65,20 +67,20 @@ FF.data = {
   // How much the barn holds, and what each bigger barn costs.
   barn: { sizes: [100, 200, 400, 800, Infinity], costs: [150, 400, 1000, 2500] },
 
-  // Orchard trees. The apple tree is free. spot = where it stands (0 = left edge, 1 = right edge).
+  // Orchard trees, each one a grove. The apple tree is free. spot = where it stands (0 = left edge, 1 = right edge).
+  // A grove holds `holds` fruit plus `perLevel` for each farm level, and refills over `refill` days.
   // shape picks the drawing in scenery.js: round, palm, bush or vine.
   trees: [
-    { type: 'apple',      name: 'Apple tree',       cost: 0,   spot: 0.30, shape: 'round' },
-    { type: 'orange',     name: 'Orange tree',      cost: 15,  spot: 0.70, shape: 'round' },
-    { type: 'banana',     name: 'Banana tree',      cost: 35,  spot: 0.10, shape: 'palm' },
-    { type: 'strawberry', name: 'Strawberry patch', cost: 70,  spot: 0.50, shape: 'bush' },
-    { type: 'grapes',     name: 'Grape vine',       cost: 140, spot: 0.90, shape: 'vine' }
+    { type: 'apple',      name: 'Apple tree',       cost: 0,   spot: 0.30, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
+    { type: 'orange',     name: 'Orange tree',      cost: 15,  spot: 0.70, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
+    { type: 'banana',     name: 'Banana tree',      cost: 35,  spot: 0.10, shape: 'palm', holds: 10, perLevel: 1.5, refill: 1 },
+    { type: 'strawberry', name: 'Strawberry patch', cost: 70,  spot: 0.50, shape: 'bush', holds: 10, perLevel: 1.5, refill: 2 },
+    { type: 'grapes',     name: 'Grape vine',       cost: 140, spot: 0.90, shape: 'vine', holds: 10, perLevel: 1, refill: 2 }
   ],
 
-  // Upgrades with one price per level. The ids are used by the game: speed, magnet, luck.
+  // Upgrades with one price per level. The ids are used by the game: speed, luck.
   upgrades: [
     { id: 'speed',  icon: 'speed',  name: 'Zippy wheels', desc: 'Zip across the orchard faster and smoother.', costs: [20, 60, 190] },
-    { id: 'magnet', icon: 'magnet', name: 'Fruit magnet', desc: 'Pulls nearby fruit into what you carry.',    costs: [60, 240] },
     { id: 'luck',   icon: 'luck',   name: 'Lucky stars',  desc: 'More gold stars fall. Stars sell for 10!',   costs: [40, 160] }
   ],
 
@@ -207,7 +209,7 @@ FF.data = {
   seeds: { per: 100, challengePay: 2, tinyCap: 5 },
   challenges: [
     { id: 'apples',   name: 'Apples Only', desc: 'One tree, forever' },
-    { id: 'nomagnet', name: 'No Magnet',   desc: 'Catch everything yourself' },
+    { id: 'nomagnet', name: 'No Filters',  desc: 'Catch everything yourself' },
     { id: 'tiny',     name: 'Tiny Hands',  desc: 'Carry 5 fruit at most' },
     { id: 'wallrush', name: 'Wall Rush',   desc: 'The Barrel wall from day one' }
   ],

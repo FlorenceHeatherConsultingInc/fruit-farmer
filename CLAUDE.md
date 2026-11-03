@@ -20,7 +20,8 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/draw.js` | Drawing toolkit (`FF.draw`): outlines, `blob()`, fruit art, small icon canvases. Particle effects (`FF.fx`). |
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
-| `js/farm.js` | Harvest mode: carrier movement, fruit spawning, catching, carrier drawing. |
+| `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, catching, filters, carrier drawing. |
+| `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, the grove card, and filters. |
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
 | `js/market-layouts.js` | The two market layouts (`FF.marketLayouts`): animal friends and the barrel wall, including the covered wall and its reveal. Tags and request bubbles. |
 | `js/market.js` | Market mode: pull-back aiming, throwing, Perfect and rim shots, requests, selling. |
@@ -40,7 +41,7 @@ It works offline except for the Google Font, which falls back to a system font.
 
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
-- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
+- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm → groves →
   animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → map → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
@@ -79,7 +80,8 @@ It works offline except for the Google Font, which falls back to a system font.
 ## Design rules for this player (age 7)
 
 - No game over and no losing fruit. Misses roll back or fade away.
-- Every falling fruit must be reachable (see `reach()` and `spawnFruit()` in `farm.js`).
+- Stream fruit must be reachable (see `reach()` and `spawnFruit()` in `farm.js`). Shakes drop fruit across the whole
+  width on purpose, so you can always catch some fruit but not every fruit. Missed fruit stays on the tree.
 - In the market, the player must never hold a fruit nobody wants (see `askForLoaded()`), and
   every opening must be reachable by a pull (see `aimRange()`).
 - Big touch targets, short words, lots of sound and sparkle feedback.

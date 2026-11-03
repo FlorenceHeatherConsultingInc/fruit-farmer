@@ -23,6 +23,7 @@
 <div class="hud" id="farmHud" hidden>
   <div class="chip" id="loadChip" aria-live="polite"><span class="chip-icon" id="loadIcon"></span><span id="load">0/2</span></div>
   <div class="hud-right">
+    <button class="iconbtn" id="farmDoneBtn" type="button" aria-label="Done harvesting">Done</button>
     <button class="iconbtn go" id="toMarketBtn" type="button" aria-label="Go to market" hidden></button>
     <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
     <button class="iconbtn" id="pauseBtn" type="button" aria-label="Pause"></button>
@@ -110,6 +111,19 @@
     <h2 id="fullTitle">Hands full!</h2>
     <p id="fullMsg"></p>
     <button class="btn primary" id="goMarketBtn" type="button">Go to market</button>
+    <button class="btn secondary" id="fullVillageBtn" type="button">Back to the village</button>
+  </div>
+</div>
+
+<!-- A grove's card, before a harvest round -->
+<div class="overlay" id="groveOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="groveTitle">
+    <h2 id="groveTitle">Apple grove</h2>
+    <p id="groveStock"></p>
+    <p class="note" id="grovePin"></p>
+    <section class="msec" id="groveFilterSec"><div class="label">Filter</div><div class="grid3" id="groveFilters"></div><p class="note" id="groveFilterNote"></p></section>
+    <button class="btn primary" id="groveGo" type="button">Go!</button>
+    <button class="btn secondary" id="groveBack" type="button">Not now</button>
   </div>
 </div>
 
@@ -148,6 +162,7 @@
     <section class="msec"><div class="label">Plant fruit trees</div><div class="rows" id="shopTrees"></div></section>
     <section class="msec"><div class="label">Market</div><div id="shopMarket"></div></section>
     <section class="msec" id="shopSeedsSec" hidden><div class="label" id="shopSeedsLabel"></div><div class="rows" id="shopSeeds"></div></section>
+    <section class="msec" id="shopFiltersSec"><div class="label">Filters</div><div class="rows" id="shopFilters"></div></section>
     <section class="msec"><div class="label">Upgrades</div><div class="rows" id="shopUps"></div></section>
     <section class="msec"><div class="label">Basket colors</div><div class="grid3" id="shopSkins"></div></section>
     <section class="msec"><div class="label">Farm scenery</div><div class="grid3" id="shopScenes"></div></section>
@@ -202,6 +217,7 @@
 <script src="js/scenery.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/farm.js"></script>
+<script src="js/groves.js"></script>
 <script src="js/animals.js"></script>
 <script src="js/friends.js"></script>
 <script src="js/stickers.js"></script>
