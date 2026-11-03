@@ -17,7 +17,7 @@
   let coinsFly = [], rings = [], drag = null, aim = null, stretched = 0, info = null;
   let earned = 0, streak = 0, streakBump = 0, hits = 0, soldT = -1, shake = 0, wobble = 0, revealT = 0;
 
-  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded, aim: () => aim, info: () => info };
+  const Market = FF.market = { unsold: () => ammo.length + shots.length + (loaded ? 1 : 0), earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded, aim: () => aim, info: () => info };
   const pay = () => MK[active];
 
   /* ---------- Layout ---------- */
@@ -147,7 +147,8 @@
     const bonus = (perfect ? MK.perfectBonus : 0) + Math.min(MK.streakBonusMax, Math.floor(streak / MK.streakEvery));
     const coins = t.price + bonus;
     t.got++; t.inside.push(s.type); t.bump = 1;
-    FF.save.crate[s.type] = Math.max(0, FF.save.crate[s.type] - 1);
+    FF.save.barn[s.type] = Math.max(0, FF.save.barn[s.type] - 1);
+    FF.addPoints(D.levels.pointsPerSale);
     FF.save.coins += coins; earned += coins;
     FF.book.sale(t.kind, s.type, coins, perfect);
     const St = FF.stickers, fruitName = s.type[0].toUpperCase() + s.type.slice(1);
@@ -200,10 +201,11 @@
   }
 
   /* ---------- Start / update ---------- */
-  Market.start = () => {
+  // picks: how many of each fruit to bring from the barn. Leave it out to bring everything.
+  Market.start = picks => {
     active = FF.save.wallOwned ? FF.save.marketLayout : 'friends';
     ammo = [];
-    FF.FRUIT_TYPES.forEach(t => { for (let i = 0; i < FF.save.crate[t]; i++) ammo.push(t); });
+    FF.FRUIT_TYPES.forEach(t => { const k = Math.min(FF.save.barn[t], picks ? picks[t] || 0 : FF.save.barn[t]); for (let i = 0; i < k; i++) ammo.push(t); });
     FF.util.shuffle(ammo);
     shots = []; coinsFly = []; rings = []; loaded = ammo.shift() || null; reloadT = 0;
     targets = Layouts[active].build();
@@ -220,8 +222,9 @@
   Market.refresh = () => {
     const wanted = FF.save.wallOwned ? FF.save.marketLayout : 'friends';
     if (wanted === active && Layouts[active].build().length === targets.length) return;
-    const kept = earned;
-    Market.start();
+    const kept = earned, left = {};
+    for (const t of [...ammo, ...shots.map(s => s.type), loaded].filter(Boolean)) left[t] = (left[t] || 0) + 1;
+    Market.start(left);
     earned = kept;
   };
 
@@ -298,6 +301,9 @@
       else { soldT -= dt; if (soldT <= 0) { soldT = -1; FF.screens.showSold(); } }
     } else soldT = -1;
   };
+
+  // Done selling: whatever wasn't sold is still in the barn, since only sales take fruit out of it.
+  Market.finish = () => { soldT = -1; FF.screens.showSold(); };
 
   /* ---------- Pointer and keyboard ---------- */
   function pullFeedback() {

@@ -33,8 +33,8 @@
 <div class="hud" id="marketHud" hidden>
   <div class="chip" id="coinChip" aria-live="polite"></div>
   <div class="hud-right">
+    <button class="iconbtn" id="doneBtn" type="button" aria-label="Done selling">Done</button>
     <button class="iconbtn" id="shopBtn" type="button" aria-label="Shop"></button>
-    <button class="iconbtn" id="farmBtn" type="button" aria-label="Back to the farm"></button>
     <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
   </div>
 </div>
@@ -96,10 +96,21 @@
   </div>
 </div>
 
+<!-- Choosing what to take to market -->
+<div class="overlay" id="packOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="packTitle">
+    <h2 id="packTitle">To market!</h2>
+    <p id="packNote"></p>
+    <div class="rows" id="packRows"></div>
+    <button class="btn primary" id="packGo" type="button">Go to market</button>
+    <button class="btn secondary" id="packBack" type="button">Not now</button>
+  </div>
+</div>
+
 <!-- Everything sold -->
 <div class="overlay" id="soldOv" hidden>
   <div class="card">
-    <h2>Sold out!</h2>
+    <h2 id="soldTitle">Sold out!</h2>
     <p id="soldMsg"></p>
     <div class="stats" id="soldStats"></div>
     <button class="btn primary" id="soldShopBtn" type="button">Shop</button>
@@ -116,7 +127,7 @@
       <h2 id="shopTitle">Shop</h2>
       <div class="coins" id="shopCoins" aria-live="polite"></div>
     </div>
-    <section class="msec"><div class="label">Carry more fruit</div><div class="rows" id="shopCarry"></div></section>
+    <section class="msec"><div class="label">Your basket</div><div class="rows" id="shopCarry"></div></section>
     <section class="msec"><div class="label">Plant fruit trees</div><div class="rows" id="shopTrees"></div></section>
     <section class="msec"><div class="label">Market</div><div id="shopMarket"></div></section>
     <section class="msec" id="shopSeedsSec" hidden><div class="label" id="shopSeedsLabel"></div><div class="rows" id="shopSeeds"></div></section>

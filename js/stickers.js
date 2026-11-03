@@ -18,7 +18,7 @@
     bestDay: () => FF.save.bestDay,
     lifetime: () => FF.save.lifetime,
     farmDay: () => FF.save.day,
-    tier: () => FF.save.tier,
+    level: () => FF.level(),
     kinds: () => FF.save.trees.length,
     farms: () => FF.save.farmNo,
     crowns: () => FF.save.crownWeeks.length,

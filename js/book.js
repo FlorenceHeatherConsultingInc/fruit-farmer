@@ -112,10 +112,10 @@
     closeDay();
     s.seeds += seedsFromFarm();
     s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary, challenge: s.challenge });
-    ['coins', 'crate', 'tier', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
+    ['coins', 'crate', 'barn', 'points', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
     s.farmNo++;
     s.challenge = challenge || null;
-    if (s.seedBuys.includes('start-basket')) s.tier = 1;
+    if (s.seedBuys.includes('start-basket')) s.points = FF.pointsFor(5);
     if (s.seedBuys.includes('start-tree') && challenge !== 'apples') s.trees.push('orange');
     if (challenge === 'wallrush') { s.wallOwned = true; s.wallRevealed = true; s.marketLayout = 'wall'; }
     FF.stickers.check();

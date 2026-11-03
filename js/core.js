@@ -28,9 +28,17 @@
   FF.FRUIT_TYPES = Object.keys(D.fruits);
   const SAVE_KEY = 'fruitfarmer.save';
 
+  /* ---------- Farm levels and the basket ---------- */
+  const lookFor = level => D.basketLooks.filter(l => level >= l.from).pop();
+  const capAt = level => { const l = lookFor(level); return l.start + Math.min(level - l.from, l.tiers - 1) * l.step; };
+  // Points needed to go from `level` to the next one.
+  const stepAt = level => Math.ceil(2 * capAt(level) * (1 + level / D.levels.levelPace));
+  function pointsFor(level) { let p = 0; for (let l = 1; l < level; l++) p += stepAt(l); return p; }
+  function levelOf(points) { let l = 1, need = stepAt(1); while (points >= need) { points -= need; l++; need = stepAt(l); } return l; }
+
   function freshSave() {
     const s = {
-      coins: 0, crate: {}, tier: 0, up: {}, trips: 0, speed: 'slow',
+      coins: 0, crate: {}, barn: {}, barnLevel: 0, points: 0, basketLook: null, up: {}, trips: 0, speed: 'slow',
       trees: D.trees.filter(t => !t.cost).map(t => t.type),
       skins: [D.skins[0].id], skin: D.skins[0].id,
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
@@ -39,7 +47,7 @@
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {},
       seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false
     };
-    FF.FRUIT_TYPES.forEach(t => s.crate[t] = 0);
+    FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
     D.upgrades.forEach(u => s.up[u.id] = 0);
     return s;
   }
@@ -53,7 +61,12 @@
     const has = (list, id) => Array.isArray(list) && list.includes(id);
     s.coins = n(raw.coins);
     FF.FRUIT_TYPES.forEach(t => s.crate[t] = n(raw.crate && raw.crate[t]));
-    s.tier = U.clamp(n(raw.tier), 0, D.carriers.length - 1);
+    if (raw.barn && typeof raw.barn === 'object') FF.FRUIT_TYPES.forEach(t => s.barn[t] = n(raw.barn[t]));
+    else FF.FRUIT_TYPES.forEach(t => { s.barn[t] = s.crate[t]; s.crate[t] = 0; });   // before the barn, carried fruit waited for market
+    s.barnLevel = U.clamp(n(raw.barnLevel), 0, D.barn.sizes.length - 1);
+    // before farm levels, the carrier you'd bought sets your level
+    s.points = raw.points != null ? n(raw.points) : pointsFor([1, 5, 10, 15, 20][U.clamp(n(raw.tier), 0, 4)]);
+    if (D.basketLooks.some(l => l.look === raw.basketLook)) s.basketLook = raw.basketLook;
     s.trees = D.trees.filter(t => !t.cost || has(raw.trees, t.type)).map(t => t.type);
     D.upgrades.forEach(u => s.up[u.id] = U.clamp(n(raw.up && raw.up[u.id]), 0, u.costs.length));
     s.skins = D.skins.filter(k => !k.cost || has(raw.skins, k.id)).map(k => k.id);
@@ -102,9 +115,32 @@
   };
 
   // Handy lookups for the current progress
-  FF.carrier = () => D.carriers[FF.save.tier];
-  FF.cap = () => (FF.save.challenge === 'tiny' ? Math.min(D.seeds.tinyCap, FF.carrier().cap) : FF.carrier().cap);
+  FF.pointsFor = pointsFor;
+  FF.level = () => levelOf(FF.save.points);
+  FF.levelProgress = () => { const l = FF.level(); return { level: l, into: FF.save.points - pointsFor(l), need: stepAt(l) }; };
+  FF.looksReached = () => D.basketLooks.filter(l => FF.level() >= l.from);
+  // What you carry: its name, tier and capacity come from your level; how it looks can be any look you've reached.
+  FF.carrier = () => {
+    const level = FF.level(), now = lookFor(level), shown = FF.looksReached().find(l => l.look === FF.save.basketLook) || now;
+    return { look: shown.look, name: now.name, full: now.full, tier: Math.min(level - now.from, now.tiers - 1) + 1, cap: capAt(level) };
+  };
+  FF.cap = () => (FF.save.challenge === 'tiny' ? Math.min(D.seeds.tinyCap, capAt(FF.level())) : capAt(FF.level()));
   FF.carried = () => FF.FRUIT_TYPES.reduce((sum, t) => sum + FF.save.crate[t], 0);
+  FF.inBarn = () => FF.FRUIT_TYPES.reduce((sum, t) => sum + FF.save.barn[t], 0);
+  FF.barnSize = () => D.barn.sizes[FF.save.barnLevel];
+  // Moves the basket into the barn, as far as there's room. Returns how much had to stay in the basket.
+  FF.unloadBasket = () => {
+    let room = FF.barnSize() - FF.inBarn();
+    for (const t of FF.FRUIT_TYPES) { const k = Math.min(FF.save.crate[t], room); FF.save.crate[t] -= k; FF.save.barn[t] += k; room -= k; }
+    FF.persist();
+    return FF.carried();
+  };
+  FF.addPoints = n => {
+    const before = FF.level(), look = lookFor(before).look;
+    FF.save.points += n;
+    const after = FF.level();
+    if (after > before && FF.levelUp) FF.levelUp(after, lookFor(after).look !== look);
+  };
   FF.scene = () => D.scenes.find(s => s.id === FF.save.scene) || D.scenes[0];
   FF.skin = () => D.skins.find(s => s.id === FF.save.skin) || D.skins[0];
 

@@ -20,7 +20,7 @@
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade'];
+  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack'];
   FF.ui = {
     show(id) { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = o !== id; }); G.overlay = id; },
     hideAll() { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = true; }); G.overlay = null; },
@@ -57,7 +57,6 @@
   $('toMarketBtn').innerHTML = FF.icons.stall + '<span class="txt">Market</span>';
   $('pauseBtn').innerHTML = FF.icons.pause;
   $('shopBtn').innerHTML = FF.icons.bag;
-  $('farmBtn').innerHTML = FF.icons.tree;
   $('padL').innerHTML = FF.icons.left;
   $('padR').innerHTML = FF.icons.right;
 })();

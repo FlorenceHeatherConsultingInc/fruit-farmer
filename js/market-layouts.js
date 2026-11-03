@@ -131,7 +131,7 @@
 
   L.friends = {
     build() {
-      const n = FF.save.tier >= D.market.newFriendTier ? 3 : 2;
+      const n = FF.level() >= D.market.newFriendLevel ? 3 : 2;
       return n === 3 ? [{ row: 0 }, { row: 1, side: -1 }, { row: 1, side: 1 }] : [{ row: 1, side: -1 }, { row: 1, side: 1 }];
     },
     place(M, targets) {

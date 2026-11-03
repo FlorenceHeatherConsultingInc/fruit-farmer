@@ -22,18 +22,19 @@
   const stat = (icon, text, cls = '') => `<span class="stat ${cls}">${icon}<span>${text}</span></span>`;
 
   function renderTitle() {
-    const s = FF.save, n = FF.carried(), c = FF.carrier();
-    const brandNew = s.trips === 0 && s.tier === 0 && s.coins === 0;
+    const s = FF.save, n = FF.inBarn(), c = FF.carrier();
+    const brandNew = s.trips === 0 && s.points === 0 && s.coins === 0;
     $('titleIntro').textContent = brandNew
       ? "You're a brand-new fruit farmer! For now you only have your hands, so you can carry 2 fruit. Catch them, then sell them at the market."
-      : 'Grow your fruit farm! Catch fruit, sell it at the market, and buy bigger baskets and new trees.';
+      : 'Grow your fruit farm! Catch fruit, keep it in your barn, and sell it at the market. Your basket grows as your farm levels up.';
     $('titleStats').innerHTML =
       stat(I.coin, s.coins, 'coin') +
-      stat(I.basket, c.name + ' · holds ' + c.cap) +
+      stat(I.basket, 'Level ' + FF.level() + ' · ' + c.name + ' ' + '★'.repeat(Math.min(c.tier, 5)) + ' · holds ' + FF.cap()) +
+      stat(I.stall, 'Barn: ' + n + (n === 1 ? ' fruit' : ' fruit')) +
       stat(I.tree, s.trees.length + (s.trees.length > 1 ? ' trees' : ' tree'));
     $('titleSpecial').textContent = UI.specialText();
     $('titleMarketBtn').hidden = n === 0;
-    $('titleMarketBtn').innerHTML = I.stall + ' Sell ' + n + ' fruit';
+    $('titleMarketBtn').innerHTML = I.stall + ' Go to market';
   }
 
   function showSoldCard() {
@@ -43,8 +44,41 @@
     $('soldShopBtn').focus();
   }
 
+  // Choosing what to take to market. Everything in the barn starts picked.
+  let picks = {}, overflow = 0;
+  function renderPack() {
+    const s = FF.save, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0), total = kinds.reduce((n, t) => n + picks[t], 0);
+    $('packNote').textContent = (overflow ? 'The barn is full! ' + overflow + ' fruit stayed in your basket. ' : '') +
+      (kinds.length ? 'Pick what to sell. The rest stays in your barn.' : 'Your barn is empty. Go catch some fruit!');
+    $('packRows').innerHTML = kinds.map(t => `<div class="up pack"><div class="badge" data-fruit="${t}"></div><div><h3>${FF.data.fruits[t].name}</h3><p>${picks[t]} of ${s.barn[t]}</p></div>` +
+      `<div class="stepper"><button class="mini" type="button" data-pack="${t}" data-d="-1" aria-label="One less ${FF.data.fruits[t].name}" ${picks[t] ? '' : 'disabled'}>−</button><button class="mini" type="button" data-pack="${t}" data-d="1" aria-label="One more ${FF.data.fruits[t].name}" ${picks[t] < s.barn[t] ? '' : 'disabled'}>+</button></div></div>`).join('');
+    kinds.forEach(t => $('packRows').querySelector(`[data-fruit="${t}"]`).appendChild(FF.draw.fruitIcon(t)));
+    $('packGo').disabled = total === 0;
+    $('packGo').textContent = total ? 'Go sell ' + total + ' fruit' : 'Go to market';
+  }
+
+  // Level-up cheers, wherever you are.
+  FF.levelUp = (level, newLook) => {
+    const c = FF.carrier(), fx = FF.fx;
+    FF.sfx.buy();
+    fx.text(G.W / 2, G.H * 0.32, 'Level ' + level + '!', true);
+    setTimeout(() => fx.text(G.W / 2, G.H * 0.32 + 50, newLook ? 'Your basket became a ' + c.name + '!' : c.name + ' holds ' + FF.cap(), newLook), 450);
+    if (newLook) fx.confetti();
+    FF.layout(); FF.hud.load(); FF.stickers.check();
+  };
+
   const Screens = FF.screens = {
+    toMarket() {
+      FF.sound.ensure();
+      overflow = FF.unloadBasket();
+      if (G.state === 'farm') { G.state = 'title'; FF.farm.reset(); UI.hud(null); }
+      picks = { ...FF.save.barn };
+      renderPack();
+      UI.show('pack');
+      $('packGo').focus();
+    },
     title() {
+      FF.unloadBasket();
       G.state = 'title';
       FF.farm.reset(); FF.fx.clear();
       UI.hud(null);
@@ -66,14 +100,14 @@
       $('farmSpecial').textContent = UI.specialText();
       FF.hud.load();
     },
-    market() {
+    market(chosen) {
       FF.sound.ensure();
       G.state = 'market';
       UI.hideAll();
       clearInput();
       UI.hud('market');
       FF.layout();
-      FF.market.start();
+      FF.market.start(chosen);
       FF.save.trips++; FF.persist();
       FF.hud.coins();
     },
@@ -87,7 +121,9 @@
       const earned = FF.market.earned();
       FF.book.sold();
       if (FF.save.legend && !FF.save.legendSeen) { FF.save.legendSeen = true; FF.persist(); FF.parade.open('sold'); return; }
-      $('soldMsg').textContent = earned ? 'You earned ' + earned + ' coins this trip. Nice throwing!' : 'All your fruit is sold.';
+      const left = FF.market.unsold();
+      $('soldTitle').textContent = left ? 'All done!' : 'Sold out!';
+      $('soldMsg').textContent = (earned ? 'You earned ' + earned + ' coins this trip. ' : '') + (left ? left + ' fruit went back to the barn.' : earned ? 'Nice throwing!' : 'All your fruit is sold.');
       showSoldCard();
       $('soldShopBtn').focus();
     },
@@ -133,17 +169,26 @@
   on('titleVillageBtn', () => FF.village.open('title'));
   on('soldVillageBtn', () => FF.village.open('sold'));
   on('soldBookBtn', () => FF.book.open('sold'));
-  on('titleMarketBtn', Screens.market);
-  on('toMarketBtn', Screens.market);
+  on('titleMarketBtn', Screens.toMarket);
+  on('toMarketBtn', Screens.toMarket);
+  on('packGo', () => Screens.market(picks));
+  on('packBack', Screens.title);
+  on('doneBtn', () => FF.market.finish());
+  $('packRows').addEventListener('click', e => {
+    const b = e.target.closest('[data-pack]');
+    if (!b) return;
+    const t = b.dataset.pack;
+    picks[t] = FF.util.clamp(picks[t] + +b.dataset.d, 0, FF.save.barn[t]);
+    FF.sfx.tick(); renderPack();
+  });
   on('pauseBtn', Screens.pause);
   on('resumeBtn', Screens.resume);
-  on('pauseMarketBtn', Screens.market);
+  on('pauseMarketBtn', Screens.toMarket);
   on('homeBtn', Screens.title);
-  on('goMarketBtn', Screens.market);
+  on('goMarketBtn', Screens.toMarket);
   on('soldShopBtn', () => FF.shop.open('sold'));
   on('soldFarmBtn', Screens.farm);
   on('shopBtn', () => FF.shop.open('market'));
-  on('farmBtn', Screens.farm);
   document.addEventListener('visibilitychange', () => { if (document.hidden) Screens.pause(); });
 
   /* ---------- Input ---------- */

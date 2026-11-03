@@ -46,15 +46,24 @@ FF.data = {
   // Gold star chance for each fruit: base + perLevel × Lucky stars level.
   stars: { base: 0.04, perLevel: 0.05 },
 
-  // What you carry fruit in, bought in this order. cap = how many fruit it holds.
-  // width: fraction of screen width, kept between min and max pixels. look: how it's drawn (farm.js).
-  carriers: [
-    { id: 'hands',  look: 'hands',  name: 'Your hands',    full: 'Hands full!',       cap: 2,  width: 0.20, min: 84,  max: 130, cost: 0 },
-    { id: 'small',  look: 'basket', name: 'Little basket', full: 'Basket full!',      cap: 5,  width: 0.25, min: 108, max: 165, cost: 5 },
-    { id: 'big',    look: 'handle', name: 'Big basket',    full: 'Basket full!',      cap: 10, width: 0.30, min: 128, max: 205, cost: 30 },
-    { id: 'barrow', look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', cap: 20, width: 0.34, min: 148, max: 235, cost: 100 },
-    { id: 'cart',   look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        cap: 40, width: 0.39, min: 165, max: 275, cost: 330 }
+  // Your basket grows a tier every farm level. Each look covers the levels from `from` onward: it
+  // holds `start` at its first tier and `step` more each tier after. The last look never stops.
+  // look picks the drawing in farm.js. Every look catches the same width.
+  basketLooks: [
+    { look: 'hands',  name: 'Your hands',    full: 'Hands full!',       from: 1,  tiers: 4,        start: 2,  step: 1 },
+    { look: 'basket', name: 'Little basket', full: 'Basket full!',      from: 5,  tiers: 5,        start: 6,  step: 1 },
+    { look: 'handle', name: 'Big basket',    full: 'Basket full!',      from: 10, tiers: 5,        start: 12, step: 2 },
+    { look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', from: 15, tiers: 5,        start: 23, step: 3 },
+    { look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        from: 20, tiers: 5,        start: 40, step: 5 },
+    { look: 'wagon',  name: 'Wagon',         full: 'Wagon full!',       from: 25, tiers: Infinity, start: 65, step: 5 }
   ],
+
+  // Farm points and levels. Points to reach the next level = 2 x what you can carry x (1 + level / levelPace),
+  // so early levels take about one trip and later ones about three. Bigger levelPace = faster levels.
+  levels: { pointsPerCatch: 1, pointsPerSale: 1, levelPace: 12 },
+
+  // How much the barn holds, and what each bigger barn costs.
+  barn: { sizes: [100, 200, 400, 800, Infinity], costs: [150, 400, 1000, 2500] },
 
   // Orchard trees. The apple tree is free. spot = where it stands (0 = left edge, 1 = right edge).
   // shape picks the drawing in scenery.js: round, palm, bush or vine.
@@ -253,7 +262,7 @@ FF.data = {
     { id: 'speedy', name: 'Speedy Farmer', icon: 'orange', reward: 'comet', stickers: [
       { id: 'speedy1', name: 'Wall by Day 30', stat: 'wallDay', within: 30, icon: 'orange' },
       { id: 'speedy2', name: 'Wall by Day 15', stat: 'wallDay', within: 15, icon: 'orange' },
-      { id: 'speedy3', name: 'Own the cart', stat: 'tier', n: 4, icon: 'banana' },
+      { id: 'speedy3', name: 'Reach level 20', stat: 'level', n: 20, icon: 'banana' },
       { id: 'speedy4', name: 'All five trees', stat: 'kinds', n: 5, icon: 'grapes' },
       { id: 'speedy5', name: '100 coins in a day', stat: 'bestDay', n: 100, icon: 'star' },
       { id: 'speedy6', name: '300 coins in a day', stat: 'bestDay', n: 300, icon: 'star' },
@@ -319,9 +328,9 @@ FF.data = {
   market: {
     friends: { rowBonus: [1, 0], maxAsk: [3, 2], mixChance: 0 },
     wall:    { rowBonus: [2, 1, 0], maxAsk: [4, 3, 2], mixChance: 0.25 },
-    newFriendTier: 2,     // carrier number that brings the third animal (2 = Big basket)
+    newFriendLevel: 10,   // farm level that brings the third animal
     // The Barrel wall appears in the shop from the start. Reach all three goals, then buy it.
-    wallUnlock: { tier: 3, fruitKinds: 3, filled: 10, cost: 150 },  // tier 3 = Wheelbarrow
+    wallUnlock: { level: 15, fruitKinds: 3, filled: 10, cost: 150 },  // goals to unlock the Barrel wall
     anyChance: 0.15,      // chance an animal takes any fruit (1 coin plus the row bonus)
     tipPerFruit: 1,       // bonus when a basket or barrel is filled, per fruit it held
     perfectBonus: 1,      // extra coins for a center shot

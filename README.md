@@ -27,6 +27,8 @@ browser on that computer.
 - **Fruit Legend:** reach a Farm Score of 100,000 for a parade of all your friends.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it
   to another device.
+- **Barn and levels:** fruit you catch goes to your barn, and you pick what to take to market.
+  Every fruit caught or sold earns farm points, and each farm level makes your basket hold more.
 - **Shop:** buy bigger baskets, new fruit trees, upgrades, basket colors and scenery. Reach the
   goals on the Barrel wall card to unlock a bigger market with 12 barrels.
 

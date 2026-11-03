@@ -13,11 +13,11 @@
 
   Farm.layout = () => {
     const { W, H } = G, c = FF.carrier();
-    basket.w = Math.min(W * 0.6, clamp(W * c.width, c.min, c.max));
+    basket.w = Math.min(W * 0.6, clamp(W * 0.25, 108, 165));   // every look catches the same width
     const baseH = clamp(W * 0.25, 108, 165) * 0.5;
     basket.h = c.look === 'hands' ? baseH * 0.85 : baseH;
     groundY = H - clamp(H * 0.11, 56, 110);
-    const lift = { hands: 0.95, barrow: 1.12, cart: 1.12 }[c.look] || 0.75;
+    const lift = { hands: 0.95, barrow: 1.12, cart: 1.12, wagon: 1.12 }[c.look] || 0.75;
     basket.y = groundY - basket.h * lift;
     if (!basket.x) basket.x = basket.tx = W / 2;
     basket.x = clamp(basket.x, basket.w / 2, W - basket.w / 2);
@@ -86,6 +86,7 @@
     if (demo || FF.carried() >= FF.cap()) return;
     FF.save.crate[f.type]++;
     FF.book.harvest(f.type);
+    FF.addPoints(D.levels.pointsPerCatch);
     combo++;
     FF.persist();
     FF.hud.load(true);
@@ -190,7 +191,7 @@
   /* ---------- Drawing the carrier ---------- */
   function bodyPath(look, w, h) {
     const ctx = G.ctx;
-    if (look === 'cart') { Draw.rr(-w / 2, 0, w, h * 0.78, 6); return; }
+    if (look === 'cart' || look === 'wagon') { Draw.rr(-w / 2, 0, w, h * 0.78, 6); return; }
     ctx.beginPath();
     if (look === 'barrow') {
       ctx.moveTo(-w / 2, 0); ctx.lineTo(w / 2, 0); ctx.lineTo(w * 0.32, h * 0.72); ctx.lineTo(-w * 0.36, h * 0.72); ctx.closePath();
@@ -208,7 +209,7 @@
     if (sk.rainbow) D.rainbow.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(-w, i * h / D.rainbow.length, w * 2, h / D.rainbow.length + 1); });
     else { ctx.fillStyle = sk.body; ctx.fillRect(-w, 0, w * 2, h); }
     ctx.strokeStyle = sk.weave; ctx.lineWidth = 3;
-    if (look === 'cart') {
+    if (look === 'cart' || look === 'wagon') {
       for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-w, i * h * 0.195); ctx.lineTo(w, i * h * 0.195); ctx.stroke(); }
       ctx.beginPath(); ctx.moveTo(-w * 0.45, 4); ctx.lineTo(w * 0.45, h * 0.74); ctx.moveTo(w * 0.45, 4); ctx.lineTo(-w * 0.45, h * 0.74); ctx.stroke();
     } else if (look === 'barrow') {
@@ -234,16 +235,28 @@
     ctx.restore();
   }
 
-  function drawCarrier(demo) {
-    const ctx = G.ctx, { x, y, w, h } = basket;
-    const look = FF.carrier().look, sk = FF.skin(), top = tuning().top;
+  // Small stars on the rim show the basket's tier.
+  function tierStars(w, h, tier) {
+    const ctx = G.ctx, n = Math.min(tier, 5), gap = Math.min(16, w * 0.12);
+    for (let i = 0; i < n; i++) { ctx.save(); ctx.translate((i - (n - 1) / 2) * gap, -h * 0.02); Draw.starPath(6.5); Draw.fillStroke(D.colors.sun, 2); ctx.restore(); }
+    if (tier > 5) {
+      ctx.font = `800 13px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+      ctx.strokeText('+' + (tier - 5), n * gap / 2 + 14, 4); ctx.fillStyle = D.colors.sun; ctx.fillText('+' + (tier - 5), n * gap / 2 + 14, 4);
+    }
+  }
+
+  function drawCarrier(demo, lookOverride) {
+    const ctx = G.ctx, { x, y, w, h } = basket, preview = !!lookOverride;
+    const look = lookOverride || FF.carrier().look, sk = FF.skin(), top = tuning().top;
     const b = Math.sin(basket.bounce * Math.PI);
     const lean = clamp(basket.vel / top, -1, 1) * (look === 'hands' ? 0.06 : 0.09);
     ctx.save();
     ctx.translate(x, y + h); ctx.rotate(lean); ctx.scale(1 + 0.06 * b, 1 - 0.09 * b); ctx.translate(0, -h);
 
-    ctx.fillStyle = 'rgba(43,35,80,0.18)';
-    ctx.beginPath(); ctx.ellipse(0, groundY - y + 2, w * 0.45, 7, 0, 0, TAU); ctx.fill();
+    if (!preview) {
+      ctx.fillStyle = 'rgba(43,35,80,0.18)';
+      ctx.beginPath(); ctx.ellipse(0, groundY - y + 2, w * 0.45, 7, 0, 0, TAU); ctx.fill();
+    }
 
     if (FF.save.up.magnet && !demo) {
       ctx.save();
@@ -293,9 +306,33 @@
       Draw.fillStroke(sk.rim, 4);
       if (look === 'barrow') wheel(w * 0.28, h * 0.92, h * 0.28);
       if (look === 'cart') { wheel(-w * 0.3, h * 0.86, h * 0.3); wheel(w * 0.3, h * 0.86, h * 0.3); }
+      if (look === 'wagon') {
+        // tall side rails and a pull handle make it read as bigger without being wider
+        ctx.strokeStyle = INK; ctx.lineWidth = 8; ctx.lineCap = 'round';
+        for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(d * w * 0.46, -h * 0.1); ctx.lineTo(d * w * 0.46, -h * 0.62); ctx.stroke(); }
+        ctx.beginPath(); ctx.moveTo(-w * 0.5, -h * 0.58); ctx.lineTo(w * 0.5, -h * 0.58); ctx.stroke();
+        ctx.strokeStyle = sk.rim; ctx.lineWidth = 4; ctx.stroke();
+        for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(d * w * 0.46, -h * 0.1); ctx.lineTo(d * w * 0.46, -h * 0.62); ctx.stroke(); }
+        ctx.strokeStyle = INK; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(w * 0.5, h * 0.45); ctx.lineTo(w * 0.72, h * 0.25); ctx.stroke();
+        ctx.strokeStyle = '#8a5a32'; ctx.lineWidth = 3.5; ctx.stroke();
+        wheel(-w * 0.3, h * 0.88, h * 0.34); wheel(w * 0.3, h * 0.88, h * 0.34);
+      }
     }
+    if (!preview) tierStars(w, h, FF.carrier().tier);
     ctx.restore();
   }
+
+  // A small picture of any basket look, for the shop.
+  Farm.lookPreview = look => {
+    const saved = { ...basket }, savedPile = pile;
+    try {
+      return Draw.toCanvas(132, 104, () => {
+        Object.assign(basket, { x: 66, y: 34, w: 80, h: 40, bounce: 0, vel: 0 });
+        pile = [{ type: 'apple', dx: 0, rot: 0 }, { type: 'orange', dx: 0, rot: 0.2 }];
+        drawCarrier(true, look);
+      });
+    } finally { Object.assign(basket, saved); pile = savedPile; }
+  };
 
   function drawSpeedLines() {
     const ctx = G.ctx, v = Math.abs(basket.vel), top = tuning().top;

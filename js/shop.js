@@ -13,7 +13,7 @@
   const wallGoals = () => {
     const save = FF.save, W = D.market.wallUnlock, kinds = save.trees.length;
     return [
-      { text: 'Get the ' + D.carriers[W.tier].name, done: save.tier >= W.tier },
+      { text: 'Reach farm level ' + W.level, done: FF.level() >= W.level },
       { text: 'Grow ' + W.fruitKinds + ' kinds of fruit (' + Math.min(kinds, W.fruitKinds) + '/' + W.fruitKinds + ')', done: kinds >= W.fruitKinds },
       { text: 'Fill ' + W.filled + ' baskets (' + Math.min(save.filled, W.filled) + '/' + W.filled + ')', done: save.filled >= W.filled }
     ];
@@ -62,12 +62,20 @@
     const focusKey = fa && fa.dataset && fa.dataset.act ? fa.dataset.act + ':' + (fa.dataset.id || '') : '';
     $('shopCoins').innerHTML = UI.coinHTML(save.coins);
 
-    const cur = FF.carrier(), nx = D.carriers[save.tier + 1];
-    $('shopCarry').innerHTML =
-      `<div class="up"><div class="badge">${I.basket}</div><div><h3>${nx ? nx.name : cur.name}</h3>` +
-      `<p>${nx ? 'Holds ' + nx.cap + ' fruit and is easier to catch with. Right now you can carry ' + cur.cap + '.' : 'Your biggest! It holds ' + cur.cap + ' fruit.'}</p>` +
-      pips(save.tier, D.carriers.length - 1) + `</div>` +
-      (nx ? buyBtn('tier', 'next', nx.cost, 'Buy ' + nx.name) : ownedBtn('Max')) + `</div>`;
+    const cur = FF.carrier(), prog = FF.levelProgress(), size = FF.barnSize(), next = D.barn.sizes[save.barnLevel + 1];
+    const carry = $('shopCarry');
+    carry.innerHTML = `<p class="note">Farm level ${prog.level}: ${cur.name} ${'★'.repeat(Math.min(cur.tier, 5))} holds ${FF.cap()}. ${prog.need - prog.into} more farm points to level ${prog.level + 1}.</p><div class="grid3" id="shopLooks"></div>` +
+      `<div class="up"><div class="badge">${I.stall}</div><div><h3>Barn</h3><p>${FF.inBarn()} fruit stored. ${size === Infinity ? 'Holds as much as you like.' : 'Holds ' + size + '.'}${next ? ' Next: ' + (next === Infinity ? 'no limit' : next) + '.' : ''}</p></div>` +
+      (next ? buyBtn('barn', 'next', D.barn.costs[save.barnLevel], 'Buy a bigger barn') : ownedBtn('Max')) + `</div>`;
+    FF.looksReached().forEach(l => {
+      const on = cur.look === l.look, btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'pick' + (on ? ' on' : ''); btn.dataset.act = 'look'; btn.dataset.id = l.look;
+      btn.setAttribute('aria-pressed', String(on));
+      const pic = FF.farm.lookPreview(l.look); pic.className = 'scene';
+      btn.appendChild(pic);
+      btn.insertAdjacentHTML('beforeend', `<b>${l.name}</b><small>${on ? 'Using' : 'Use it'}</small>`);
+      $('shopLooks').appendChild(btn);
+    });
 
     const trees = $('shopTrees'); trees.innerHTML = '';
     D.trees.filter(t => t.cost).forEach(t => {
@@ -134,7 +142,8 @@
     FF.sound.ensure();
     const id = b.dataset.id, save = FF.save;
     switch (b.dataset.act) {
-      case 'tier': { const nx = D.carriers[save.tier + 1]; if (nx && spend(nx.cost)) { save.tier++; FF.book.bought(nx.name); FF.layout(); } break; }
+      case 'look': if (FF.looksReached().some(l => l.look === id)) { save.basketLook = id; FF.sfx.coin(); FF.layout(); } break;
+      case 'barn': { const cost = D.barn.costs[save.barnLevel]; if (cost != null && spend(cost)) { save.barnLevel++; FF.book.bought('Bigger barn'); } break; }
       case 'tree': { const t = D.trees.find(x => x.type === id); if (t && !save.trees.includes(id) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }
       case 'wall': if (wallGoals().every(g => g.done) && spend(D.market.wallUnlock.cost)) { save.wallOwned = true; save.marketLayout = 'wall'; FF.book.bought('Barrel wall'); FF.stickers.first('wallDay', save.day); } break;

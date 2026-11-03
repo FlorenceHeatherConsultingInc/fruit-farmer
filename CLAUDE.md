@@ -54,8 +54,10 @@ It works offline except for the Google Font, which falls back to a system font.
   `scenery.js` (`BITS` or `WEATHER`).
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
-- **New carrier:** add a row to `carriers`. A new `look` needs drawing code in `drawCarrier()`
-  in `farm.js`.
+- **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in
+  `drawCarrier()` in `farm.js`. Every look catches the same width.
+- **Barn size:** `barn` in `data.js`. Fruit caught goes to the barn when a harvest ends (`FF.unloadBasket()`), and only
+  sales take it out (`market.js`).
 - **Market pay and aim feel:** edit `market` in `data.js`. Each layout has its own `rowBonus`,
   `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
   and price.
