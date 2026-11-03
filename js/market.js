@@ -56,10 +56,11 @@
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
-    const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k));
-    t.kind = pick(unused.length ? unused : pool);
-    const fav = D.animals[t.kind].fav, plain = spare.length ? spare : stock;
-    t.wants = force || (spare.includes(fav) && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(plain));
+    const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k)), plain = spare.length ? spare : stock;
+    t.wants = force || (Math.random() < MK.anyChance ? 'any' : pick(plain));
+    // whoever loves this fruit comes to ask for it, if they're free
+    const fans = (unused.length ? unused : pool).filter(k => D.animals[k].fav === t.wants);
+    t.kind = pick(fans.length ? fans : unused.length ? unused : pool);
     t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
     let bonus = pay().rowBonus[t.row];
     if (Math.random() < pay().mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
@@ -329,7 +330,7 @@
   // Tapping an animal's face shows who they are. Tapping anywhere else puts the card away.
   function tapAnimal(x, y) {
     const t = targets.find(t => t.head && t.state !== 'closed' && Math.hypot(x - t.head.x, y - t.head.y) < Math.max(24, t.head.r * 1.3));
-    info = t ? { kind: t.kind, t: INFO_SECONDS } : null;
+    info = t ? { kind: t.kind, wants: t.wants, t: INFO_SECONDS } : null;
     if (t) FF.sfx.tick();
   }
   // A throw has to start on the fruit, so stray taps around the screen never fire one.
@@ -463,7 +464,8 @@
     ctx.font = `800 23px ${FONT}`; ctx.fillText(n ? a.name : 'New friend!', x + 96, y + 26);
     for (let i = 0; i < 5; i++) { ctx.save(); ctx.translate(x + 106 + i * 21, y + 52); Draw.heartPath(9); Draw.fillStroke(i < n ? '#ff3b5c' : '#ddd6e8', 2); ctx.restore(); }
     ctx.font = `700 16px ${FONT}`; ctx.fillStyle = INK;
-    if (n >= D.friendship.favoriteAt) { Draw.fruit(a.fav, x + 107, y + 86, 10); ctx.fillText('Loves ' + D.fruits[a.fav].name.toLowerCase(), x + 122, y + 87); }
+    if (n >= D.friendship.favoriteAt && info.wants === a.fav) { Draw.fruit(a.fav, x + 107, y + 86, 10); ctx.fillText('Their favorite! Double hearts', x + 122, y + 87); }
+    else if (n >= D.friendship.favoriteAt) ctx.fillText('Sell to fill their hearts', x + 96, y + 87);
     else ctx.fillText(n ? 'Sell more to learn what they love' : 'Sell them fruit to learn their name', x + 96, y + 87);
     if (goal) { ctx.textAlign = 'right'; ctx.font = `700 14px ${FONT}`; ctx.fillText(F.sold(k) + '/' + goal, x + w - 14, y + 26); }
     ctx.restore(); ctx.textBaseline = 'alphabetic';

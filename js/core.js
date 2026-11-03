@@ -30,7 +30,7 @@
 
   /* ---------- Farm levels and the basket ---------- */
   const lookFor = level => D.basketLooks.filter(l => level >= l.from).pop();
-  const capAt = level => { const l = lookFor(level); return l.start + Math.min(level - l.from, l.tiers - 1) * l.step; };
+  const capAt = level => { const l = lookFor(level); return Math.round(l.start + Math.min(level - l.from, l.tiers - 1) * l.step); };
   // Points needed to go from `level` to the next one.
   const stepAt = level => Math.ceil(2 * capAt(level) * (1 + level / D.levels.levelPace));
   function pointsFor(level) { let p = 0; for (let l = 1; l < level; l++) p += stepAt(l); return p; }
@@ -65,7 +65,7 @@
     else FF.FRUIT_TYPES.forEach(t => { s.barn[t] = s.crate[t]; s.crate[t] = 0; });   // before the barn, carried fruit waited for market
     s.barnLevel = U.clamp(n(raw.barnLevel), 0, D.barn.sizes.length - 1);
     // before farm levels, the carrier you'd bought sets your level
-    s.points = raw.points != null ? n(raw.points) : pointsFor([1, 5, 10, 15, 20][U.clamp(n(raw.tier), 0, 4)]);
+    s.points = raw.points != null ? n(raw.points) : pointsFor([1, 5, 15, 30, 50][U.clamp(n(raw.tier), 0, 4)]);
     if (D.basketLooks.some(l => l.look === raw.basketLook)) s.basketLook = raw.basketLook;
     s.trees = D.trees.filter(t => !t.cost || has(raw.trees, t.type)).map(t => t.type);
     D.upgrades.forEach(u => s.up[u.id] = U.clamp(n(raw.up && raw.up[u.id]), 0, u.costs.length));
@@ -121,8 +121,21 @@
 
   // Handy lookups for the current progress
   FF.pointsFor = pointsFor;
-  FF.level = () => levelOf(FF.save.points);
-  FF.levelProgress = () => { const l = FF.level(); return { level: l, into: FF.save.points - pointsFor(l), need: stepAt(l) }; };
+  FF.capAt = capAt; FF.lookFor = lookFor;
+  // During a harvest the level is held where it started; points still add up and the level-up comes at the end.
+  let held = null;
+  FF.realLevel = () => levelOf(FF.save.points);
+  FF.level = () => (held != null ? held : FF.realLevel());
+  FF.holdLevel = () => { held = FF.realLevel(); };
+  // Ends the hold and returns { from, to, newLook } if the harvest earned a level.
+  FF.releaseLevel = () => {
+    if (held == null) return null;
+    const from = held, to = FF.realLevel(), newLook = lookFor(to).look !== lookFor(from).look;
+    held = null;
+    if (to > from) { FF.layout(); return { from, to, newLook }; }
+    return null;
+  };
+  FF.levelProgress = () => { const l = FF.realLevel(); return { level: l, into: FF.save.points - pointsFor(l), need: stepAt(l) }; };
   FF.looksReached = () => D.basketLooks.filter(l => FF.level() >= l.from);
   // What you carry: its name, tier and capacity come from your level; how it looks can be any look you've reached.
   FF.carrier = () => {
@@ -143,6 +156,7 @@
   FF.addPoints = n => {
     const before = FF.level(), look = lookFor(before).look;
     FF.save.points += n;
+    if (held != null) return;
     const after = FF.level();
     if (after > before && FF.levelUp) FF.levelUp(after, lookFor(after).look !== look);
   };

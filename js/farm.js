@@ -60,7 +60,7 @@
     return !others.length || Math.random() < D.groveMix ? grove : pick(others);
   }
   function spawnFruit(demo, shake) {
-    const r = clamp(G.W * 0.055, 26, 42);
+    const r = clamp(G.W * 0.055, 26, 42), edge = Math.max(r + 8, G.W * D.speeds.edge);
     const type = pickType(demo);
     if (!type) return false;
     const vy = G.H * D.speeds[FF.save.speed].fall * (shake ? 1.12 : 1);
@@ -68,7 +68,7 @@
     const arrive = G.clock + (basket.y - y0) / vy;
     if (shake) {
       // a shake drops fruit across the whole width: you choose which to chase
-      const x = clamp(G.W * (shake.i + 0.5) / shake.n + rand(-0.05, 0.05) * G.W, r + 8, G.W - r - 8);
+      const x = clamp(edge + (G.W - 2 * edge) * (shake.i + 0.5) / shake.n + rand(-0.04, 0.04) * G.W, edge, G.W - edge);
       fruits.push({ x, y: y0, r, type, vy, arrive, rot: rand(-0.3, 0.3), vr: rand(-0.8, 0.8), landed: false, life: 1, caught: false, shake: true });
       return true;
     }
@@ -77,7 +77,7 @@
     if (prev && arrive < prev.arrive + 0.35) return false;
     const fromX = prev ? prev.x : basket.x;
     const d = demo ? G.W : reach(prev ? arrive - prev.arrive : arrive - G.clock);
-    const lo = Math.max(r + 8, fromX - d), hi = Math.min(G.W - r - 8, fromX + d);
+    const lo = Math.max(edge, fromX - d), hi = Math.min(G.W - edge, fromX + d);
     // Fruit falls near its own tree, as far as staying catchable allows. Stars can come from anywhere.
     const tree = D.trees.find(t => t.type === type);
     const x = tree ? clamp(G.W * (tree.spot + rand(-0.09, 0.09)), lo, Math.max(lo, hi)) : rand(lo, Math.max(lo, hi));
@@ -117,7 +117,7 @@
   /* ---------- Start / update ---------- */
   // g: which grove to pick from. f: a filter fruit for this round, if one was applied.
   Farm.start = (g, f) => {
-    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; filter = f || null;
+    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; filter = f || null; Farm.startPoints = FF.save.points;
     shakeT = D.speeds[FF.save.speed].shakeEvery * 0.6; bareT = -1;
     fruits = []; FX.clear();
     pile = [];
@@ -358,7 +358,6 @@
         wheel(-w * 0.3, h * 0.88, h * 0.34); wheel(w * 0.3, h * 0.88, h * 0.34);
       }
     }
-    if (!preview) tierStars(w, h, FF.carrier().tier);
     ctx.restore();
   }
 

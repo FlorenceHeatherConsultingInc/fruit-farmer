@@ -56,6 +56,20 @@
     $('packGo').textContent = total ? 'Go sell ' + total + ' fruit' : 'Go to market';
   }
 
+  const fruitImg = {};
+  const img = t => { if (!fruitImg[t]) fruitImg[t] = FF.draw.fruitIcon(t, 48).toDataURL(); return `<img class="ic sm" src="${fruitImg[t]}" alt="">`; };
+  function summaryHTML(up) {
+    const s = FF.save, got = FF.FRUIT_TYPES.filter(t => s.crate[t] > 0), pts = s.points - (FF.farm.startPoints || s.points);
+    const p = FF.levelProgress(), next = p.level + 1, nextLook = FF.lookFor(next), nowLook = FF.lookFor(p.level);
+    const gives = nextLook.look !== nowLook.look ? `a new ${nextLook.name.toLowerCase()} that holds ${FF.capAt(next)}` : FF.capAt(next) > FF.capAt(p.level) ? `room for ${FF.capAt(next)} fruit` : 'more farm points';
+    const newLook = up && up.newLook;
+    return (newLook ? `<div class="newlook"><span data-look="${FF.carrier().look}"></span><b>Your ${FF.carrier().name.toLowerCase()} holds ${FF.cap()}!</b></div>` : '') +
+      `<div class="caught">${got.length ? got.map(t => `<span class="item">${img(t)}×${s.crate[t]}</span>`).join('') : '<span>Nothing caught this time.</span>'}</div>` +
+      `<div class="pts"><b>+${pts}</b> farm points${up && !newLook ? ` · now holds ${FF.cap()}` : ''}</div>` +
+      `<div class="lvl"><span>Level ${p.level}</span><div class="meter"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></div><span>${next}</span></div>` +
+      `<p class="note">${p.need - p.into} more points to level ${next}: ${gives}.</p>`;
+  }
+
   // Level-up cheers, wherever you are.
   FF.levelUp = (level, newLook) => {
     const c = FF.carrier(), fx = FF.fx;
@@ -72,6 +86,8 @@
       FF.sound.ensure();
       FF.unloadBasket();
       if (G.state === 'farm') FF.farm.reset();
+      const up = FF.releaseLevel();
+      if (up) setTimeout(() => FF.levelUp(up.to, up.newLook), 300);
       FF.book.startDay();
       mapFrom = from === 'sold' ? 'sold' : 'title';
       G.state = 'village';
@@ -114,6 +130,7 @@
       UI.hideAll();
       FF.layout();
       clearInput();
+      FF.holdLevel();
       FF.farm.start(grove, filter);
       UI.hud('farm');
       FF.hud.load(); FF.hud.pin();
@@ -129,12 +146,17 @@
       FF.save.trips++; FF.persist();
       FF.hud.coins();
     },
-    showFull(bare) {
-      const n = FF.carried();
-      $('fullTitle').textContent = bare ? 'All picked!' : FF.carrier().full;
-      $('fullMsg').textContent = bare ? (n ? 'You caught ' + n + ' fruit. This grove refills tomorrow.' : 'This grove is bare for today. It refills tomorrow.') : 'Take your ' + n + ' fruit to the market, or keep them in the barn.';
+    // The end of a harvest: full, bare or Done. Shows what you caught and what the next level brings.
+    showFull(why) {
+      const n = FF.carried(), up = FF.releaseLevel(), c = FF.carrier();
+      $('fullTitle').textContent = up && up.newLook ? 'New: ' + c.name + '!' : up ? 'Level ' + up.to + '!' : why === true ? 'All picked!' : why === 'done' ? 'Harvest done' : c.full;
+      $('fullMsg').textContent = why === true ? 'This grove refills tomorrow.' : '';
+      $('fullSummary').innerHTML = summaryHTML(up);
+      document.querySelectorAll('#fullSummary [data-look]').forEach(el => el.appendChild(FF.farm.lookPreview(el.dataset.look)));
+      $('goMarketBtn').hidden = n === 0 && FF.inBarn() === 0;
       UI.show('full');
-      $('goMarketBtn').focus();
+      if (up) { FF.sfx.buy(); if (up.newLook) { FF.fx.confetti(); FF.sfx.party(); } FF.stickers.check(); FF.hud.load(); }
+      $(n || FF.inBarn() ? 'goMarketBtn' : 'fullVillageBtn').focus();
     },
     showSold() {
       const earned = FF.market.earned();
@@ -183,7 +205,7 @@
   }));
   const on = (id, fn) => $(id).addEventListener('click', fn);
   on('harvestBtn', () => Screens.village('title', 'groves'));
-  on('farmDoneBtn', () => Screens.village('title', 'groves'));
+  on('farmDoneBtn', () => { if (G.state === 'farm' && !G.overlay) Screens.showFull('done'); });
   on('fullVillageBtn', () => Screens.village('title', 'groves'));
   on('titleShopBtn', () => FF.shop.open('title'));
   on('titleBookBtn', () => FF.book.open('title'));

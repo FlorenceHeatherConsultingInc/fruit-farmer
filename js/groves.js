@@ -21,14 +21,14 @@
     const s = FF.save, n = stock(open), f = D.fruits[open];
     $('groveTitle').textContent = tree(open).name.replace(' tree', ' grove');
     $('groveStock').textContent = n ? `${n} ${f.name.toLowerCase()} on the tree. Some fruit from nearby trees falls too.` : `The grove is bare. It refills in ${tree(open).refill === 1 ? 'a day' : tree(open).refill + ' days'}.`;
-    const owned = FF.FRUIT_TYPES.filter(t => (s.filters[t] || 0) > 0);
+    const owned = (s.filters[open] || 0) > 0 ? [open] : [];
     $('groveFilterSec').hidden = !filtersAllowed();
     $('groveFilters').innerHTML = [null, ...owned].map(t => {
       const on = chosen === t;
       return `<button class="pick${on ? ' on' : ''}" type="button" data-filter="${t || ''}" aria-pressed="${on}">${t ? '' : '<b>No filter</b>'}${t ? `<b>${D.fruits[t].name}</b><small>${s.filters[t]} left</small>` : '<small>Catch a mix</small>'}</button>`;
     }).join('');
     owned.forEach(t => $('groveFilters').querySelector(`[data-filter="${t}"]`).prepend(FF.draw.fruitIcon(t, 48)));
-    $('groveFilterNote').textContent = owned.length ? '' : 'Buy filters in the shop to catch just one kind of fruit.';
+    $('groveFilterNote').textContent = owned.length ? `Only ${f.name.toLowerCase()} go in your basket. Other fruit falls past.` : `A ${f.name.toLowerCase().replace(/s$/, '')} filter lets only ${f.name.toLowerCase()} into your basket.`;
     $('grovePin').innerHTML = FF.orders ? FF.orders.pinLine(open) : '';
     $('groveGo').disabled = n === 0;
   }

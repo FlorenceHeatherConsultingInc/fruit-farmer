@@ -65,7 +65,9 @@ It works offline except for the Google Font, which falls back to a system font.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
 - **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in
-  `drawCarrier()` in `farm.js`. Every look catches the same width.
+  `drawCarrier()` in `farm.js`. Every look catches the same width. The level is held during a harvest
+  (`FF.holdLevel()` / `FF.releaseLevel()`), so the basket only changes on the harvest summary card.
+- **How far in from the edges fruit falls:** `speeds.edge` in `data.js`.
 - **Barn size:** `barn` in `data.js`. Fruit caught goes to the barn when a harvest ends (`FF.unloadBasket()`), and only
   sales take it out (`market.js`).
 - **Market pay and aim feel:** edit `market` in `data.js`. Each layout has its own `rowBonus`,

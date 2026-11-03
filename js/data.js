@@ -58,6 +58,7 @@ FF.data = {
   // fall: screen-heights per second. gap: seconds between fruit (before a little randomness).
   // shakeEvery: seconds between tree shakes. shakeSize: how many fruit drop in a shake.
   speeds: {
+    edge: 0.09,   // fruit falls at least this far in from each side, as a fraction of screen width
     slow:   { fall: 0.16, gap: 1.2,  shakeEvery: 10, shakeSize: 3 },
     medium: { fall: 0.23, gap: 0.9,  shakeEvery: 9,  shakeSize: 4 },
     fast:   { fall: 0.31, gap: 0.7,  shakeEvery: 8,  shakeSize: 5 }
@@ -87,12 +88,12 @@ FF.data = {
   // holds `start` at its first tier and `step` more each tier after. The last look never stops.
   // look picks the drawing in farm.js. Every look catches the same width.
   basketLooks: [
-    { look: 'hands',  name: 'Your hands',    full: 'Hands full!',       from: 1,  tiers: 4,        start: 2,  step: 1 },
-    { look: 'basket', name: 'Little basket', full: 'Basket full!',      from: 5,  tiers: 5,        start: 6,  step: 1 },
-    { look: 'handle', name: 'Big basket',    full: 'Basket full!',      from: 10, tiers: 5,        start: 12, step: 2 },
-    { look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', from: 15, tiers: 5,        start: 23, step: 3 },
-    { look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        from: 20, tiers: 5,        start: 40, step: 5 },
-    { look: 'wagon',  name: 'Wagon',         full: 'Wagon full!',       from: 25, tiers: Infinity, start: 65, step: 5 }
+    { look: 'hands',  name: 'Your hands',    full: 'Hands full!',       from: 1,  tiers: 4,        start: 2,   step: 1 },
+    { look: 'basket', name: 'Little basket', full: 'Basket full!',      from: 5,  tiers: 10,       start: 6,   step: 1 },
+    { look: 'handle', name: 'Big basket',    full: 'Basket full!',      from: 15, tiers: 15,       start: 17,  step: 1 },
+    { look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', from: 30, tiers: 20,       start: 34,  step: 1.5 },
+    { look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        from: 50, tiers: 25,       start: 66,  step: 2 },
+    { look: 'wagon',  name: 'Wagon',         full: 'Wagon full!',       from: 75, tiers: Infinity, start: 118, step: 2 }
   ],
 
   // Farm points and levels. Points to reach the next level = 2 x what you can carry x (1 + level / levelPace),
