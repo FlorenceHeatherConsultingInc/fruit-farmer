@@ -197,6 +197,37 @@
     Draw.rr(s * 0.32, s * 0.5, s * 0.36, s * 0.16, 0); Draw.fillStroke('#4aa3e8', s * 0.04);
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s * 0.5, s * 0.58, s * 0.05, 0, TAU); ctx.fill();
   };
+  GOODS.popcorn = (ctx, s) => {
+    Draw.blob([[0.36, 0.3, 0.1], [0.5, 0.24, 0.11], [0.64, 0.3, 0.1], [0.43, 0.36, 0.1], [0.58, 0.36, 0.1]].map(([x, y, r]) => [s * x, s * y, s * r]), '#fff6d8', s * 0.04);
+    ctx.beginPath(); ctx.moveTo(s * 0.28, s * 0.36); ctx.lineTo(s * 0.72, s * 0.36); ctx.lineTo(s * 0.64, s * 0.88); ctx.lineTo(s * 0.36, s * 0.88); ctx.closePath(); Draw.fillStroke('#fffaf0', s * 0.05);
+    ctx.fillStyle = '#e8323f'; for (const x of [0.36, 0.5, 0.64]) { ctx.beginPath(); ctx.moveTo(s * (x - 0.04), s * 0.38); ctx.lineTo(s * (x + 0.04), s * 0.38); ctx.lineTo(s * (x + 0.025), s * 0.86); ctx.lineTo(s * (x - 0.025), s * 0.86); ctx.closePath(); ctx.fill(); }
+    ctx.beginPath(); ctx.moveTo(s * 0.28, s * 0.36); ctx.lineTo(s * 0.72, s * 0.36); ctx.lineTo(s * 0.64, s * 0.88); ctx.lineTo(s * 0.36, s * 0.88); ctx.closePath(); ctx.strokeStyle = INK; ctx.lineWidth = s * 0.05; ctx.stroke();
+  };
+  GOODS.salad = (ctx, s) => {
+    for (const [x, y, c] of [[0.36, 0.44, '#e8322f'], [0.5, 0.38, '#8a4bd6'], [0.64, 0.44, '#ff9a1f'], [0.44, 0.5, '#ffd93b'], [0.58, 0.5, '#ff3b5c']]) { ctx.beginPath(); ctx.arc(s * x, s * y, s * 0.09, 0, TAU); Draw.fillStroke(c, s * 0.035); }
+    ctx.beginPath(); ctx.moveTo(s * 0.18, s * 0.52); ctx.lineTo(s * 0.82, s * 0.52); ctx.quadraticCurveTo(s * 0.8, s * 0.86, s * 0.5, s * 0.86); ctx.quadraticCurveTo(s * 0.2, s * 0.86, s * 0.18, s * 0.52); ctx.closePath(); Draw.fillStroke('#bfe6fb', s * 0.05);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.ellipse(s * 0.34, s * 0.64, s * 0.05, s * 0.08, 0.4, 0, TAU); ctx.fill();
+  };
+  GOODS.pie = (ctx, s) => {
+    ctx.beginPath(); ctx.moveTo(s * 0.16, s * 0.6); ctx.lineTo(s * 0.84, s * 0.6); ctx.lineTo(s * 0.76, s * 0.8); ctx.lineTo(s * 0.24, s * 0.8); ctx.closePath(); Draw.fillStroke('#c9874a', s * 0.05);
+    ctx.beginPath(); ctx.ellipse(s * 0.5, s * 0.58, s * 0.36, s * 0.18, 0, Math.PI, 0); ctx.closePath(); Draw.fillStroke('#e8a85a', s * 0.05);
+    ctx.strokeStyle = '#b8743a'; ctx.lineWidth = s * 0.035;
+    for (const d of [-0.16, 0, 0.16]) { ctx.beginPath(); ctx.moveTo(s * (0.5 + d - 0.05), s * 0.5); ctx.lineTo(s * (0.5 + d + 0.05), s * 0.54); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(s * 0.5, s * 0.38, s * 0.05, 0, TAU); Draw.fillStroke('#e8322f', s * 0.03);
+  };
+  GOODS.shake = (ctx, s) => {
+    Draw.blob([[0.38, 0.3, 0.12], [0.5, 0.24, 0.13], [0.62, 0.3, 0.12]].map(([x, y, r]) => [s * x, s * y, s * r]), '#ffffff', s * 0.04);
+    ctx.beginPath(); ctx.arc(s * 0.5, s * 0.13, s * 0.05, 0, TAU); Draw.fillStroke('#e8323f', s * 0.03);
+    ctx.beginPath(); ctx.moveTo(s * 0.3, s * 0.36); ctx.lineTo(s * 0.7, s * 0.36); ctx.lineTo(s * 0.6, s * 0.88); ctx.lineTo(s * 0.4, s * 0.88); ctx.closePath(); Draw.fillStroke('#ff8fb1', s * 0.05);
+    ctx.strokeStyle = INK; ctx.lineWidth = s * 0.06; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(s * 0.6, s * 0.3); ctx.lineTo(s * 0.72, s * 0.06); ctx.stroke();
+    ctx.strokeStyle = '#4aa3e8'; ctx.lineWidth = s * 0.03; ctx.stroke();
+  };
+  GOODS.pancakes = (ctx, s) => {
+    ctx.beginPath(); ctx.ellipse(s * 0.5, s * 0.8, s * 0.4, s * 0.09, 0, 0, TAU); Draw.fillStroke('#ffffff', s * 0.04);
+    for (let i = 0; i < 3; i++) { Draw.rr(s * 0.2, s * (0.62 - i * 0.12), s * 0.6, s * 0.14, s * 0.07); Draw.fillStroke('#e8b06a', s * 0.04); }
+    ctx.beginPath(); ctx.moveTo(s * 0.26, s * 0.4); ctx.quadraticCurveTo(s * 0.5, s * 0.3, s * 0.74, s * 0.4); ctx.lineTo(s * 0.7, s * 0.5); ctx.quadraticCurveTo(s * 0.5, s * 0.44, s * 0.3, s * 0.5); ctx.closePath(); Draw.fillStroke('#e8323f', s * 0.035);
+    Draw.rr(s * 0.43, s * 0.27, s * 0.14, s * 0.08, s * 0.02); Draw.fillStroke('#fff3a8', s * 0.03);
+  };
   // Goods draw through the same call as fruit, centered on the spot and about 2r across.
   Draw.goodsArt = GOODS;
   for (const name of Object.keys(GOODS)) FRUIT_ART[name] = r => { const ctx = G.ctx; ctx.save(); ctx.translate(-r * 1.5, -r * 1.55); GOODS[name](ctx, r * 3); ctx.restore(); };

@@ -25,7 +25,13 @@ FF.data = {
     corn:       { name: 'Corn',         price: 2,  colors: ['#ffd23f', '#5cc24a'], kind: 'crop' },
     // Goods from farm animals.
     egg:        { name: 'Eggs',         price: 8,  colors: ['#fff6e0', '#f2d9a8'], kind: 'good' },
-    milk:       { name: 'Milk',         price: 12, colors: ['#ffffff', '#4aa3e8'], kind: 'good' }
+    milk:       { name: 'Milk',         price: 12, colors: ['#ffffff', '#4aa3e8'], kind: 'good' },
+    // Second-step goods, made from other goods.
+    popcorn:    { name: 'Popcorn',      price: 9,  colors: ['#fff6d8', '#e8323f'], kind: 'good' },
+    salad:      { name: 'Fruit salads', price: 26, colors: ['#5cc24a', '#ff3b5c'], kind: 'good' },
+    pie:        { name: 'Apple pies',   price: 30, colors: ['#e8a85a', '#e8322f'], kind: 'good' },
+    shake:      { name: 'Milkshakes',   price: 32, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
+    pancakes:   { name: 'Pancakes',     price: 42, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
   },
   // Fields open at farm `level`, with `start` plots; each extra plot costs the next price in plotCosts.
   // days: how many days a crop takes. yield: how many you pick from one plot.
@@ -39,6 +45,10 @@ FF.data = {
     { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4], upgrade: [200, 500] },
     { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4], upgrade: [250, 600] },
     { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4], upgrade: [300, 700] },
+    { id: 'popcorn',  name: 'Popcorn cart',   area: 'kitchen', cost: 350, needs: { fields: true }, recipes: [{ in: { corn: 3 }, out: 'popcorn' }], slots: [2, 3, 4], upgrade: [300, 700] },
+    { id: 'salad',    name: 'Salad bar',      area: 'kitchen', cost: 500, needs: { trees: ['apple', 'orange', 'banana', 'strawberry', 'grapes'] }, recipes: [{ in: { apple: 1, orange: 1, banana: 1, strawberry: 1, grapes: 1 }, out: 'salad' }], slots: [2, 3, 4], upgrade: [400, 900] },
+    { id: 'bakery',   name: 'Bakery',         area: 'kitchen', cost: 900, needs: { buildings: ['coop', 'cows'] }, deliver: { egg: 5 }, recipes: [{ in: { apple: 3, egg: 1, milk: 1 }, out: 'pie' }], slots: [2, 3, 4], upgrade: [600, 1200] },
+    { id: 'diner',    name: 'Diner',          area: 'kitchen', cost: 1500, needs: { buildings: ['bakery', 'jam'] }, deliver: { pie: 3 }, recipes: [{ in: { milk: 1, smoothie: 1 }, out: 'shake' }, { in: { egg: 1, milk: 1, jam: 1 }, out: 'pancakes' }], slots: [2, 3, 4], upgrade: [800, 1600] },
     // Farm animals live in the barnyard. More slots means more animals.
     { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4], upgrade: [300, 700] },
     { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 600, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4], upgrade: [400, 900] }

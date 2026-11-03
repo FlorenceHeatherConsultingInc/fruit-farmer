@@ -35,6 +35,8 @@ browser on that computer.
   two days), then tap ripe plots to pick them into the barn. Buy more plots, up to 12.
 - **Farm animals:** with fields open, build a chicken coop (corn makes eggs) and a cow barn (hay makes
   milk) in the barnyard.
+- **More kitchens:** a popcorn cart, a salad bar (one of every fruit), a bakery (apple pie from apples,
+  eggs and milk) and a diner (milkshakes and pancakes), each unlocked by the ones before.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

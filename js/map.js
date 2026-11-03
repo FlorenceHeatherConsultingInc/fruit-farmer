@@ -202,7 +202,7 @@
   }
   // A market stand for a kitchen building, with its goods on the counter when they're ready.
   function stand(x, y, b, roof, sc) {
-    const ctx = G.ctx, w = 170, h = 150, out = b.recipes[0].out;
+    const ctx = G.ctx, w = 170, h = 150, out = b.recipes[0].out, readyItems = FF.save.buildings[b.id].queue.filter(q => FF.save.day >= q.ready).map(q => q.out);
     Draw.rr(x - w / 2, y - h, w, h, 10); Draw.fillStroke('#fff0d0', 4);
     for (let j = 0; j < 7; j++) { ctx.fillStyle = j % 2 ? '#fffaf0' : roof; ctx.fillRect(x - w / 2 - 6 + j * (w + 12) / 7, y - h - 16, (w + 12) / 7 + 0.5, 30); }
     ctx.strokeStyle = INK; ctx.lineWidth = 3.5; ctx.strokeRect(x - w / 2 - 6, y - h - 16, w + 12, 30);
@@ -210,9 +210,9 @@
     Draw.rr(x - w / 2 - 4, y - 58, w + 8, 18, 5); Draw.fillStroke('#c99a62', 3);
     ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText(b.name, x, y - 14);
     const n = FF.buildings.ready(b.id);
-    for (let i = 0; i < Math.min(n, 4); i++) Draw.fruit(out, x - 45 + i * 30, y - 72, 15);
+    for (let i = 0; i < Math.min(n, 4); i++) Draw.fruit(readyItems[i], x - 45 + i * 30, y - 72, 15);
     if (n) { ctx.beginPath(); ctx.arc(x + w / 2 - 6, y - h - 16, 18, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.fillText(n, x + w / 2 - 6, y - h - 9); }
-    else Draw.fruit(out, x, y - h + 57, 18);
+    else b.recipes.forEach((r, i) => Draw.fruit(r.out, x + (i - (b.recipes.length - 1) / 2) * 44, y - h + 57, 18));
   }
   function kitchen(x0, sc) {
     label(x0 + 800, 'Kitchen');
