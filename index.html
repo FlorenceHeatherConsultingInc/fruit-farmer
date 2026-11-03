@@ -41,6 +41,23 @@
 
 <div class="special farm" id="farmSpecial" hidden></div>
 
+<!-- Village map top bar and jump buttons -->
+<div class="hud" id="mapHud" hidden>
+  <button class="iconbtn" id="mapBackBtn" type="button" aria-label="Back">Back</button>
+  <div class="chip" id="mapCoins" aria-live="polite"></div>
+  <div class="hud-right">
+    <button class="iconbtn" id="mapFriendsBtn" type="button" aria-label="Friends list">Friends</button>
+    <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+  </div>
+</div>
+<nav class="mapjump" id="mapJump" hidden aria-label="Village areas">
+  <button type="button" data-jump="groves">Groves</button>
+  <button type="button" data-jump="friends">Friends</button>
+  <button type="button" data-jump="kitchen">Kitchen</button>
+  <button type="button" data-jump="barnyard">Barnyard</button>
+  <button type="button" data-jump="fields">Fields</button>
+</nav>
+
 <div class="toast" id="stickerToast" hidden role="status"></div>
 
 <!-- Hold-to-move arrows -->
@@ -161,9 +178,9 @@
       <h2 id="villageTitle">Village</h2>
       <div class="coins" id="villageCoins" aria-live="polite"></div>
     </div>
-    <canvas class="villageart" id="villageArt" aria-label="Your village, with a home for each animal friend. Tap a home to see that friend."></canvas>
-    <section class="msec"><div class="label">Friends</div><div class="rows" id="villageFriends"></div><p class="note" id="villageNext"></p></section>
-    <section class="msec"><div class="label">Decorations</div><div class="grid3" id="villageDecor"></div></section>
+    <section class="msec"><div class="rows" id="villageFriends"></div><p class="note" id="villageNext"></p></section>
+    <button class="btn secondary" type="button" data-act="villagemore" id="villageMore" hidden>All friends</button>
+    <section class="msec" id="villageDecorSec"><div class="label">Decorations</div><div class="grid3" id="villageDecor"></div></section>
     <button class="btn primary done" type="button" data-act="villagedone" id="villageDone">Done</button>
   </div>
 </div>
@@ -195,6 +212,7 @@
 <script src="js/book.js"></script>
 <script src="js/village.js"></script>
 <script src="js/parade.js"></script>
+<script src="js/map.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

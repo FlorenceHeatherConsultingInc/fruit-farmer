@@ -309,16 +309,31 @@ FF.data = {
   friendship: { hearts: [10, 30, 60, 100, 150], favoriteCounts: 2, favoriteAt: 2, homeAt: 3, hatAt: 4 },
   // Cost of each home, in the order you build them.
   homeCosts: [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800],
-  // Village decorations. x and y are their spots in the village picture (360 by 300).
+  // The village map, in world units 700 tall. Areas run left to right; w is each area's width.
+  // homes: x of each friend's lot in the Friends area. square: x of the village square there.
+  // soon: wooden signs for buildings that arrive in later steps.
+  map: {
+    areas: [
+      { id: 'groves',   name: 'Groves',   w: 900 },
+      { id: 'friends',  name: 'Friends',  w: 1560 },
+      { id: 'kitchen',  name: 'Kitchen',  w: 900 },
+      { id: 'barnyard', name: 'Barnyard', w: 1000 },
+      { id: 'fields',   name: 'Fields',   w: 860 }
+    ],
+    homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470],
+    square: 780,
+    soon: { kitchen: ['Juice press', 'Smoothie stand', 'Jam kitchen', 'Bakery'] }
+  },
+  // Village decorations. x and y place them in the Friends area of the map.
   decorations: [
-    { id: 'flowers',  name: 'Flowers',  cost: 50,  x: 180, y: 293 },
-    { id: 'fence',    name: 'Fence',    cost: 80,  x: 0,   y: 118 },
-    { id: 'bench',    name: 'Bench',    cost: 100, x: 154, y: 246 },
-    { id: 'lamp',     name: 'Lamps',    cost: 120, x: 128, y: 185 },
-    { id: 'well',     name: 'Well',     cost: 150, x: 180, y: 162 },
-    { id: 'pond',     name: 'Pond',     cost: 200, x: 300, y: 104 },
-    { id: 'windmill', name: 'Windmill', cost: 400, x: 90,  y: 80 },
-    { id: 'fountain', name: 'Fountain', cost: 500, x: 180, y: 203 }
+    { id: 'flowers',  name: 'Flowers',  cost: 50,  x: 150, y: 650 },
+    { id: 'fence',    name: 'Fence',    cost: 80,  x: 0,   y: 410 },
+    { id: 'bench',    name: 'Bench',    cost: 100, x: 650, y: 660 },
+    { id: 'lamp',     name: 'Lamps',    cost: 120, x: 690, y: 560 },
+    { id: 'well',     name: 'Well',     cost: 150, x: 780, y: 470 },
+    { id: 'pond',     name: 'Pond',     cost: 200, x: 960, y: 660 },
+    { id: 'windmill', name: 'Windmill', cost: 400, x: 1300, y: 300 },
+    { id: 'fountain', name: 'Fountain', cost: 500, x: 780, y: 560 }
   ],
 
   // The market has two layouts. Rows are listed back to front.

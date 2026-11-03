@@ -30,7 +30,8 @@ It works offline except for the Google Font, which falls back to a system font.
 | `supabase/schema.sql` | The online side of the leaderboards. Its name word lists must match `boardWords` in `data.js`. |
 | `js/friends.js` | Hearts and friendship (`FF.friends`). Kept across farms. |
 | `js/stickers.js` | The Sticker Book (`FF.stickers`). Stickers and rewards are listed in `data.js`; new counters go through `add()`, `best()` or `first()`. |
-| `js/village.js` | The Village screen: homes, decorations and the friends list. |
+| `js/map.js` | The village map (`FF.map`): five areas you drag through, drawn in world units 700 tall. Tap targets are collected while drawing. |
+| `js/village.js` | The friends panel the map opens: the full list with decorations, or one friend's card. |
 | `js/parade.js` | The Fruit Legend parade, shown once and replayable from the Farm book. |
 | `js/main.js` | Screen flow, input routing, resize, and the game loop. |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Add to Home Screen and offline play on the hosted site. A new game file must also go in `FILES` in `sw.js`. |
@@ -40,7 +41,7 @@ It works offline except for the Google Font, which falls back to a system font.
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
 - Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm →
-  animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → main.
+  animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → map → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans
@@ -62,6 +63,8 @@ It works offline except for the Google Font, which falls back to a system font.
   `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
   and price.
 - **Seeds and challenges:** `seeds`, `challenges` and `seedShop` in `data.js`. A new challenge also needs its rule added where it applies (see `save.challenge`).
+- **The village map:** `map` in `data.js` lists the areas, home lots and coming-soon signs. Decoration spots are in
+  `decorations`. A new area needs a drawing function in `map.js`.
 - **New animal:** add it to `animals` in `data.js` with a name and favorite, then add its ears and snout in `animals.js`. New animals arrive in list order.
 - **How fast new friends arrive:** `newFriends` in `data.js` (`firstAt` and `every`, in total hearts).
 

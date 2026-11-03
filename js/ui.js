@@ -29,6 +29,8 @@
       $('pads').hidden = which !== 'farm';
       $('farmSpecial').hidden = which !== 'farm';
       $('marketHud').hidden = which !== 'market';
+      $('mapHud').hidden = which !== 'village';
+      $('mapJump').hidden = which !== 'village';
     },
     specialText() {
       const sp = FF.special(), name = FF.data.fruits[sp.fruit].name.toLowerCase(), who = FF.friends.name(sp.animal);

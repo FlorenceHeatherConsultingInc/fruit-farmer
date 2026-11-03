@@ -12,7 +12,7 @@
     G.W = Math.round(box.width); G.H = Math.round(box.height);
     cv.width = Math.round(G.W * dpr); cv.height = Math.round(G.H * dpr);
     screenCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    FF.scenery.layout(); FF.farm.layout(); FF.market.layout();
+    FF.scenery.layout(); FF.farm.layout(); FF.market.layout(); FF.map.layout();
   };
   window.addEventListener('resize', FF.layout);
   FF.layout();
@@ -45,7 +45,7 @@
   }
 
   // Choosing what to take to market. Everything in the barn starts picked.
-  let picks = {}, overflow = 0;
+  let picks = {}, overflow = 0, mapFrom = 'title';
   function renderPack() {
     const s = FF.save, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0), total = kinds.reduce((n, t) => n + picks[t], 0);
     $('packNote').textContent = (overflow ? 'The barn is full! ' + overflow + ' fruit stayed in your basket. ' : '') +
@@ -68,6 +68,21 @@
   };
 
   const Screens = FF.screens = {
+    // The village map. Back returns to the title, or to the Sold card if that's where you came from.
+    village(from) {
+      FF.sound.ensure();
+      mapFrom = from === 'sold' ? 'sold' : 'title';
+      G.state = 'village';
+      UI.hideAll(); clearInput();
+      FF.map.start(mapFrom);
+      UI.hud('village');
+      $('mapCoins').innerHTML = UI.coinHTML(FF.save.coins);
+    },
+    backToMap() { $('mapCoins').innerHTML = UI.coinHTML(FF.save.coins); },
+    leaveMap() {
+      if (mapFrom === 'sold') { G.state = 'market'; UI.hud('market'); $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
+      else Screens.title();
+    },
     toMarket() {
       FF.sound.ensure();
       overflow = FF.unloadBasket();
@@ -166,8 +181,11 @@
   on('harvestBtn', Screens.farm);
   on('titleShopBtn', () => FF.shop.open('title'));
   on('titleBookBtn', () => FF.book.open('title'));
-  on('titleVillageBtn', () => FF.village.open('title'));
-  on('soldVillageBtn', () => FF.village.open('sold'));
+  on('titleVillageBtn', () => Screens.village('title'));
+  on('soldVillageBtn', () => Screens.village('sold'));
+  on('mapBackBtn', () => Screens.leaveMap());
+  on('mapFriendsBtn', () => FF.village.open());
+  $('mapJump').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) FF.map.jump(b.dataset.jump); });
   on('soldBookBtn', () => FF.book.open('sold'));
   on('titleMarketBtn', Screens.toMarket);
   on('toMarketBtn', Screens.toMarket);
@@ -214,7 +232,7 @@
   });
 
   // The canvas routes pointers to whichever mode is active
-  const mode = () => G.state === 'farm' ? FF.farm : G.state === 'market' ? FF.market : null;
+  const mode = () => G.state === 'farm' ? FF.farm : G.state === 'market' ? FF.market : G.state === 'village' ? FF.map : null;
   cv.addEventListener('pointerdown', e => {
     if (G.overlay || !mode()) return;
     FF.sound.ensure();
@@ -226,12 +244,17 @@
   cv.addEventListener('pointercancel', e => {
     if (G.state === 'farm') FF.farm.pointerUp(e);
     else if (G.state === 'market') FF.market.pointerCancel(e);
+    else if (G.state === 'village') FF.map.pointerCancel(e);
   });
 
   const isLeft = k => k === 'ArrowLeft' || k === 'a' || k === 'A';
   const isRight = k => k === 'ArrowRight' || k === 'd' || k === 'D';
   window.addEventListener('keydown', e => {
     const k = e.key;
+    if (G.state === 'village' && !G.overlay && (isLeft(k) || isRight(k))) {
+      const areas = FF.data.map.areas.map(a => a.id), i = areas.indexOf(FF.map.areaAt());
+      FF.map.jump(areas[FF.util.clamp(i + (isLeft(k) ? -1 : 1), 0, areas.length - 1)]); e.preventDefault(); return;
+    }
     if (G.state === 'farm' && !G.overlay) {
       if (isLeft(k)) { G.input.keys.left = true; e.preventDefault(); }
       else if (isRight(k)) { G.input.keys.right = true; e.preventDefault(); }
@@ -258,11 +281,11 @@
     last = now;
     G.clock += dt;
     if (G.state === 'title') FF.farm.update(dt, true);
+    else if (G.state === 'village') { if (!G.overlay) FF.map.update(dt); }
     else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
     else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
-    if (G.overlay === 'village') FF.village.tick();
     if (G.overlay === 'parade') FF.parade.tick(dt);
-    if (G.state === 'market') FF.market.draw(); else FF.farm.draw(G.state === 'title');
+    if (G.state === 'market') FF.market.draw(); else if (G.state === 'village') FF.map.draw(); else FF.farm.draw(G.state === 'title');
     requestAnimationFrame(frame);
   }
   Screens.title();

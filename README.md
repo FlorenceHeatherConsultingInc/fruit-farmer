@@ -19,8 +19,9 @@ browser on that computer.
   every day, and your farms. You can start a new farm and keep your colors and scenery.
 - **Family:** in the Farm book, start a family or join one with a code to compare scores for today,
   this week, this month and all time. Farm names are made up by the game, and there's no chat.
-- **Village:** sell fruit to animals to earn hearts. At 3 hearts, build them a home. Friends stay
-  across every farm, and best friends give you a special basket color.
+- **Village:** a map you drag left and right, with buttons to jump between areas. Tap a tree to
+  harvest, tap a friend's home to see them, and tap the barn to see what's inside. Sell fruit to
+  animals to earn hearts, and at 3 hearts build them a home. Friends stay across every farm.
 - **Stickers:** 60 stickers in the Farm book. Fill a page to unlock a reward you can't buy.
 - **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
   animals, scenery and head starts in the shop.
