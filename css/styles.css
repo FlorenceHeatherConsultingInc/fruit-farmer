@@ -375,6 +375,17 @@ button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; 
 .slot.empty { border-style: dashed; background: transparent; }
 .slot.making { opacity: .65; }
 .slot.ready { background: #e2f7d6; }
+.slot.making { opacity: 1; background: #e2f7d6; }
+.slot.waiting { background: #fff3b0; }
+.slot small { font-size: 11px; text-align: center; line-height: 1.1; }
+.slot { height: 60px; width: 54px; }
+.pallet { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; min-height: 44px; align-items: center; border: 3px solid var(--ink); border-radius: 12px; background: #e9c79a; padding: 4px; }
+.pallet .ic.sm { width: 32px; height: 32px; }
+.pallet small { font-weight: 700; font-size: 14px; }
+.recipe .have { flex-basis: 100%; margin-left: 0; font-size: 13px; }
+.feedbtns { display: flex; gap: 6px; margin-left: auto; }
+.upgrades { display: flex; flex-direction: column; gap: 6px; }
+.upgrades .btn { margin: 0; }
 #buildBody .goals { text-align: left; }
 .grid3.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid3.two canvas { width: 64px; height: 64px; }

@@ -198,8 +198,22 @@
     sign(x, y - 20, text, true);
   }
   // A market stand for a kitchen building, with its goods on the counter when they're ready.
+  // Under a building: a row of slot boxes (filled when busy next round) and its pallet with a count.
+  function nodeStatus(x, y, b) {
+    const ctx = G.ctx, B = FF.buildings, n = B.slots(b.id), on = B.busy(b.id), st = FF.save.buildings[b.id], cap = B.palletSize(b.id), items = st.palletItems;
+    const bw = 18, gap = 6, sx = x - (n * bw + (n - 1) * gap) / 2, wait = Math.max(0, Math.min(n, B.fed(b.id)) - on);
+    // green: busy next round; yellow: has feed but waits for pallet room; white: needs feed
+    for (let i = 0; i < n; i++) { Draw.rr(sx + i * (bw + gap), y, bw, bw, 4); Draw.fillStroke(i < on ? '#5cc24a' : i < on + wait ? '#ffd23f' : '#fffaf0', 3); }
+    // the pallet: three wooden boards with goods stacked on top
+    const px = x - 60, py = y + 34;
+    for (let i = 0; i < 3; i++) { Draw.rr(px + i * 42, py, 36, 10, 2); Draw.fillStroke('#c99a62', 2.5); }
+    for (let i = 0; i < Math.min(items.length, 6); i++) Draw.fruit(items[i], px + 14 + (i % 3) * 40, py - 10 - Math.floor(i / 3) * 18, 11);
+    const tag = items.length + '/' + cap;
+    ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = INK;
+    ctx.strokeText(tag, px + 130, py + 10); ctx.fillStyle = items.length >= cap ? '#ffd23f' : D.colors.card; ctx.fillText(tag, px + 130, py + 10); ctx.textAlign = 'center';
+  }
   function stand(x, y, b, roof, sc) {
-    const ctx = G.ctx, w = 170, h = 150, out = b.recipes[0].out, readyItems = FF.save.buildings[b.id].queue.filter(q => FF.save.day >= q.ready).map(q => q.out);
+    const ctx = G.ctx, w = 170, h = 150, out = b.recipes[0].out, readyItems = FF.save.buildings[b.id].palletItems;
     Draw.rr(x - w / 2, y - h, w, h, 10); Draw.fillStroke('#fff0d0', 4);
     for (let j = 0; j < 7; j++) { ctx.fillStyle = j % 2 ? '#fffaf0' : roof; ctx.fillRect(x - w / 2 - 6 + j * (w + 12) / 7, y - h - 16, (w + 12) / 7 + 0.5, 30); }
     ctx.strokeStyle = INK; ctx.lineWidth = 3.5; ctx.strokeRect(x - w / 2 - 6, y - h - 16, w + 12, 30);
@@ -210,6 +224,7 @@
     for (let i = 0; i < Math.min(n, 4); i++) Draw.fruit(readyItems[i], x - 45 + i * 30, y - 72, 15);
     if (n) { ctx.beginPath(); ctx.arc(x + w / 2 - 6, y - h - 16, 18, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.fillText(n, x + w / 2 - 6, y - h - 9); }
     else b.recipes.forEach((r, i) => Draw.fruit(r.out, x + (i - (b.recipes.length - 1) / 2) * 44, y - h + 57, 18));
+    nodeStatus(x, y + 22, b);
   }
   function kitchen(x0, sc) {
     label(x0 + 800, 'Kitchen');
@@ -252,7 +267,7 @@
     target(x0 + 160, STREET - 290, x0 + 420, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'barn'); });
     shed(x0 + 1100, STREET - 6);
     target(x0 + 1000, STREET - 190, x0 + 1200, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'shed'); });
-    for (const [id, x] of [['cows', x0 + 600], ['coop', x0 + 860]]) {
+    for (const [id, x] of [['coop', x0 + 600], ['cows', x0 + 870]]) {
       const b = FF.buildings.def(id), y = STREET - 10;
       if (FF.buildings.owned(id)) (id === 'cows' ? cowPen : chickenYard)(x, y, b);
       else lot(x, y, 200, b.name + '\n' + (FF.buildings.canBuild(id) ? 'tap to build' : 'build here'));
@@ -334,19 +349,17 @@
     const spots = [[x - 60, y - 44, 48, 1], [x + 62, y - 44, 48, 1], [x + 4, y - 84, 38, -1]].slice(0, n);
     for (let i = spots.length - 1; i >= 0; i--) { const [cx, cy, sz, f] = spots[i]; cow(cx, cy + Math.sin(t * 1.5 + i) * 1.5, sz, f); }
     fenceRun(x - 130, x + 130, y + 14);
-    trough(x - 60, y + 20, 70, st.queue.length > 0);
-    const ready = FF.buildings.ready(b.id);
-    for (let i = 0; i < Math.min(ready, 3); i++) Draw.fruit('milk', x + 50 + i * 26, y + 8, 16);
-    readyBadge(x + 120, y - 130, ready);
+    trough(x - 60, y + 20, 70, FF.buildings.fed(b.id) > 0);
+    readyBadge(x + 120, y - 130, FF.buildings.ready(b.id));
+    nodeStatus(x, y + 42, b);
   }
   // A coop with one chicken per slot pecking about, and eggs in the straw when ready.
   function chickenYard(x, y, b) {
     const n = FF.buildings.slots(b.id), t = performance.now() / 1000;
     coop(x - 30, y + 6, 120);
     for (let i = 0; i < n; i++) chicken(x + 30 + (i % 2) * 50, y - 6 - Math.floor(i / 2) * 36 + Math.abs(Math.sin(t * 3 + i)) * -4, 34, i % 2 ? -1 : 1);
-    const ready = FF.buildings.ready(b.id);
-    for (let i = 0; i < Math.min(ready, 3); i++) Draw.fruit('egg', x - 80 + i * 22, y + 4, 12);
-    readyBadge(x + 90, y - 170, ready);
+    readyBadge(x + 90, y - 170, FF.buildings.ready(b.id));
+    nodeStatus(x, y + 42, b);
   }
   /* ---------- Fields: crops grow taller each day ---------- */
   function sprout(x, y, k) {

@@ -150,7 +150,7 @@
       const bare = s.trees.filter(t => FF.groves.stock(t) < FF.groves.holds(t));
       if (bare.length) list.push('Your trees grow more fruit.');
       if (FF.fields && FF.fields.crops().some(c => FF.fields.level(c))) list.push('Your fields grow more.');
-      if (D.buildings.some(b => FF.buildings.owned(b.id) && s.buildings[b.id].queue.length)) list.push('Your kitchens finish cooking.');
+      if (D.buildings.some(b => FF.buildings.owned(b.id) && FF.buildings.busy(b.id))) list.push('Your kitchens and animals make more.');
       $('sleepMsg').textContent = 'Tomorrow is Day ' + (s.day + 1) + '. ' + (list.join(' ') || 'A brand-new day on the farm.');
       UI.show('sleep'); $('sleepYes').focus();
     },

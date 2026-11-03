@@ -28,8 +28,9 @@ browser on that computer.
 - **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
   animals, scenery and head starts in the shop.
 - **Fruit Legend:** reach a Farm Score of 100,000 for a parade of all your friends.
-- **Buildings:** build a Juice press, Smoothie stand or Jam kitchen in the village's kitchen row. Put
-  fruit in and the goods are ready after your next harvest. Collect them to your barn, then sell them
+- **Buildings:** build a Juice press, Smoothie stand or Jam kitchen in the village's kitchen row. Stock its
+  feed box with as much as you like; every day each slot makes one thing onto the pallet by itself. Collect
+  the pallet into your barn (a full pallet waits for you), add slots or a bigger pallet, then sell them
   or use them for orders.
 - **Fields:** once you grow three kinds of fruit, the Fields open with a free hay field. A corn field costs
   120. Each field grows a set amount every day by itself and holds two days' worth; tap it to bring it into

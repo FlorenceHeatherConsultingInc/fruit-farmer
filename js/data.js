@@ -40,20 +40,22 @@ FF.data = {
     crops: { hay: { cost: 0, grow: 4, perLevel: 2, upCost: 80 }, corn: { cost: 120, grow: 3, perLevel: 2, upCost: 110 } } },
   // Farm points for each good you collect from a building.
   goodsPoints: 2,
+  // Every building's pallet: how many finished things it holds at each size, and what each bigger size costs.
+  pallets: { sizes: [4, 6, 10, 16], costs: [150, 400, 900] },
   // Production buildings. needs: trees, buildings or fields you must have first. deliver: items you hand
   // over to build it. recipes: what goes in and what comes out. slots: how many it makes at once at each
   // level, and upgrade: what each next level costs. area: where it stands on the village map.
   buildings: [
-    { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4], upgrade: [200, 500] },
-    { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4], upgrade: [250, 600] },
-    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4], upgrade: [300, 700] },
-    { id: 'popcorn',  name: 'Popcorn cart',   area: 'kitchen', cost: 350, needs: { fields: true }, recipes: [{ in: { corn: 3 }, out: 'popcorn' }], slots: [2, 3, 4], upgrade: [300, 700] },
-    { id: 'salad',    name: 'Salad bar',      area: 'kitchen', cost: 500, needs: { trees: ['apple', 'orange', 'banana', 'strawberry', 'grapes'] }, recipes: [{ in: { apple: 1, orange: 1, banana: 1, strawberry: 1, grapes: 1 }, out: 'salad' }], slots: [2, 3, 4], upgrade: [400, 900] },
-    { id: 'bakery',   name: 'Bakery',         area: 'kitchen', cost: 900, needs: { buildings: ['coop', 'cows'] }, deliver: { egg: 5 }, recipes: [{ in: { apple: 3, egg: 1, milk: 1 }, out: 'pie' }], slots: [2, 3, 4], upgrade: [600, 1200] },
-    { id: 'diner',    name: 'Diner',          area: 'kitchen', cost: 1500, needs: { buildings: ['bakery', 'jam'] }, deliver: { pie: 3 }, recipes: [{ in: { milk: 1, smoothie: 1 }, out: 'shake' }, { in: { egg: 1, milk: 1, jam: 1 }, out: 'pancakes' }], slots: [2, 3, 4], upgrade: [800, 1600] },
+    { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4, 5], upgrade: [200, 500, 1000], worker: 'presses', more: 'Another press' },
+    { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4, 5], upgrade: [250, 600, 1200], worker: 'blenders', more: 'Another blender' },
+    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'pots', more: 'Another pot' },
+    { id: 'popcorn',  name: 'Popcorn cart',   area: 'kitchen', cost: 350, needs: { fields: true }, recipes: [{ in: { corn: 3 }, out: 'popcorn' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'poppers', more: 'Another popper' },
+    { id: 'salad',    name: 'Salad bar',      area: 'kitchen', cost: 500, needs: { trees: ['apple', 'orange', 'banana', 'strawberry', 'grapes'] }, recipes: [{ in: { apple: 1, orange: 1, banana: 1, strawberry: 1, grapes: 1 }, out: 'salad' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'bowls', more: 'Another bowl' },
+    { id: 'bakery',   name: 'Bakery',         area: 'kitchen', cost: 900, needs: { buildings: ['coop', 'cows'] }, deliver: { egg: 5 }, recipes: [{ in: { apple: 3, egg: 1, milk: 1 }, out: 'pie' }], slots: [2, 3, 4, 5], upgrade: [600, 1200, 2400], worker: 'ovens', more: 'Another oven' },
+    { id: 'diner',    name: 'Diner',          area: 'kitchen', cost: 1500, needs: { buildings: ['bakery', 'jam'] }, deliver: { pie: 3 }, recipes: [{ in: { milk: 1, smoothie: 1 }, out: 'shake' }, { in: { egg: 1, milk: 1, jam: 1 }, out: 'pancakes' }], slots: [2, 3, 4, 5], upgrade: [800, 1600, 3200], worker: 'cooks', more: 'Another cook' },
     // Farm animals live in the barnyard. More slots means more animals.
-    { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4], upgrade: [300, 700] },
-    { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 600, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4], upgrade: [400, 900] }
+    { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4, 5, 6], upgrade: [300, 700, 1400, 2800], worker: 'hens', more: 'More hens' },
+    { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 600, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'cows', more: 'More cows' }
   ],
 
   // Harvest speed picked on the title screen.

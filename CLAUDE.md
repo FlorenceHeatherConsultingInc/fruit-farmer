@@ -21,7 +21,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
 | `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, bonus fruit, catching, carrier drawing. |
-| `js/buildings.js` | Production buildings (`FF.buildings`): building, making, collecting, upgrading, and the building card. Rows in `buildings` in `data.js`. |
+| `js/buildings.js` | Production buildings (`FF.buildings`): feed boxes, slots that make things each round, pallets, collecting, upgrades, and the building card. Rows in `buildings` and `pallets` in `data.js`. |
 | `js/fields.js` | Fields (`FF.fields`): one field per crop that grows by itself each day, the field card, collecting, buying and upgrading. Numbers in `fields` in `data.js`. |
 | `js/orders.js` | The order board (`FF.orders`): making orders, delivering, pinning, the harvest counter. Numbers in `orders` in `data.js`. |
 | `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, and the grove card. `groveMix` in `data.js` sets how much is bonus fruit. |

@@ -114,7 +114,12 @@
     }
     if (raw.buildings && typeof raw.buildings === 'object') for (const b of D.buildings) {
       const v = raw.buildings[b.id];
-      if (v && typeof v === 'object') s.buildings[b.id] = { level: U.clamp(n(v.level), 1, b.slots.length), queue: Array.isArray(v.queue) ? v.queue.filter(q => q && D.fruits[q.out]) : [] };
+      if (!v || typeof v !== 'object') continue;
+      // Older saves had a queue of things cooking: they all land on the pallet.
+      const items = (Array.isArray(v.palletItems) ? v.palletItems : []).concat(Array.isArray(v.queue) ? v.queue.map(q => q && q.out) : []).filter(t => D.fruits[t]);
+      const feed = {};
+      if (v.feed && typeof v.feed === 'object') Object.keys(v.feed).forEach(t => { if (D.fruits[t] && n(v.feed[t]) > 0) feed[t] = n(v.feed[t]); });
+      s.buildings[b.id] = { level: U.clamp(n(v.level), 1, b.slots.length), pallet: U.clamp(n(v.pallet), 0, D.pallets.sizes.length - 1), feed, palletItems: items, day: v.day != null ? n(v.day) : s.day, turn: n(v.turn) };
     }
     // Filters are gone: any left over come back as the coins they cost.
     if (raw.filters && typeof raw.filters === 'object') Object.entries(D.oldFilters.cost).forEach(([t, c]) => { s.coins += Math.round(n(raw.filters[t]) * c / D.oldFilters.bundle); });
