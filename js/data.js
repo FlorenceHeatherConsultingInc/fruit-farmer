@@ -403,6 +403,7 @@ FF.data = {
     streakBonusMax: 1,    // ...up to this many (keep these small: the sparkle is the reward)
     aim: {
       pull: 0.24, pullMin: 92, pullMax: 170,  // full pull, as a fraction of the screen's short side, in pixels
+      edgeRoom: 60,       // pixels left between a full pull and the bottom of the screen
       reachX: 0.62,       // how far sideways a full pull reaches, as a fraction of screen width
       snap: 1.3,          // how close to an opening (in opening sizes) a shot starts to drift in
       assist: 0.4,        // how much of the way it drifts

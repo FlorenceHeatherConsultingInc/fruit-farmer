@@ -25,10 +25,11 @@
     const { W, H } = G;
     M.trayH = clamp(H * 0.085, 52, 70);
     M.trayY = H - M.trayH;
-    M.slingY = M.trayY - clamp(H * 0.11, 64, 96);
+    M.maxPull = clamp(Math.min(W, H) * MK.aim.pull, MK.aim.pullMin, MK.aim.pullMax);
+    // A full pull starts on the fruit and needs room below it, plus a margin before the screen edge.
+    M.slingY = Math.min(M.trayY - clamp(H * 0.11, 64, 96), H - M.maxPull - MK.aim.edgeRoom + 14);
     M.ax = W / 2; M.ay = M.slingY - 14;
     M.fr = clamp(W * 0.045, 20, 30);
-    M.maxPull = clamp(Math.min(W, H) * MK.aim.pull, MK.aim.pullMin, MK.aim.pullMax);
     Layouts[active].place(M, targets);
   };
 
