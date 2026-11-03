@@ -5,7 +5,9 @@
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui;
   const PAGE_STEP = 15, MAX_PAGES = 500;
-  let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null;
+  let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null, confirmRemove = null, confirmWipe = false;
+  // Everything that belongs to one farm. The rest (score, friends, stickers, looks, seeds) is shared.
+  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'buildings', 'plots', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid'];
 
   const dateKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const blankDay = () => ({ date: dateKey(), harvest: {}, sales: {}, bought: [], perfect: 0, earned: 0, sold: false });
@@ -43,6 +45,7 @@
   const rankOf = n => D.ranks.filter(r => n >= r.score).pop();
 
   /* ---------- Small icons, drawn once ---------- */
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const iconCache = {};
   function picture(key, paint) {
     if (!iconCache[key]) iconCache[key] = paint().toDataURL();
@@ -99,18 +102,31 @@
     if (!open && !list) return `<p class="note">Nothing yet. Go pick some fruit!</p>`;
     return open + list + (pages.length > shown ? `<button class="btn secondary" type="button" data-book="more">Show older days</button>` : '');
   }
+  // One card per farm: the one you're on, farms you can go back to, and old finished farms.
+  function farmCard(f, kind) {
+    const name = f.farmName || 'Farm ' + (f.farmNo || f.no), key = kind === 'old' ? 'old-' + f.no : f.farmNo;
+    const info = kind === 'old' ? `Finished · ${f.days} ${f.days === 1 ? 'day' : 'days'}` : `Day ${f.day} · Level ${FF.levelOfPoints(f.points || 0)} · ${I.coin}${f.coins || 0}`;
+    const btns = kind === 'now' ? `<span class="pill">Playing</span>`
+      : confirmRemove === String(key) ? `<button class="mini" type="button" data-book="removeyes-${key}">Yes, remove it</button><button class="mini" type="button" data-book="removeno">Keep</button>`
+      : (kind === 'other' ? `<button class="mini" type="button" data-book="switch-${key}">Play</button>` : '') + `<button class="mini" type="button" data-book="remove-${key}">Remove</button>`;
+    return `<div class="farmcard${kind === 'now' ? ' on' : ''}"><div><b>${esc(name)}</b><small>${f.challenge ? challengeName(f.challenge) + ' · ' : ''}${info}</small><small>Earned ${I.coin}${f.farmEarned != null ? f.farmEarned : f.earned}</small></div><div class="farmbtns">${btns}</div></div>`;
+  }
   function farmsHTML() {
-    const s = FF.save, farms = s.pastFarms.map(f => ({ ...f, now: false })).concat({ no: s.farmNo, days: s.day, earned: s.farmEarned, challenge: s.challenge, now: true });
-    farms.sort((a, b) => b.earned - a.earned);
-    return `<div class="label">My best farms</div><ol class="board">` +
-      farms.map(f => `<li class="${f.now ? 'on' : ''}"><b>Farm ${f.no}</b><span>${f.challenge ? challengeName(f.challenge) + ', ' : ''}${f.days} ${f.days === 1 ? 'day' : 'days'}</span><span class="pay">${I.coin}${f.earned}</span></li>`).join('') + `</ol>` +
+    const s = FF.save;
+    return `<div class="label">Your farms</div><div class="farms">` + farmCard(s, 'now') + s.otherFarms.map(f => farmCard(f, 'other')).join('') + s.pastFarms.map(f => farmCard(f, 'old')).join('') + `</div>` +
       (confirmNew
-        ? `<p class="note">Start over? This farm earns you <b>${seedsFromFarm()} Golden Seeds</b>. You keep your friends, village, stickers, colors and scenery.</p>` +
+        ? `<p class="note">Start a new farm? This one stays in your list so you can come back to it${Math.max(0, seedsFromFarm() - FF.save.seedsPaid) ? `, and it earns you <b>${Math.max(0, seedsFromFarm() - FF.save.seedsPaid)} Golden Seeds</b>` : ''}. You keep your friends, stickers, colors and scenery.</p>` +
           `<button class="btn primary" type="button" data-book="newyes">Regular farm</button>` +
           `<div class="label">Challenge farms pay double seeds</div><div class="rows">${D.challenges.map(c => `<button class="choice" type="button" data-book="ch-${c.id}"><b>${c.name}</b><small>${c.desc}</small></button>`).join('')}</div>` +
           `<button class="btn secondary" type="button" data-book="newno">Keep this farm</button>`
         : `<button class="btn secondary" type="button" data-book="new">Start a new farm</button>`) +
-      (FF.board.enabled() ? FF.board.saveHTML() : '');
+      (FF.board.enabled() ? FF.board.saveHTML() : '') +
+      `<div class="label">Start over from nothing</div>` +
+      (confirmWipe
+        ? `<p class="note">This removes <b>everything</b>: every farm, your friends, stickers, looks and Farm Score. It can't be undone. Press and hold the red button to start over.</p>` +
+          `<button class="btn danger hold" type="button" id="wipeHold"><span class="fillbar"></span><span>Hold to start over</span></button>` +
+          `<button class="btn secondary" type="button" data-book="wipeno">Keep everything</button>`
+        : `<button class="btn secondary" type="button" data-book="wipe">Start over from nothing</button>`);
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
@@ -127,10 +143,12 @@
   function newFarm(challenge) {
     const s = FF.save, n = FF.freshSave();
     closeDay();
-    s.seeds += seedsFromFarm();
-    s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary, challenge: s.challenge });
-    ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'buildings', 'plots', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
-    s.farmNo++;
+    const seeds = Math.max(0, seedsFromFarm() - s.seedsPaid);
+    s.seeds += seeds; s.seedsPaid += seeds;
+    s.otherFarms.push(stash());
+    const next = Math.max(s.farmNo, ...s.otherFarms.map(f => f.farmNo), ...s.pastFarms.map(f => f.no || 0)) + 1;
+    FARM_KEYS.forEach(k => { s[k] = n[k] === undefined ? null : JSON.parse(JSON.stringify(n[k])); });
+    s.farmNo = next; s.seedsPaid = 0;
     s.challenge = challenge || null;
     if (s.seedBuys.includes('start-basket')) s.points = FF.pointsFor(5);
     if (s.seedBuys.includes('start-tree') && challenge !== 'apples') s.trees.push('orange');
@@ -139,7 +157,38 @@
     FF.persist(); FF.layout();
   }
 
+  // A copy of the current farm's own things, to put away while you play another.
+  const stash = () => JSON.parse(JSON.stringify(Object.fromEntries(FARM_KEYS.map(k => [k, FF.save[k] === undefined ? null : FF.save[k]]))));
+  function switchFarm(no) {
+    const s = FF.save, i = s.otherFarms.findIndex(f => String(f.farmNo) === String(no));
+    if (i < 0) return false;
+    closeDay();
+    const target = s.otherFarms.splice(i, 1)[0], fresh = FF.freshSave();
+    s.otherFarms.push(stash());
+    FARM_KEYS.forEach(k => { s[k] = target[k] != null ? target[k] : JSON.parse(JSON.stringify(fresh[k] === undefined ? null : fresh[k])); });
+    FF.FRUIT_TYPES.forEach(t => { s.crate[t] = s.crate[t] || 0; s.barn[t] = s.barn[t] || 0; });
+    s.otherFarms.sort((a, b) => a.farmNo - b.farmNo);
+    FF.stickers.check(); FF.persist(); FF.layout();
+    return true;
+  }
+  function removeFarm(key) {
+    const s = FF.save;
+    if (key.startsWith('old-')) s.pastFarms = s.pastFarms.filter(f => String(f.no) !== key.slice(4));
+    else s.otherFarms = s.otherFarms.filter(f => String(f.farmNo) !== key);
+    confirmRemove = null; FF.persist();
+  }
+  function wipe() { FF.wipeSave(); location.reload(); }
+
   function startOver(challenge) { confirmNew = false; newFarm(challenge); FF.sfx.party(); from = 'title'; FF.book.close(); }
+
+  let holdTimer = null;
+  const endHold = () => { clearTimeout(holdTimer); holdTimer = null; const b = $('wipeHold'); if (b) b.classList.remove('holding'); };
+  $('bookOv').addEventListener('pointerdown', e => {
+    const b = e.target.closest('#wipeHold');
+    if (!b) return;
+    b.classList.add('holding'); holdTimer = setTimeout(wipe, 2000);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => $('bookOv').addEventListener(t, endHold));
 
   $('bookOv').addEventListener('click', e => {
     const b = e.target.closest('button');
@@ -160,15 +209,24 @@
       case 'new': confirmNew = true; render(); break;
       case 'newno': confirmNew = false; render(); break;
       case 'newyes': startOver(); break;
+      case 'removeno': confirmRemove = null; render(); break;
+      case 'wipe': confirmWipe = true; render(); break;
+      case 'wipeno': confirmWipe = false; render(); break;
       case 'parade': FF.parade.open(from === 'sold' ? 'sold' : 'title'); break;
-      default: if (b.dataset.book && b.dataset.book.startsWith('ch-')) startOver(b.dataset.book.slice(3));
+      default: {
+        const act = b.dataset.book || '';
+        if (act.startsWith('ch-')) startOver(act.slice(3));
+        else if (act.startsWith('switch-')) { if (switchFarm(act.slice(7))) { FF.sfx.party(); from = 'title'; FF.book.close(); } }
+        else if (act.startsWith('removeyes-')) { removeFarm(act.slice(10)); FF.sfx.tick(); render(); }
+        else if (act.startsWith('remove-')) { confirmRemove = act.slice(7); render(); }
+      }
     }
   });
 
   FF.book = {
     dateKey,
     refresh: () => render(),
-    esc: t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
+    esc: t => esc(t),
     harvest(type) { const t = today(); t.harvest[type] = (t.harvest[type] || 0) + 1; },
     sale(animal, fruit, coins, perfect) {
       const t = today(), key = animal + '|' + fruit, row = t.sales[key] || (t.sales[key] = { animal, fruit, n: 0, coins: 0 });
@@ -185,13 +243,14 @@
     sleep() { const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
     open(origin) {
       FF.sound.ensure();
-      from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false; period = null;
+      from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false; period = null; confirmRemove = null; confirmWipe = false;
       FF.stickers.check();
       $('familyTab').hidden = !FF.board.enabled();
       render();
       UI.show('book');
       $('bookDone').focus({ preventScroll: true });
     },
-    close() { FF.screens.afterBook(from); }
+    close() { FF.screens.afterBook(from); },
+    switchFarm, removeFarm, wipe
   };
 })();

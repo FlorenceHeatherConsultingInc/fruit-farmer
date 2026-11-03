@@ -78,7 +78,7 @@
   /* ---------- Save codes ---------- */
   function backupData() {
     const data = JSON.parse(JSON.stringify(FF.save));
-    if (JSON.stringify(data).length > 400000) data.pastFarms.forEach(f => { f.diary = []; });
+    if (JSON.stringify(data).length > 400000) data.pastFarms.concat(data.otherFarms || []).forEach(f => { f.diary = []; });
     return data;
   }
   async function backup() {

@@ -263,6 +263,19 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .tile small { font-size: 14px; font-weight: 700; opacity: .75; }
 button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .tile.on { background: var(--sun); }
+.farms { display: flex; flex-direction: column; gap: 6px; }
+.farmcard { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 8px 10px; }
+.farmcard.on { background: var(--sun); }
+.farmcard b { display: block; font-size: 18px; }
+.farmcard small { display: block; font-size: 14px; font-weight: 700; opacity: .8; }
+.farmcard svg { width: 15px; height: 15px; vertical-align: -2px; margin-right: 2px; }
+.farmbtns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.farmcard .pill { border: 3px solid var(--ink); border-radius: 999px; padding: 0 8px; font-weight: 800; font-size: 14px; background: var(--card); }
+.btn.danger { background: #ff5e7a; color: #fff; }
+.btn.hold { position: relative; overflow: hidden; touch-action: none; }
+.btn.hold span { position: relative; }
+.btn.hold .fillbar { position: absolute; inset: 0; width: 0; background: rgba(43,35,80,0.35); }
+.btn.hold.holding .fillbar { width: 100%; transition: width 2s linear; }
 .ranks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
 .ranks li { border: 3px solid var(--ink); border-radius: 12px; padding: 4px 2px; text-align: center; background: var(--paper); opacity: .55; display: flex; flex-direction: column; }
 .ranks li b { font-size: 12px; line-height: 1.1; }

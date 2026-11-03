@@ -39,6 +39,8 @@ browser on that computer.
   eggs and milk) and a diner (milkshakes and pancakes), each unlocked by the ones before.
 - **Days:** the day shows in the village and while you harvest. Coming back from market starts the next day,
   or tap Sleep in the village to end the day whenever you like.
+- **Farms:** the Farms tab in the Farm book lists every farm. Play any of them again, remove one, or start a
+  new one. Start over from nothing (press and hold) wipes everything for a brand-new game.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

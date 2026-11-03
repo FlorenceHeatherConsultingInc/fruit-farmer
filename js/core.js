@@ -43,7 +43,7 @@
       skins: [D.skins[0].id], skin: D.skins[0].id,
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
-      day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
+      day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {},
       seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, filters: {}, orders: [], pin: null, buildings: {}, plots: []
     };
@@ -85,6 +85,8 @@
     if (raw.byDate && typeof raw.byDate === 'object') s.byDate = raw.byDate;
     if (Array.isArray(raw.diary)) s.diary = raw.diary;
     if (Array.isArray(raw.pastFarms)) s.pastFarms = raw.pastFarms;
+    if (Array.isArray(raw.otherFarms)) s.otherFarms = raw.otherFarms.filter(f => f && typeof f === 'object' && f.farmNo > 0);
+    s.seedsPaid = n(raw.seedsPaid);
     if (raw.today && typeof raw.today === 'object') s.today = raw.today;
     if (raw.family && typeof raw.family === 'object') s.family = raw.family;
     if (raw.backup && typeof raw.backup === 'object') s.backup = raw.backup;
@@ -116,11 +118,13 @@
 
   FF.freshSave = freshSave;
   FF.replaceSave = data => localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  FF.wipeSave = () => localStorage.removeItem(SAVE_KEY);
   FF.save = loadSave();
   FF.persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(FF.save)); } catch (e) {} };
 
   // Handy lookups for the current progress
   FF.pointsFor = pointsFor;
+  FF.levelOfPoints = levelOf;
   FF.capAt = capAt; FF.lookFor = lookFor;
   // During a harvest the level is held where it started; points still add up and the level-up comes at the end.
   let held = null;
