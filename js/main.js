@@ -143,6 +143,7 @@
       $('mapBasketBtn').innerHTML = I.basket + '<span>holds ' + FF.cap() + '</span>';
       $('mapBarnBtn').innerHTML = I.barn + '<span>' + FF.inBarn() + (size === Infinity ? '' : '/' + size) + '</span>';
       FF.guide.refresh();
+      FF.hud.barn();
     },
     // Bedtime: tell the player what tomorrow brings, then start the next day.
     sleep() {

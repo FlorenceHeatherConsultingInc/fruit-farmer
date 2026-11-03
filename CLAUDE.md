@@ -19,7 +19,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/core.js` | Helpers (`FF.util`), shared state (`FF.G`), saved progress (`FF.save`, `FF.persist`), sound effects (`FF.sfx`). |
 | `js/draw.js` | Drawing toolkit (`FF.draw`): outlines, `blob()`, fruit art, small icon canvases. Particle effects (`FF.fx`). |
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
-| `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
+| `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`), and the village's barn panel (`FF.hud.barn()`). |
 | `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, bonus fruit, catching, carrier drawing. |
 | `js/buildings.js` | Production buildings (`FF.buildings`): feed boxes, slots that make things each round, pallets, collecting, upgrades, and the building card. Rows in `buildings` and `pallets` in `data.js`. |
 | `js/fields.js` | Fields (`FF.fields`): one field per crop that grows by itself each day, the field card, collecting, buying and upgrading. Numbers in `fields` in `data.js`. |

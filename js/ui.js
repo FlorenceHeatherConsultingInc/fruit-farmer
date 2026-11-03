@@ -41,6 +41,7 @@
       $('mapHud').hidden = which !== 'village';
       $('mapJump').hidden = which !== 'village';
       $('mapTools').hidden = which !== 'village';
+      $('barnPanel').hidden = which !== 'village';
       if (which !== 'village') $('mapTip').hidden = true;
       $('farmPin').hidden = which !== 'farm' || !FF.orders.hudText();
     },
@@ -61,11 +62,33 @@
       $('farmPin').textContent = text; $('farmPin').hidden = !text || FF.G.state !== 'farm';
       $('farmDoneBtn').classList.toggle('glow', FF.orders.pinFilled());
     },
+    // The barn panel on the right of the village: Picked (fruit and crops) and Made (goods), each a chip
+    // that opens into small icons with numbers. Only what you have shows.
+    barn() {
+      const s = FF.save, D = FF.data, el = $('barnPanel');
+      const groups = [
+        { id: 'picked', name: 'Picked', items: FF.FRUIT_TYPES.filter(t => D.fruits[t].kind !== 'good' && s.barn[t] > 0) },
+        { id: 'made', name: 'Made', items: FF.FRUIT_TYPES.filter(t => D.fruits[t].kind === 'good' && s.barn[t] > 0) }
+      ].filter(g => g.items.length);
+      el.innerHTML = groups.map(g => {
+        const total = g.items.reduce((n, t) => n + s.barn[t], 0), on = barnOpen[g.id];
+        return `<button class="bp-chip" type="button" data-fold="${g.id}" aria-expanded="${!!on}">${barnPic(g.items[0])}<span>${g.name} ${total}</span><b>${on ? '▾' : '▸'}</b></button>` +
+          (on ? `<div class="bp-list">${g.items.map(t => `<span class="bp-item" title="${D.fruits[t].name}">${barnPic(t)}${s.barn[t]}</span>`).join('')}</div>` : '');
+      }).join('');
+    },
     coins(bump) {
       $('coinChip').innerHTML = FF.ui.coinHTML(FF.save.coins);
       if (bump) FF.ui.bump($('coinChip'));
     }
   };
+
+  const barnOpen = { picked: false, made: false }, barnPics = {};
+  const barnPic = t => { if (!barnPics[t]) barnPics[t] = FF.draw.fruitIcon(t, 40).toDataURL(); return `<img src="${barnPics[t]}" alt="">`; };
+  $('barnPanel').addEventListener('click', e => {
+    const b = e.target.closest('[data-fold]');
+    if (!b) return;
+    barnOpen[b.dataset.fold] = !barnOpen[b.dataset.fold]; FF.sfx.tick(); FF.hud.barn();
+  });
 
   // Static icons in the markup
   $('loadIcon').innerHTML = FF.icons.apple;
