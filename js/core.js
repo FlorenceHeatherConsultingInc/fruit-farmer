@@ -160,6 +160,7 @@
     const after = FF.level();
     if (after > before && FF.levelUp) FF.levelUp(after, lookFor(after).look !== look);
   };
+  FF.farmName = () => FF.save.farmName || 'Farm ' + FF.save.farmNo;
   FF.scene = () => D.scenes.find(s => s.id === FF.save.scene) || D.scenes[0];
   FF.skin = () => D.skins.find(s => s.id === FF.save.skin) || D.skins[0];
 

@@ -40,12 +40,18 @@
 </div>
 
 <div class="special farm pin" id="farmPin" hidden></div>
+<div class="daytag" id="farmDay" hidden></div>
 
 <!-- Village map top bar and jump buttons -->
 <div class="hud" id="mapHud" hidden>
   <button class="iconbtn" id="mapBackBtn" type="button" aria-label="Back">Back</button>
   <div class="chip" id="mapCoins" aria-live="polite"></div>
   <div class="hud-right">
+    <button class="iconbtn" id="mapSleepBtn" type="button" aria-label="Go to bed">Sleep</button>
+  </div>
+  <div class="maptools">
+    <button class="iconbtn" id="mapMarketBtn" type="button">Market</button>
+    <button class="iconbtn" id="mapShopBtn" type="button">Shop</button>
     <button class="iconbtn" id="mapOrdersBtn" type="button" aria-label="Order board">Orders</button>
     <button class="iconbtn" id="mapFriendsBtn" type="button" aria-label="Friends list">Friends</button>
   </div>
@@ -71,23 +77,12 @@
   <div class="card">
     <h1>Fruit Farmer</h1>
     <p id="titleIntro"></p>
+    <div class="farmline" id="titleFarm"></div>
     <div class="stats" id="titleStats"></div>
-    <div class="label">Harvest speed</div>
-    <fieldset class="speeds">
-      <legend hidden>Harvest speed</legend>
-      <label class="speed"><input type="radio" name="speed" id="sp-slow" value="slow" checked><span>Slow</span></label>
-      <label class="speed"><input type="radio" name="speed" id="sp-medium" value="medium"><span>Medium</span></label>
-      <label class="speed"><input type="radio" name="speed" id="sp-fast" value="fast"><span>Fast</span></label>
-    </fieldset>
-    <button class="btn primary" id="harvestBtn" type="button">Go harvest</button>
+    <button class="btn primary" id="harvestBtn" type="button">Go to the farm</button>
     <div class="btnrow">
-      <button class="btn yellow" id="titleMarketBtn" type="button" hidden>Market</button>
-      <button class="btn secondary" id="titleShopBtn" type="button">Shop</button>
       <button class="btn secondary" id="titleBookBtn" type="button">Farm book</button>
-      <button class="btn secondary" id="titleVillageBtn" type="button">Village</button>
-      <button class="btn secondary" id="titleOrdersBtn" type="button">Orders</button>
     </div>
-    <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
   </div>
 </div>
 
@@ -120,6 +115,14 @@
   <div class="card shop" role="dialog" aria-labelledby="groveTitle">
     <h2 id="groveTitle">Apple grove</h2>
     <p id="groveStock"></p>
+    <div class="label">Harvest speed</div>
+    <fieldset class="speeds">
+      <legend hidden>Harvest speed</legend>
+      <label class="speed"><input type="radio" name="speed" id="sp-slow" value="slow" checked><span>Slow</span></label>
+      <label class="speed"><input type="radio" name="speed" id="sp-medium" value="medium"><span>Medium</span></label>
+      <label class="speed"><input type="radio" name="speed" id="sp-fast" value="fast"><span>Fast</span></label>
+    </fieldset>
+    <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
     <p class="note" id="grovePin"></p>
     <section class="msec" id="groveFilterSec"><div class="label">Filter</div><div class="grid3" id="groveFilters"></div><p class="note" id="groveFilterNote"></p></section>
     <button class="btn primary" id="groveGo" type="button">Go!</button>
@@ -134,6 +137,16 @@
     <p class="note" id="buildNote"></p>
     <div class="bookbody" id="buildBody"></div>
     <button class="btn secondary done" type="button" id="buildDone">Done</button>
+  </div>
+</div>
+
+<!-- Going to bed: ends the day whenever you like -->
+<div class="overlay" id="sleepOv" hidden>
+  <div class="card" role="dialog" aria-labelledby="sleepTitle">
+    <h2 id="sleepTitle">Go to bed?</h2>
+    <p id="sleepMsg"></p>
+    <button class="btn primary" id="sleepYes" type="button">Sleep</button>
+    <button class="btn secondary" id="sleepNo" type="button">Not yet</button>
   </div>
 </div>
 

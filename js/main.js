@@ -27,13 +27,10 @@
     $('titleIntro').textContent = brandNew
       ? "You're a brand-new fruit farmer! For now you only have your hands, so you can carry 2 fruit. Catch them, then sell them at the market."
       : 'Grow your fruit farm! Catch fruit, keep it in your barn, and sell it at the market. Your basket grows as your farm levels up.';
-    $('titleStats').innerHTML =
-      stat(I.coin, s.coins, 'coin') +
-      stat(I.basket, 'Level ' + FF.level() + ' · ' + c.name + ' ' + '★'.repeat(Math.min(c.tier, 5)) + ' · holds ' + FF.cap()) +
-      stat(I.stall, 'Barn: ' + n + (n === 1 ? ' fruit' : ' fruit')) +
-      stat(I.tree, s.trees.length + (s.trees.length > 1 ? ' trees' : ' tree'));
-    $('titleMarketBtn').hidden = n === 0;
-    $('titleMarketBtn').innerHTML = I.stall + ' Go to market';
+    $('titleIntro').hidden = !brandNew;
+    $('titleFarm').textContent = FF.farmName() + ' · Day ' + s.day;
+    $('titleStats').innerHTML = stat(I.coin, s.coins, 'coin') +
+      `<button class="stat statbtn" type="button" id="titleLevelBtn">${I.basket}<span>Level ${FF.level()} · ${c.name} · holds ${FF.cap()} ›</span></button>`;
   }
 
   function showSoldCard() {
@@ -44,7 +41,7 @@
   }
 
   // Choosing what to take to market. Everything in the barn starts picked.
-  let picks = {}, overflow = 0, mapFrom = 'title';
+  let picks = {}, overflow = 0, mapFrom = 'title', packFrom = null;
   function renderPack() {
     const s = FF.save, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0), total = kinds.reduce((n, t) => n + picks[t], 0);
     $('packNote').textContent = (overflow ? 'The barn is full! ' + overflow + ' fruit stayed in your basket. ' : '') +
@@ -95,9 +92,19 @@
       FF.map.start(mapFrom);
       if (area) FF.map.jump(area);
       UI.hud('village');
-      $('mapCoins').innerHTML = UI.coinHTML(FF.save.coins);
+      Screens.backToMap();
     },
-    backToMap() { $('mapCoins').innerHTML = UI.coinHTML(FF.save.coins); },
+    backToMap() { $('mapCoins').innerHTML = `<span class="day">Day ${FF.save.day}</span>` + UI.coinHTML(FF.save.coins); },
+    // Bedtime: tell the player what tomorrow brings, then start the next day.
+    sleep() {
+      const s = FF.save, list = [];
+      const bare = s.trees.filter(t => FF.groves.stock(t) < FF.groves.holds(t));
+      if (bare.length) list.push('Your trees grow more fruit.');
+      if (FF.fields && FF.fields.plots().some(p => p.crop)) list.push('Your crops grow.');
+      if (D.buildings.some(b => FF.buildings.owned(b.id) && s.buildings[b.id].queue.length)) list.push('Your kitchens finish cooking.');
+      $('sleepMsg').textContent = 'Tomorrow is Day ' + (s.day + 1) + '. ' + (list.join(' ') || 'A brand-new day on the farm.');
+      UI.show('sleep'); $('sleepYes').focus();
+    },
     leaveMap() {
       if (mapFrom === 'sold') { G.state = 'market'; UI.hud('market'); $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else Screens.title();
@@ -136,6 +143,7 @@
       FF.hud.load(); FF.hud.pin();
     },
     market(chosen) {
+      packFrom = null;
       FF.sound.ensure();
       G.state = 'market';
       UI.hideAll();
@@ -179,7 +187,8 @@
     },
     resume() { FF.sound.ensure(); UI.hideAll(); last = performance.now(); },
     afterShop(from) {
-      if (from === 'market') { UI.hideAll(); FF.market.refresh(); FF.hud.coins(); }
+      if (from === 'map') { UI.hideAll(); Screens.backToMap(); }
+      else if (from === 'market') { UI.hideAll(); FF.market.refresh(); FF.hud.coins(); }
       else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else { renderTitle(); UI.show('title'); }
     },
@@ -204,23 +213,28 @@
     renderSoundBtns();
   }));
   const on = (id, fn) => $(id).addEventListener('click', fn);
-  on('harvestBtn', () => Screens.village('title', 'groves'));
+  on('harvestBtn', () => Screens.village('title'));
+  $('titleStats').addEventListener('click', e => { if (e.target.closest('#titleLevelBtn') && FF.basketPath) FF.basketPath.open('title'); });
   on('farmDoneBtn', () => { if (G.state === 'farm' && !G.overlay) Screens.showFull('done'); });
   on('fullVillageBtn', () => Screens.village('title', 'groves'));
-  on('titleShopBtn', () => FF.shop.open('title'));
   on('titleBookBtn', () => FF.book.open('title'));
-  on('titleVillageBtn', () => Screens.village('title'));
   on('soldVillageBtn', () => Screens.village('sold'));
   on('mapBackBtn', () => Screens.leaveMap());
   on('mapFriendsBtn', () => FF.village.open());
   on('mapOrdersBtn', () => FF.orders.open('map'));
+  on('mapSleepBtn', Screens.sleep);
+  on('sleepNo', () => { UI.hideAll(); Screens.backToMap(); });
+  on('sleepYes', () => {
+    FF.book.sleep(); UI.hideAll(); Screens.backToMap();
+    FF.fx.text(FF.map.metrics().cam + 300, 200, 'Good morning! Day ' + FF.save.day, true); FF.sfx.star();
+  });
+  on('mapMarketBtn', () => { if (FF.inBarn()) { packFrom = 'map'; Screens.toMarket(); } else FF.fx.text(FF.map.metrics().cam + 300, 200, 'The barn is empty. Go pick some fruit!', false); });
+  on('mapShopBtn', () => FF.shop.open('map'));
   on('plantDone', () => { UI.hideAll(); Screens.backToMap(); });
-  on('titleOrdersBtn', () => FF.orders.open('title'));
   $('mapJump').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) FF.map.jump(b.dataset.jump); });
   on('soldBookBtn', () => FF.book.open('sold'));
-  on('titleMarketBtn', Screens.toMarket);
   on('packGo', () => Screens.market(picks));
-  on('packBack', Screens.title);
+  on('packBack', () => { if (packFrom === 'map') { packFrom = null; UI.hideAll(); Screens.backToMap(); } else Screens.title(); });
   on('doneBtn', () => FF.market.finish());
   $('packRows').addEventListener('click', e => {
     const b = e.target.closest('[data-pack]');

@@ -161,6 +161,8 @@
     delivered(name) { const t = today(); (t.delivered || (t.delivered = [])).push(name); },
     sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
     startDay() { if (today().sold) { closeDay(); FF.stickers.check(); FF.persist(); } },
+    // Going to bed ends the day even if nothing happened in it.
+    sleep() { const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
     open(origin) {
       FF.sound.ensure();
       from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false;

@@ -1,7 +1,7 @@
-/* Fruit Farmer: the order board. Three friends always have an order up: some fruit (and later,
-   goods) for more coins than the market, plus hearts and farm points. Orders never expire; "Not
-   today" swaps one for a new one. Pin an order and the harvest counts toward it, pausing shakes
-   once you have everything. Numbers live in D.orders. */
+/* Fruit Farmer: the order board. Each morning three friends post an order: some fruit, goods or
+   crops for more coins than the market, plus hearts and farm points. Orders last the whole day; a
+   delivered one stays ticked until tomorrow, and "Not today" swaps an order once. Pin an order and
+   the harvest counts toward it. Numbers live in D.orders. */
 (() => {
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui, { randi, pick } = FF.util;
   const O = D.orders;
@@ -10,8 +10,8 @@
   // What orders can ask for: fruit you grow, plus anything a later step adds (goods, crops).
   const sources = () => FF.save.trees.concat(FF.orderExtras ? FF.orderExtras() : []);
   const have = t => FF.save.barn[t] + (FF.G.state === 'farm' ? FF.save.crate[t] : 0);
-  const ready = o => Object.entries(o.items).every(([t, n]) => FF.save.barn[t] >= n);
-  const pinned = () => FF.save.orders.find(o => o.id === FF.save.pin) || null;
+  const ready = o => !o.done && Object.entries(o.items).every(([t, n]) => FF.save.barn[t] >= n);
+  const pinned = () => FF.save.orders.find(o => o.id === FF.save.pin && !o.done) || null;
 
   function make() {
     const s = FF.save, used = s.orders.map(o => o.animal), pool = FF.friends.available().filter(k => !used.includes(k));
@@ -24,9 +24,15 @@
     }
     const value = Object.entries(items).reduce((n, [t, k]) => n + D.fruits[t].price * k, 0);
     const animal = pick(pool.length ? pool : FF.friends.available());
-    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), animal, items, coins: Math.round(value * O.payBonus) + O.base };
+    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), animal, items, coins: Math.round(value * O.payBonus) + O.base, day: FF.save.day };
   }
-  function fill() { while (FF.save.orders.length < O.count) FF.save.orders.push(make()); }
+  // A new day brings a new board; during the day the board only fills up to the count.
+  function fill() {
+    const s = FF.save;
+    if (s.orders.some(o => o.day !== s.day)) { s.orders = []; s.pin = null; }
+    while (s.orders.length < O.count) s.orders.push(make());
+  }
+  const open = () => FF.save.orders.filter(o => !o.done);
 
   function deliver(id) {
     const s = FF.save, o = s.orders.find(x => x.id === id);
@@ -36,8 +42,8 @@
     s.coins += o.coins; FF.book.bonus(o.coins); FF.book.delivered(FF.friends.name(o.animal));
     FF.addPoints(count * O.pointsPerItem);
     FF.stickers.add('orders'); FF.stickers.add('orderItems', count);
-    s.orders = s.orders.filter(x => x !== o); if (s.pin === id) s.pin = null;
-    fill(); FF.stickers.check(); FF.persist();
+    o.done = true; if (s.pin === id) s.pin = null;
+    FF.stickers.check(); FF.persist();
     FF.sfx.buy(); FF.fx.confetti();
     return o;
   }
@@ -50,13 +56,14 @@
   function render(note) {
     fill();
     $('ordersCoins').innerHTML = UI.coinHTML(FF.save.coins);
-    $('ordersNote').textContent = note || 'Orders wait as long as you like. Pin one and your harvest counts toward it.';
+    $('ordersNote').textContent = note || (open().length ? "Today's orders. Pin one and your harvest counts toward it." : 'All done for today! New orders come tomorrow.');
     $('ordersList').innerHTML = FF.save.orders.map(o => {
+      if (o.done) return `<div class="order done"><div class="row">${animalPic(o.animal)}<div class="grow"><b>${FF.friends.name(o.animal)}</b><div class="items">${Object.entries(o.items).map(([t, n]) => `<span class="item got">${pic(t)}${n}</span>`).join('')}</div></div><span class="pill tick">Done today</span></div></div>`;
       const on = FF.save.pin === o.id, can = ready(o);
       return `<div class="order${on ? ' pinned' : ''}"><div class="row">${animalPic(o.animal)}<div class="grow"><b>${FF.friends.name(o.animal)}</b><div class="items">${itemsHTML(o)}</div></div><span class="pill">${I.coin}${o.coins}</span></div>` +
         `<div class="orderbtns"><button class="mini" type="button" data-order="deliver" data-id="${o.id}" ${can ? '' : 'disabled'}>Deliver</button>` +
         `<button class="mini ${on ? 'owned' : ''}" type="button" data-order="pin" data-id="${o.id}" aria-pressed="${on}">${on ? 'Pinned' : 'Pin'}</button>` +
-        `<button class="mini" type="button" data-order="skip" data-id="${o.id}">Not today</button></div></div>`;
+        `<button class="mini" type="button" data-order="skip" data-id="${o.id}" ${o.swapped ? 'disabled' : ''}>${o.swapped ? 'New today' : 'Not today'}</button></div></div>`;
     }).join('');
   }
   $('ordersOv').addEventListener('click', e => {
@@ -67,7 +74,10 @@
     const id = b.dataset.id, s = FF.save;
     if (b.dataset.order === 'deliver') { const o = deliver(id); if (o) render(FF.friends.name(o.animal) + ' says thank you! +' + o.coins + ' coins.'); return; }
     if (b.dataset.order === 'pin') { s.pin = s.pin === id ? null : id; cheered = null; FF.sfx.tick(); }
-    if (b.dataset.order === 'skip') { s.orders = s.orders.filter(o => o.id !== id); if (s.pin === id) s.pin = null; FF.sfx.tick(); }
+    if (b.dataset.order === 'skip') {
+      const i = s.orders.findIndex(o => o.id === id);
+      if (i >= 0 && !s.orders[i].swapped) { s.orders.splice(i, 1); const n = make(); n.swapped = true; s.orders.splice(i, 0, n); if (s.pin === id) s.pin = null; FF.sfx.tick(); }
+    }
     FF.persist(); render();
   });
 
@@ -76,6 +86,7 @@
     close() { UI.hideAll(); if (from === 'title') FF.screens.title(); else FF.screens.backToMap(); },
     reset() { FF.save.orders = []; FF.save.pin = null; },
     readyCount: () => { fill(); return FF.save.orders.filter(ready).length; },
+    fill,
     // The grove card line for a pinned order that wants this grove's fruit.
     pinLine(type) {
       const o = pinned();

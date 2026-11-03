@@ -37,6 +37,8 @@ browser on that computer.
   milk) in the barnyard.
 - **More kitchens:** a popcorn cart, a salad bar (one of every fruit), a bakery (apple pie from apples,
   eggs and milk) and a diner (milkshakes and pancakes), each unlocked by the ones before.
+- **Days:** the day shows in the village and while you harvest. Coming back from market starts the next day,
+  or tap Sleep in the village to end the day whenever you like.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

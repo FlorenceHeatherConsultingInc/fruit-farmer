@@ -20,13 +20,15 @@
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove', 'orders', 'build', 'plant'];
+  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove', 'orders', 'build', 'plant', 'sleep'];
   FF.ui = {
     show(id) { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = o !== id; }); G.overlay = id; },
     hideAll() { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = true; }); G.overlay = null; },
     hud(which) {
       $('farmHud').hidden = which !== 'farm';
       $('pads').hidden = which !== 'farm';
+      $('farmDay').hidden = which !== 'farm';
+      $('farmDay').textContent = 'Day ' + FF.save.day;
       $('marketHud').hidden = which !== 'market';
       $('mapHud').hidden = which !== 'village';
       $('mapJump').hidden = which !== 'village';

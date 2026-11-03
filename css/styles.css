@@ -305,7 +305,7 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .mapjump button[aria-pressed="true"] { background: var(--sun); }
 .mapjump button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 #mapHud .chip { font-size: clamp(18px, 5vw, 26px); }
-#mapBackBtn, #mapFriendsBtn { font-size: 17px; padding: 0 12px; }
+#mapBackBtn, #mapFriendsBtn, #mapSleepBtn, #mapMarketBtn, #mapShopBtn { font-size: 17px; padding: 0 12px; }
 .order { border: 3px solid var(--ink); border-radius: 18px; background: var(--paper); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
 .order.pinned { background: #fff6cc; }
 .order .row { display: flex; align-items: center; gap: 10px; }
@@ -349,6 +349,15 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .summary .newlook canvas { width: 170px !important; height: auto !important; }
 .summary .newlook b { font-size: 21px; }
 @keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+#mapHud { flex-wrap: wrap; }
+.maptools { flex-basis: 100%; display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.maptools .iconbtn { pointer-events: auto; }
+#mapCoins .day { font-weight: 800; margin-right: 8px; padding-right: 8px; border-right: 3px solid var(--ink); }
+.order.done { opacity: .75; }
+.pill.tick { background: var(--leaf, #5cc24a); color: #fff; }
+.daytag { position: fixed; z-index: 2; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 62px); left: max(16px, env(safe-area-inset-left, 0px)); background: var(--card); border: 3px solid var(--ink); border-radius: 999px; padding: 0 10px; font-weight: 800; font-size: 15px; pointer-events: none; }
+.farmline { font-weight: 800; font-size: 18px; text-align: center; }
+.statbtn { cursor: pointer; pointer-events: auto; font: inherit; color: inherit; }
 .pagehead { display: flex; justify-content: space-between; align-items: center; }
 .pagehead h3 { margin: 0; font-size: 20px; }
 .stickers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
