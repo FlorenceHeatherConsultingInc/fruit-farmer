@@ -20,7 +20,7 @@
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove'];
+  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove', 'orders'];
   FF.ui = {
     show(id) { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = o !== id; }); G.overlay = id; },
     hideAll() { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = true; }); G.overlay = null; },
@@ -31,6 +31,7 @@
       $('marketHud').hidden = which !== 'market';
       $('mapHud').hidden = which !== 'village';
       $('mapJump').hidden = which !== 'village';
+      $('farmPin').hidden = which !== 'farm' || !FF.orders.hudText();
     },
     specialText() {
       const sp = FF.special(), name = FF.data.fruits[sp.fruit].name.toLowerCase(), who = FF.friends.name(sp.animal);
@@ -47,6 +48,12 @@
       $('loadChip').classList.toggle('full', n >= c);
       $('toMarketBtn').hidden = n === 0;
       if (bump) FF.ui.bump($('loadChip'));
+    },
+    // The pinned order's counter during a harvest; the Done button glows once it's filled.
+    pin() {
+      const text = FF.orders.hudText();
+      $('farmPin').textContent = text; $('farmPin').hidden = !text || FF.G.state !== 'farm';
+      $('farmDoneBtn').classList.toggle('glow', FF.orders.pinFilled());
     },
     coins(bump) {
       $('coinChip').innerHTML = FF.ui.coinHTML(FF.save.coins);

@@ -105,6 +105,7 @@
     if (f.type !== 'star') FF.groves.take(f.type);
     FF.book.harvest(f.type);
     FF.addPoints(D.levels.pointsPerCatch);
+    FF.orders.caught(); FF.hud.pin();
     combo++;
     FF.persist();
     FF.hud.load(true);

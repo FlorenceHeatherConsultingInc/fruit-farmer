@@ -41,14 +41,15 @@
 </div>
 
 <div class="special farm" id="farmSpecial" hidden></div>
+<div class="special farm pin" id="farmPin" hidden></div>
 
 <!-- Village map top bar and jump buttons -->
 <div class="hud" id="mapHud" hidden>
   <button class="iconbtn" id="mapBackBtn" type="button" aria-label="Back">Back</button>
   <div class="chip" id="mapCoins" aria-live="polite"></div>
   <div class="hud-right">
+    <button class="iconbtn" id="mapOrdersBtn" type="button" aria-label="Order board">Orders</button>
     <button class="iconbtn" id="mapFriendsBtn" type="button" aria-label="Friends list">Friends</button>
-    <button class="iconbtn soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
   </div>
 </div>
 <nav class="mapjump" id="mapJump" hidden aria-label="Village areas">
@@ -87,6 +88,7 @@
       <button class="btn secondary" id="titleShopBtn" type="button">Shop</button>
       <button class="btn secondary" id="titleBookBtn" type="button">Farm book</button>
       <button class="btn secondary" id="titleVillageBtn" type="button">Village</button>
+      <button class="btn secondary" id="titleOrdersBtn" type="button">Orders</button>
     </div>
     <div class="hint">Tap an arrow to scoot. Hold it to zip! You can also drag your basket.</div>
   </div>
@@ -124,6 +126,16 @@
     <section class="msec" id="groveFilterSec"><div class="label">Filter</div><div class="grid3" id="groveFilters"></div><p class="note" id="groveFilterNote"></p></section>
     <button class="btn primary" id="groveGo" type="button">Go!</button>
     <button class="btn secondary" id="groveBack" type="button">Not now</button>
+  </div>
+</div>
+
+<!-- The order board -->
+<div class="overlay" id="ordersOv" hidden>
+  <div class="card shop" role="dialog" aria-labelledby="ordersTitle">
+    <div class="shop-head"><h2 id="ordersTitle">Orders</h2><div class="coins" id="ordersCoins" aria-live="polite"></div></div>
+    <p class="note" id="ordersNote"></p>
+    <div class="rows" id="ordersList"></div>
+    <button class="btn primary done" type="button" id="ordersDone">Done</button>
   </div>
 </div>
 
@@ -218,6 +230,7 @@
 <script src="js/ui.js"></script>
 <script src="js/farm.js"></script>
 <script src="js/groves.js"></script>
+<script src="js/orders.js"></script>
 <script src="js/animals.js"></script>
 <script src="js/friends.js"></script>
 <script src="js/stickers.js"></script>

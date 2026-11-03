@@ -63,6 +63,7 @@
       sales.map(x => `<div class="row">${animalPic(x.animal)}<span>${FF.friends.name(x.animal)} bought</span><span class="item">${fruitPic(x.fruit)}×${x.n}</span><span class="pay">${I.coin}${x.coins}</span></div>`).join('') +
       (p.perfect ? `<div class="row"><span>${p.perfect} Perfect ${p.perfect > 1 ? 'shots' : 'shot'}!</span></div>` : '') +
       (p.bought.length ? `<div class="row"><span>Got: ${p.bought.join(', ')}</span></div>` : '') +
+      (p.delivered && p.delivered.length ? `<div class="row"><span>Delivered orders to ${p.delivered.join(', ')}</span></div>` : '') +
       (p.legend ? `<div class="row"><b>Became a Fruit Legend! The whole village held a parade.</b></div>` : '') +
       (p.earned ? `<div class="row total"><span>Earned</span><span class="pay">${I.coin}${p.earned}</span></div>` : '') +
       `</article>`;
@@ -112,7 +113,7 @@
     closeDay();
     s.seeds += seedsFromFarm();
     s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary, challenge: s.challenge });
-    ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
+    ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
     s.farmNo++;
     s.challenge = challenge || null;
     if (s.seedBuys.includes('start-basket')) s.points = FF.pointsFor(5);
@@ -160,6 +161,7 @@
     },
     bonus: earn,
     bought(name) { today().bought.push(name); },
+    delivered(name) { const t = today(); (t.delivered || (t.delivered = [])).push(name); },
     sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
     startDay() { if (today().sold) { closeDay(); FF.stickers.check(); FF.persist(); } },
     open(origin) {

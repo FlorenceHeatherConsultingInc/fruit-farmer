@@ -45,7 +45,7 @@
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {},
-      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, filters: {}
+      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, filters: {}, orders: [], pin: null
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -96,6 +96,8 @@
     if (raw.stats && typeof raw.stats === 'object') s.stats = raw.stats;
     s.seeds = n(raw.seeds);
     if (raw.groves && typeof raw.groves === 'object') s.groves = raw.groves;
+    if (Array.isArray(raw.orders)) s.orders = raw.orders.filter(o => o && o.items && D.animals[o.animal] && Object.keys(o.items).every(t => D.fruits[t]));
+    if (s.orders.some(o => o.id === raw.pin)) s.pin = raw.pin;
     if (raw.filters && typeof raw.filters === 'object') FF.FRUIT_TYPES.forEach(t => { if (raw.filters[t]) s.filters[t] = n(raw.filters[t]); });
     // the Fruit magnet became filters: anyone who bought it gets those coins back
     const magnet = U.clamp(n(raw.up && raw.up.magnet), 0, 2);

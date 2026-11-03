@@ -177,6 +177,15 @@
     ctx.fillStyle = sc.plaza[0]; ctx.strokeStyle = sc.plaza[1]; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.ellipse(x0 + D.map.square, STREET + 30, 110, 46, 0, 0, TAU); ctx.fill(); ctx.stroke();
     if (has('fountain')) decor('fountain', x0 + spot('fountain').x, spot('fountain').y, 2.6);
+    // the order board stands by the square
+    const bx = x0 + D.map.square + 150, by = STREET + 120;
+    Draw.rr(bx - 6, by - 60, 12, 60, 3); Draw.fillStroke('#8a5a32', 3); Draw.rr(bx + 62, by - 60, 12, 60, 3); Draw.fillStroke('#8a5a32', 3);
+    Draw.rr(bx - 20, by - 132, 108, 80, 8); Draw.fillStroke('#c99a62', 4);
+    for (let i = 0; i < 3; i++) { Draw.rr(bx - 8 + i * 32, by - 120, 26, 34, 3); Draw.fillStroke('#fff8e0', 2); }
+    ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText('Orders', bx + 34, by - 64);
+    const ready = FF.orders.readyCount();
+    if (ready) { ctx.beginPath(); ctx.arc(bx + 86, by - 132, 16, 0, TAU); Draw.fillStroke('#ff5e7a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.fillText(ready, bx + 86, by - 125); }
+    target(bx - 30, by - 150, bx + 100, by + 4, () => { FF.sfx.tick(); FF.orders.open('map'); });
     if (has('bench')) decor('bench', x0 + spot('bench').x, spot('bench').y);
     if (has('pond')) decor('pond', x0 + spot('pond').x, spot('pond').y, 2.6);
     if (has('flowers')) [spot('flowers').x, 420, 1120, 1400].forEach(fx => decor('flowers', x0 + fx, spot('flowers').y));

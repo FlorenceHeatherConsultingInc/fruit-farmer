@@ -28,6 +28,8 @@ FF.data = {
   },
   // How much of the fruit in a grove round is the grove's own. The rest comes from nearby trees.
   groveMix: 0.7,
+  // The order board. Orders pay payBonus times what the items sell for, plus base, and give farm points per item.
+  orders: { count: 3, payBonus: 1.4, base: 5, pointsPerItem: 2 },
   // Filters: sold in bundles, priced per fruit.
   filters: { bundle: 3, cost: { apple: 6, orange: 8, banana: 10, strawberry: 12, grapes: 15 } },
 

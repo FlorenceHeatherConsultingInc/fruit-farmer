@@ -117,7 +117,7 @@
       FF.farm.start(grove, filter);
       UI.hud('farm');
       $('farmSpecial').textContent = UI.specialText();
-      FF.hud.load();
+      FF.hud.load(); FF.hud.pin();
     },
     market(chosen) {
       FF.sound.ensure();
@@ -192,6 +192,8 @@
   on('soldVillageBtn', () => Screens.village('sold'));
   on('mapBackBtn', () => Screens.leaveMap());
   on('mapFriendsBtn', () => FF.village.open());
+  on('mapOrdersBtn', () => FF.orders.open('map'));
+  on('titleOrdersBtn', () => FF.orders.open('title'));
   $('mapJump').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) FF.map.jump(b.dataset.jump); });
   on('soldBookBtn', () => FF.book.open('sold'));
   on('titleMarketBtn', Screens.toMarket);
