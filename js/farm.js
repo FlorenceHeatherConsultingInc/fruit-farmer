@@ -102,6 +102,7 @@
     if (pile.length > 9) pile.shift();
     if (demo || FF.carried() >= FF.cap()) return;
     FF.save.crate[f.type]++;
+    Farm.visit.caught[f.type] = (Farm.visit.caught[f.type] || 0) + 1;
     if (f.type !== 'star') FF.groves.take(f.type);
     FF.book.harvest(f.type);
     FF.addPoints(D.levels.pointsPerCatch);
@@ -117,9 +118,12 @@
 
   /* ---------- Start / update ---------- */
   // g: which grove to pick from.
-  Farm.bonus = {};
-  Farm.start = g => {
-    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0]; Farm.startPoints = FF.save.points; Farm.bonus = {};
+  Farm.bonus = {}; Farm.visit = { caught: {}, points: 0 };
+  // keep: true when Keep picking carries on the same visit, so the summary adds up every trip.
+  Farm.start = (g, keep) => {
+    grove = FF.save.trees.includes(g) ? g : FF.save.trees[0];
+    if (!keep) { Farm.visit = { caught: {}, points: FF.save.points }; Farm.bonus = {}; }
+    Farm.startPoints = Farm.visit.points;
     shakeT = D.speeds[FF.save.speed].shakeEvery * 0.6; bareT = -1;
     fruits = []; FX.clear();
     pile = [];

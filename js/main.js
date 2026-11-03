@@ -65,13 +65,22 @@
 
   const fruitImg = {};
   const img = t => { if (!fruitImg[t]) fruitImg[t] = FF.draw.fruitIcon(t, 48).toDataURL(); return `<img class="ic sm" src="${fruitImg[t]}" alt="">`; };
+  // What Keep picking would pick: this grove while it has fruit, then the next grove that does.
+  let keepGrove = null;
+  function nextPick() {
+    const here = FF.farm.grove(), left = t => FF.groves.stock(t);
+    if (here && left(here) > 0) return here;
+    return FF.save.trees.find(t => left(t) > 0) || null;
+  }
   function summaryHTML(up) {
-    const s = FF.save, got = FF.FRUIT_TYPES.filter(t => s.crate[t] > 0), pts = s.points - (FF.farm.startPoints || s.points);
+    const s = FF.save, v = FF.farm.visit, got = FF.FRUIT_TYPES.filter(t => v.caught[t] > 0), pts = s.points - (v.points || s.points);
+    const bonus = Object.values(FF.farm.bonus).reduce((a, b) => a + b, 0);
     const p = FF.levelProgress(), next = p.level + 1, nextLook = FF.lookFor(next), nowLook = FF.lookFor(p.level);
     const gives = nextLook.look !== nowLook.look ? `a new ${nextLook.name.toLowerCase()} that holds ${FF.capAt(next)}` : FF.capAt(next) > FF.capAt(p.level) ? `room for ${FF.capAt(next)} fruit` : 'more farm points';
     const newLook = up && up.newLook;
     return (newLook ? `<div class="newlook"><span data-look="${FF.carrier().look}"></span><b>Your ${FF.carrier().name.toLowerCase()} holds ${FF.cap()}!</b></div>` : '') +
-      `<div class="caught">${got.length ? got.map(t => `<span class="item">${img(t)}×${s.crate[t]}</span>`).join('') : '<span>Nothing caught this time.</span>'}</div>` +
+      `<div class="caught">${got.length ? got.map(t => `<span class="item">${img(t)}×${v.caught[t]}</span>`).join('') : '<span>Nothing caught this time.</span>'}</div>` +
+      (bonus ? `<div class="pts">including ${bonus} bonus fruit!</div>` : '') +
       `<div class="pts"><b>+${pts}</b> farm points${up && !newLook ? ` · now holds ${FF.cap()}` : ''}</div>` +
       `<div class="lvl"><span>Level ${p.level}</span><div class="meter"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></div><span>${next}</span></div>` +
       `<p class="note">${p.need - p.into} more points to level ${next}: ${gives}.</p>`;
@@ -164,7 +173,7 @@
       $('harvestBtn').focus();
     },
     // A harvest round in one grove.
-    farm(grove) {
+    farm(grove, keep) {
       FF.sound.ensure();
       FF.book.startDay();
       const sel = document.querySelector('input[name="speed"]:checked');
@@ -174,7 +183,7 @@
       FF.layout();
       clearInput();
       FF.holdLevel();
-      FF.farm.start(grove);
+      FF.farm.start(grove, keep);
       UI.hud('farm');
       FF.hud.load(); FF.hud.pin();
     },
@@ -192,15 +201,18 @@
     },
     // The end of a harvest: full, bare or Done. Shows what you caught and what the next level brings.
     showFull(why) {
-      const n = FF.carried(), up = FF.releaseLevel(), c = FF.carrier();
+      const up = FF.releaseLevel(), c = FF.carrier(), next = nextPick(), room = FF.barnSize() - FF.inBarn() - FF.carried() > 0;
       $('fullTitle').textContent = up && up.newLook ? 'New: ' + c.name + '!' : up ? 'Level ' + up.to + '!' : why === true ? 'All picked!' : why === 'done' ? 'Harvest done' : c.full;
-      $('fullMsg').textContent = why === true ? 'This grove refills tomorrow.' : '';
+      $('fullMsg').textContent = !room ? 'The barn is full! Sell some at the market, or build a bigger barn.' : why === true && !next ? 'Every tree is picked. They grow more fruit tomorrow.' : why === true ? 'This grove refills tomorrow.' : '';
+      // One tap to carry on: the same tree if it still has fruit, otherwise the next tree that does.
+      keepGrove = room ? next : null;
+      $('keepBtn').hidden = !keepGrove;
+      if (keepGrove) { const f = D.fruits[keepGrove].name.toLowerCase(), n = FF.groves.stock(keepGrove); $('keepBtn').textContent = (keepGrove === FF.farm.grove() ? 'Keep picking ' : 'Pick ') + f + ' (' + n + ' left)'; }
       $('fullSummary').innerHTML = summaryHTML(up);
       document.querySelectorAll('#fullSummary [data-look]').forEach(el => el.appendChild(FF.farm.lookPreview(el.dataset.look)));
-      $('goMarketBtn').hidden = n === 0 && FF.inBarn() === 0;
       UI.show('full');
       if (up) { FF.sfx.buy(); if (up.newLook) { FF.fx.confetti(); FF.sfx.party(); } FF.stickers.check(); FF.hud.load(); }
-      $(n || FF.inBarn() ? 'goMarketBtn' : 'fullVillageBtn').focus();
+      $(keepGrove ? 'keepBtn' : 'fullVillageBtn').focus();
     },
     showSold() {
       const earned = FF.market.earned();
@@ -217,7 +229,6 @@
       clearInput();
       const n = FF.carried();
       $('pauseMsg').textContent = n ? 'You are carrying ' + n + ' of ' + FF.cap() + ' fruit.' : 'You are not carrying any fruit yet.';
-      $('pauseMarketBtn').hidden = n === 0;
       UI.show('pause');
       $('resumeBtn').focus();
     },
@@ -285,9 +296,8 @@
   });
   on('pauseBtn', Screens.pause);
   on('resumeBtn', Screens.resume);
-  on('pauseMarketBtn', Screens.toMarket);
-  on('homeBtn', Screens.title);
-  on('goMarketBtn', Screens.toMarket);
+  on('homeBtn', () => Screens.village('title', 'groves'));
+  on('keepBtn', () => { const g = keepGrove; if (!g) return; FF.unloadBasket(); Screens.farm(g, true); });
   on('soldShopBtn', () => FF.shop.open('sold'));
   on('soldFarmBtn', () => Screens.village('title', 'groves'));
   on('shopBtn', () => FF.shop.open('market'));

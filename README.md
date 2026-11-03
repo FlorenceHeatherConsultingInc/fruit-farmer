@@ -50,6 +50,8 @@ browser on that computer.
 - **Finding your way:** the buttons down the left of the village (market, sleep, shop, Farm book, orders,
   friends) and the area buttons appear as your farm grows, and one-time tips point you to the barn, the
   Tool shed and other places.
+- **Keep picking:** when your basket is full, one tap empties it into the barn and keeps picking the same
+  tree (or the next tree with fruit). Every harvest ends in the village; go to the market from there.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

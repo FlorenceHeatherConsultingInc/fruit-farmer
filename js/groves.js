@@ -18,7 +18,8 @@
   function render() {
     const s = FF.save, n = stock(open), f = D.fruits[open];
     $('groveTitle').textContent = tree(open).name.replace(' tree', ' grove');
-    $('groveStock').textContent = n ? `${n} ${f.name.toLowerCase()} on the tree.` + (s.trees.length > 1 ? ' Watch for sparkly bonus fruit from your other trees!' : '') : `The grove is bare. It refills in ${tree(open).refill === 1 ? 'a day' : tree(open).refill + ' days'}.`;
+    const trips = Math.ceil(n / FF.cap());
+    $('groveStock').textContent = n ? `${n} ${f.name.toLowerCase()} on the tree. Your basket holds ${FF.cap()}, so that's ${trips === 1 ? 'one trip' : trips + ' trips'}.` + (s.trees.length > 1 ? ' Watch for sparkly bonus fruit!' : '') : `The grove is bare. It refills in ${tree(open).refill === 1 ? 'a day' : tree(open).refill + ' days'}.`;
     $('grovePin').innerHTML = FF.orders ? FF.orders.pinLine(open) : '';
     $('groveGo').disabled = n === 0;
   }
