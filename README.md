@@ -13,7 +13,8 @@ browser on that computer.
   shows where your fruit will land. On a keyboard, use the arrow keys to aim and Space to throw.
   Give each animal the fruit it asks for. The tag shows what the whole basket still pays, and
   animals farther back pay more per fruit. Missed fruit comes back to your tray.
-- **Slingshot:** start your drag on the fruit. Tap a fruit in the tray to swap it in.
+- **Slingshot:** start your drag on the fruit. Drag above the fruit and let go to put it back.
+  Tap a fruit in the tray to swap it in, and tap an animal to see who they are.
 - **Farm book:** see your Farm Score, your totals for today, this week and this month, a diary of
   every day, and your farms. You can start a new farm and keep your colors and scenery.
 - **Family:** in the Farm book, start a family or join one with a code to compare scores for today,

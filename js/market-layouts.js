@@ -73,6 +73,7 @@
     for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + d * R * 0.42, footY, R * 0.32, R * 0.17, 0, 0, TAU); Draw.fillStroke(color, lw); }
     ctx.beginPath(); ctx.ellipse(x, y + R * 0.18, R * 0.84, R * 0.92, 0, 0, TAU); Draw.fillStroke(color, lw);
     Animals.drawHead(t.kind, x, headY, hr, t.mood, G.clock + x, L.env.look(x, headY));
+    t.head = { x, y: headY, r: hr };
 
     const q = 1 + 0.12 * Math.sin(t.bump * Math.PI);
     ctx.save();
@@ -211,6 +212,7 @@
     const hr = Math.max(11, R * 0.33), hop = t.state === 'happy' ? Math.abs(Math.sin(t.t * 9)) * hr * 0.5 : 0;
     const hx = x - R * 0.68, hy = y - ry - R * 0.06 + hr * 1.4 * t.pop - hop;
     Animals.drawHead(t.kind, hx, hy, hr, t.mood, G.clock + t.row + t.c, L.env.look(hx, hy));
+    t.head = { x: hx, y: hy, r: hr };
     drawBubble(t, x + R * 0.3, y - ry - R * 0.06, s);
     drawPrice(t, x, bot - 1, s);
   }

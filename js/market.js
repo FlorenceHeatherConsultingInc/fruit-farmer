@@ -10,14 +10,14 @@
   const Draw = FF.draw, FX = FF.fx, Layouts = FF.marketLayouts, Animals = FF.animals;
   const INK = D.colors.ink, CARD = D.colors.card, SUN = D.colors.sun, MK = D.market;
   const FONT = '"Baloo 2", "Trebuchet MS", sans-serif';
-  const MIN_PULL = 16, KEY_STEP = 12, HAPPY_SECONDS = 1.25, COIN_SECONDS = 0.62, REVEAL_SECONDS = 1.5;
+  const MIN_PULL = 16, CANCEL_LIFT = 14, INFO_SECONDS = 4, KEY_STEP = 12, HAPPY_SECONDS = 1.25, COIN_SECONDS = 0.62, REVEAL_SECONDS = 1.5;
 
   const M = { horizon: 0 };
   let active = 'friends', targets = [], ammo = [], shots = [], loaded = null, reloadT = 0, popIn = 0;
-  let coinsFly = [], rings = [], drag = null, aim = null, stretched = 0;
+  let coinsFly = [], rings = [], drag = null, aim = null, stretched = 0, info = null;
   let earned = 0, streak = 0, streakBump = 0, hits = 0, soldT = -1, shake = 0, wobble = 0, revealT = 0;
 
-  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded, aim: () => aim };
+  const Market = FF.market = { earned: () => earned, layoutId: () => active, targets: () => targets, metrics: () => M, loaded: () => loaded, aim: () => aim, info: () => info };
   const pay = () => MK[active];
 
   /* ---------- Layout ---------- */
@@ -55,12 +55,18 @@
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
-    const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k));
-    t.kind = pick(unused.length ? unused : pool);
-    const sp = FF.special().fruit;
-    const fav = D.animals[t.kind].fav;
-    t.wants = force || (spare.includes(sp) && Math.random() < 0.4 ? sp : spare.includes(fav) && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(spare.length ? spare : stock));
-    t.special = t.wants === sp;
+    // Today's special animal is always at the market asking for its fruit, as long as you have some.
+    const special = FF.special(), sp = special.fruit;
+    const specialHere = targets.some(x => x !== t && x.special && x.state !== 'closed');
+    const pool = FF.friends.available().filter(k => k !== special.animal), unused = pool.filter(k => !targets.some(x => x.kind === k));
+    if ((force ? force === sp : stock.includes(sp)) && !specialHere) {
+      t.kind = special.animal; t.wants = sp;
+    } else {
+      t.kind = pick(unused.length ? unused : pool);
+      const fav = D.animals[t.kind].fav, plain = (spare.length ? spare : stock).filter(f => f !== sp);
+      t.wants = force || (spare.includes(fav) && fav !== sp && Math.random() < 0.3 ? fav : Math.random() < MK.anyChance ? 'any' : pick(plain.length ? plain : stock));
+    }
+    t.special = t.kind === special.animal && t.wants === sp;
     t.need = Math.min(randi(1, pay().maxAsk[t.row]), Math.max(1, free(t.wants, t)));
     let bonus = pay().rowBonus[t.row];
     if (Math.random() < pay().mixChance) bonus = Math.max(0, bonus + pick([-1, 1]));
@@ -93,8 +99,9 @@
     const ys = targets.map(t => t.y);
     return { far: M.ay - (Math.min(...ys) - 40), near: (M.ay - Math.max(...ys)) * 0.55, wide: G.W * MK.aim.reachX };
   }
+  const cancelling = d => d && !d.key && d.py - d.sy < -CANCEL_LIFT;
   function aimFrom(d) {
-    if (Math.hypot(d.px - d.sx, d.py - d.sy) < MIN_PULL) return null;
+    if (cancelling(d) || Math.hypot(d.px - d.sx, d.py - d.sy) < MIN_PULL) return null;
     const fx = clamp((d.px - d.sx) / M.maxPull, -1, 1), fy = clamp((d.py - d.sy) / M.maxPull, 0, 1);
     const dx = fx * M.maxPull, dy = fy * M.maxPull, power = Math.max(Math.abs(fx), fy), { far, near, wide } = aimRange();
     let x = clamp(M.ax - fx * wide, 10, G.W - 10), y = Math.max(40, M.ay - (near + fy * (far - near)));
@@ -230,6 +237,7 @@
     }
     if (!loaded && reloadT <= 0 && ammo.length) { loaded = ammo.shift(); popIn = 1; }
     aim = drag && loaded ? aimFrom(drag) : null;
+    if (info && (info.t -= dt) <= 0) info = null;
 
     const anyLeft = ammo.length || shots.length || loaded;
     for (const t of targets) {
@@ -319,10 +327,16 @@
     popIn = 1; FF.sfx.tick();
     FF.stickers.add('swaps'); FF.stickers.check();
   }
+  // Tapping an animal's face shows who they are. Tapping anywhere else puts the card away.
+  function tapAnimal(x, y) {
+    const t = targets.find(t => t.head && t.state !== 'closed' && Math.hypot(x - t.head.x, y - t.head.y) < Math.max(24, t.head.r * 1.3));
+    info = t ? { kind: t.kind, t: INFO_SECONDS } : null;
+    if (t) FF.sfx.tick();
+  }
   // A throw has to start on the fruit, so stray taps around the screen never fire one.
   Market.pointerDown = e => {
     if (e.clientY >= M.trayY) return tapTray(e.clientX);
-    if (!loaded || Math.hypot(e.clientX - M.ax, e.clientY - M.ay) > Math.max(48, M.fr * 1.7)) return;
+    if (!loaded || Math.hypot(e.clientX - M.ax, e.clientY - M.ay) > Math.max(48, M.fr * 1.7)) return tapAnimal(e.clientX, e.clientY);
     drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, px: e.clientX, py: e.clientY }; stretched = 0;
   };
   Market.pointerMove = e => {
@@ -387,6 +401,11 @@
     ctx.beginPath(); ctx.ellipse(p.x, p.y + M.fr * 0.55, M.fr * 0.8, M.fr * 0.35, 0, 0, Math.PI); ctx.strokeStyle = '#6b3b1a'; ctx.lineWidth = 7; ctx.stroke();
   }
   function drawAim() {
+    if (cancelling(drag) && loaded) {
+      const ctx = G.ctx;
+      ctx.font = `800 20px ${FONT}`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
+      ctx.strokeText('Let go to put it back', M.ax, M.ay - M.fr - 22); ctx.fillStyle = CARD; ctx.fillText('Let go to put it back', M.ax, M.ay - M.fr - 22);
+    }
     if (!aim) return;
     const ctx = G.ctx, arc = arcFor(aim.x, aim.y), p = pouch(), good = aim.target && takes(aim.target, loaded);
     ctx.save();
@@ -434,6 +453,22 @@
     ctx.fillText('Streak ' + streak, 0, 1); ctx.textBaseline = 'alphabetic';
     ctx.restore();
   }
+  function drawInfo() {
+    if (!info) return;
+    const ctx = G.ctx, F = FF.friends, k = info.kind, n = F.hearts(k), goal = F.nextGoal(k), a = D.animals[k];
+    const w = Math.min(320, G.W - 32), h = 112, x = (G.W - w) / 2, y = 78;
+    ctx.save(); ctx.globalAlpha = Math.min(1, info.t * 3);
+    Draw.rr(x, y, w, h, 18); Draw.fillStroke(CARD, 3);
+    Animals.drawHead(k, x + 52, y + 60, 30, 'happy', G.clock, { x: 0.4, y: 0 });
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = INK;
+    ctx.font = `800 23px ${FONT}`; ctx.fillText(n ? a.name : 'New friend!', x + 96, y + 26);
+    for (let i = 0; i < 5; i++) { ctx.save(); ctx.translate(x + 106 + i * 21, y + 52); Draw.heartPath(9); Draw.fillStroke(i < n ? '#ff3b5c' : '#ddd6e8', 2); ctx.restore(); }
+    ctx.font = `700 16px ${FONT}`; ctx.fillStyle = INK;
+    if (n >= D.friendship.favoriteAt) { Draw.fruit(a.fav, x + 107, y + 86, 10); ctx.fillText('Loves ' + D.fruits[a.fav].name.toLowerCase(), x + 122, y + 87); }
+    else ctx.fillText(n ? 'Sell more to learn what they love' : 'Sell them fruit to learn their name', x + 96, y + 87);
+    if (goal) { ctx.textAlign = 'right'; ctx.font = `700 14px ${FONT}`; ctx.fillText(F.sold(k) + '/' + goal, x + w - 14, y + 26); }
+    ctx.restore(); ctx.textBaseline = 'alphabetic';
+  }
   function drawHint() {
     if (hits || drag || !loaded) return;
     const ctx = G.ctx, k = (G.clock * 0.8) % 1, y = M.ay + 16 + k * 50, tx = Math.min(G.W - 80, M.ax + 118);
@@ -472,6 +507,7 @@
     drawCoins();
     drawStreak();
     drawHint();
+    drawInfo();
     ctx.restore();
     ctx.textAlign = 'left';
   };
