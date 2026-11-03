@@ -16,7 +16,7 @@
 }
 [hidden] { display: none !important; }
 html { background: var(--ink); }
-html, body { height: 100%; }
+html, body { height: 100%; overflow: hidden; max-width: 100vw; }
 body {
   margin: 0;
   background: var(--ink);
@@ -52,7 +52,7 @@ canvas#game {
   padding-block: max(12px, env(safe-area-inset-top, 0px)) 12px;
   pointer-events: none;
 }
-.hud-right { display: flex; gap: 8px; }
+.hud-right { display: flex; gap: 8px; min-width: 0; flex-shrink: 1; }
 .chip {
   background: var(--card);
   border: 3px solid var(--ink);

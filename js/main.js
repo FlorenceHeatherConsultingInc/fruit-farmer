@@ -196,7 +196,6 @@
   $('mapJump').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) FF.map.jump(b.dataset.jump); });
   on('soldBookBtn', () => FF.book.open('sold'));
   on('titleMarketBtn', Screens.toMarket);
-  on('toMarketBtn', Screens.toMarket);
   on('packGo', () => Screens.market(picks));
   on('packBack', Screens.title);
   on('doneBtn', () => FF.market.finish());

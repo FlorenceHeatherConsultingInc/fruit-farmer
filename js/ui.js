@@ -41,7 +41,6 @@
       const n = FF.carried(), c = FF.cap();
       $('load').textContent = n + '/' + c;
       $('loadChip').classList.toggle('full', n >= c);
-      $('toMarketBtn').hidden = n === 0;
       if (bump) FF.ui.bump($('loadChip'));
     },
     // The pinned order's counter during a harvest; the Done button glows once it's filled.
@@ -58,7 +57,6 @@
 
   // Static icons in the markup
   $('loadIcon').innerHTML = FF.icons.apple;
-  $('toMarketBtn').innerHTML = FF.icons.stall + '<span class="txt">Market</span>';
   $('pauseBtn').innerHTML = FF.icons.pause;
   $('shopBtn').innerHTML = FF.icons.bag;
   $('padL').innerHTML = FF.icons.left;
