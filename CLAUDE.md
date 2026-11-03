@@ -58,7 +58,10 @@ It works offline except for the Google Font, which falls back to a system font.
   every field the others have. New `ground.bits` or `ambient` kinds also need a drawer in
   `scenery.js` (`BITS` or `WEATHER`).
 - **New good or building:** add the good to `fruits` with `kind: 'good'` and its art to `GOODS` in `draw.js`, then a row to
-  `buildings`. Kitchen buildings appear on the map in list order.
+  `buildings`. Kitchen buildings appear on the map in list order; barnyard ones have fixed spots in
+  `barnyard()` in `map.js`. Collecting counts `made` plus `made<Good>` (such as `madePancakes`) for stickers.
+- **Fields:** `fields` in `data.js` (opening level, plots, plot prices, crop days and yields). A new crop needs
+  a row in `fruits` with `kind: 'crop'`, art in `GOODS`, and a drawer in `plot()` in `map.js`.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
 - **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in

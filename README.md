@@ -24,7 +24,7 @@ browser on that computer.
 - **Village:** a map you drag left and right, with buttons to jump between areas. Tap a tree to
   harvest, tap a friend's home to see them, and tap the barn to see what's inside. Sell fruit to
   animals to earn hearts, and at 3 hearts build them a home. Friends stay across every farm.
-- **Stickers:** 60 stickers in the Farm book. Fill a page to unlock a reward you can't buy.
+- **Stickers:** 70 stickers in the Farm book, including a Maker page for buildings, crops and orders. Fill a page to unlock a reward you can't buy.
 - **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
   animals, scenery and head starts in the shop.
 - **Fruit Legend:** reach a Farm Score of 100,000 for a parade of all your friends.

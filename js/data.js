@@ -27,11 +27,11 @@ FF.data = {
     egg:        { name: 'Eggs',         price: 8,  colors: ['#fff6e0', '#f2d9a8'], kind: 'good' },
     milk:       { name: 'Milk',         price: 12, colors: ['#ffffff', '#4aa3e8'], kind: 'good' },
     // Second-step goods, made from other goods.
-    popcorn:    { name: 'Popcorn',      price: 9,  colors: ['#fff6d8', '#e8323f'], kind: 'good' },
+    popcorn:    { name: 'Popcorn',      price: 10, colors: ['#fff6d8', '#e8323f'], kind: 'good' },
     salad:      { name: 'Fruit salads', price: 26, colors: ['#5cc24a', '#ff3b5c'], kind: 'good' },
-    pie:        { name: 'Apple pies',   price: 30, colors: ['#e8a85a', '#e8322f'], kind: 'good' },
-    shake:      { name: 'Milkshakes',   price: 32, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
-    pancakes:   { name: 'Pancakes',     price: 42, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
+    pie:        { name: 'Apple pies',   price: 36, colors: ['#e8a85a', '#e8322f'], kind: 'good' },
+    shake:      { name: 'Milkshakes',   price: 40, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
+    pancakes:   { name: 'Pancakes',     price: 55, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
   },
   // Fields open at farm `level`, with `start` plots; each extra plot costs the next price in plotCosts.
   // days: how many days a crop takes. yield: how many you pick from one plot.
@@ -131,6 +131,7 @@ FF.data = {
     { id: 'gold',    name: 'Gold',    cost: 120, body: '#ffd23f', rim: '#d9a400', weave: '#e8b800' },
     { id: 'comet', name: 'Comet', cost: 1e9, reward: true, body: '#3a3a78', rim: '#ffd23f', weave: '#6a6ac0' },
     { id: 'goofy', name: 'Goofy', cost: 1e9, reward: true, body: '#ffffff', rim: '#ff5e7a', weave: '#d0c8e8' },
+    { id: 'chef',  name: 'Chef',  cost: 1e9, reward: true, body: '#fffaf0', rim: '#e8323f', weave: '#f2b8b8' },
     { id: 'rainbow', name: 'Rainbow', cost: 330, body: '#ff9a1f', rim: '#8a4bd6', weave: 'rgba(255,255,255,0.5)', rainbow: true }
   ],
   // Rewards you can't buy. Best friends each add one more below.
@@ -334,6 +335,18 @@ FF.data = {
       { id: 'silly8', name: '100 fruit swaps', stat: 'swaps', n: 100, icon: 'sheep' },
       { id: 'silly9', name: 'Start a second farm', stat: 'farms', n: 2, icon: 'bunny' },
       { id: 'silly10', name: 'Start a fourth farm', stat: 'farms', n: 4, icon: 'fox' }
+    ] },
+    { id: 'maker', name: 'Maker', icon: 'pancakes', reward: 'chef', stickers: [
+      { id: 'maker1', name: 'First building', stat: 'built', n: 1, icon: 'juice' },
+      { id: 'maker2', name: '5 buildings', stat: 'built', n: 5, icon: 'smoothie' },
+      { id: 'maker3', name: '11 buildings', stat: 'built', n: 11, icon: 'jam' },
+      { id: 'maker4', name: 'First crop picked', stat: 'crops', n: 1, icon: 'corn' },
+      { id: 'maker5', name: '200 crops picked', stat: 'crops', n: 200, icon: 'hay' },
+      { id: 'maker6', name: 'First goods made', stat: 'made', n: 1, icon: 'egg' },
+      { id: 'maker7', name: '100 goods made', stat: 'made', n: 100, icon: 'milk' },
+      { id: 'maker8', name: 'First pancakes', stat: 'madePancakes', n: 1, icon: 'pancakes' },
+      { id: 'maker9', name: 'First order', stat: 'orders', n: 1, icon: 'pie' },
+      { id: 'maker10', name: '50 orders', stat: 'orders', n: 50, icon: 'shake' }
     ] }
   ],
   stickerRewards: {
@@ -342,7 +355,8 @@ FF.data = {
     party: { name: 'Party village' },
     comet: { name: 'Comet basket', skin: 'comet' },
     crown: { name: 'Crown hats' },
-    goofy: { name: 'Goofy basket', skin: 'goofy' }
+    goofy: { name: 'Goofy basket', skin: 'goofy' },
+    chef: { name: 'Chef basket', skin: 'chef' }
   },
 
   // Fruit sold to reach each heart. A favorite fruit counts this many times.

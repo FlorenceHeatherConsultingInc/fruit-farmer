@@ -48,6 +48,7 @@
     st.queue = st.queue.filter(q => {
       if (s.day < q.ready || room <= 0) return true;
       s.barn[q.out]++; room--; got++;
+      FF.stickers.add('made' + q.out[0].toUpperCase() + q.out.slice(1));
       return false;
     });
     if (got) { FF.addPoints(got * D.goodsPoints); FF.stickers.add('made', got); FF.stickers.check(); FF.sfx.coin(got); FF.persist(); }

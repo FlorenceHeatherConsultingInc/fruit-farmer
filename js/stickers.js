@@ -79,7 +79,7 @@
     const p = PAGES[page], got = count(p.stickers, s => owned(s.id)), total = FF.save.stickers.length;
     const info = picked && p.stickers.find(s => s.id === picked);
     const reward = D.stickerRewards[p.reward];
-    return `<div class="periods sixes">${PAGES.map((x, i) => `<button type="button" data-sticker="page-${i}" aria-pressed="${i === page}" aria-label="${x.name}">${picture(x.icon)}<small>${count(x.stickers, s => owned(s.id))}/${x.stickers.length}</small></button>`).join('')}</div>` +
+    return `<div class="periods sixes" style="grid-template-columns: repeat(${PAGES.length}, minmax(0, 1fr))">${PAGES.map((x, i) => `<button type="button" data-sticker="page-${i}" aria-pressed="${i === page}" aria-label="${x.name}">${picture(x.icon)}<small>${count(x.stickers, s => owned(s.id))}/${x.stickers.length}</small></button>`).join('')}</div>` +
       `<div class="pagehead"><h3>${p.name}</h3><span class="pay">${got}/${p.stickers.length}</span></div>` +
       `<div class="stickers">${p.stickers.map(s => `<button type="button" class="sticker ${owned(s.id) ? 'got' : ''}" data-sticker="${s.id}" aria-label="${s.name}">${picture(s.icon)}</button>`).join('')}</div>` +
       `<p class="note">${info ? `<b>${info.name}</b>: ${owned(info.id) ? 'Earned!' : info.within ? 'Not yet' : `${Math.min(value(info), info.n)}/${info.n}`}` : 'Tap a sticker to see how to earn it.'}</p>` +
