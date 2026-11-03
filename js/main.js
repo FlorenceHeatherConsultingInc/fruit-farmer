@@ -149,7 +149,7 @@
       const s = FF.save, list = [];
       const bare = s.trees.filter(t => FF.groves.stock(t) < FF.groves.holds(t));
       if (bare.length) list.push('Your trees grow more fruit.');
-      if (FF.fields && FF.fields.plots().some(p => p.crop)) list.push('Your crops grow.');
+      if (FF.fields && FF.fields.crops().some(c => FF.fields.level(c))) list.push('Your fields grow more.');
       if (D.buildings.some(b => FF.buildings.owned(b.id) && s.buildings[b.id].queue.length)) list.push('Your kitchens finish cooking.');
       $('sleepMsg').textContent = 'Tomorrow is Day ' + (s.day + 1) + '. ' + (list.join(' ') || 'A brand-new day on the farm.');
       UI.show('sleep'); $('sleepYes').focus();

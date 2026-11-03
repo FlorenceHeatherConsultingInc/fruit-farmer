@@ -35,7 +35,7 @@
     { id: 'shed', when: () => sold() && FF.save.coins >= D.upgrades[0].costs[0], text: 'The Tool shed in the Barnyard has upgrades, like Zippy wheels to move faster.', go: { area: 'barnyard' } },
     { id: 'orders', when: TOOLS.orders, text: 'Friends post orders now! Tap the clipboard to see what they want.', go: { tool: 'mapOrdersBtn' } },
     { id: 'friends', when: metFriend, text: 'Every fruit you sell gives your friends hearts. Tap the heart to see them.', go: { tool: 'mapFriendsBtn' } },
-    { id: 'fields', when: () => FF.fields.open(), text: 'The Fields are open! Plant hay and corn there.', go: { area: 'fields' } },
+    { id: 'fields', when: () => FF.fields.open(), text: 'The Fields are open! Your hay field grows hay every day. Tap it to bring it in.', go: { area: 'fields' } },
     { id: 'kitchen', when: kitchenReady, text: 'You can build a kitchen to make juice and more. Have a look in the Kitchen.', go: { area: 'kitchen' } }
   ];
   let showing = null;

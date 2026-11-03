@@ -33,9 +33,11 @@ FF.data = {
     shake:      { name: 'Milkshakes',   price: 40, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
     pancakes:   { name: 'Pancakes',     price: 55, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
   },
-  // Fields open once you grow `trees` kinds of fruit, with `start` plots; each extra plot costs the next price in plotCosts.
-  // days: how many days a crop takes. yield: how many you pick from one plot.
-  fields: { trees: 3, start: 4, max: 12, plotCosts: [80, 120, 160, 200, 260, 320, 400, 500], crops: { hay: { days: 1, yield: 3 }, corn: { days: 2, yield: 3 } } },
+  // Fields open once you grow `trees` kinds of fruit. One field per crop, in this order (the first is free).
+  // grow: how many a level 1 field grows each day; perLevel: how many more each upgrade adds. A field holds
+  // holdDays days of growing. upCost: the first upgrade; each one after costs costGrowth times the last.
+  fields: { trees: 3, holdDays: 2, costGrowth: 1.5, oldPlotCosts: [80, 120, 160, 200, 260, 320, 400, 500],
+    crops: { hay: { cost: 0, grow: 4, perLevel: 2, upCost: 80 }, corn: { cost: 120, grow: 3, perLevel: 2, upCost: 110 } } },
   // Farm points for each good you collect from a building.
   goodsPoints: 2,
   // Production buildings. needs: trees, buildings or fields you must have first. deliver: items you hand
@@ -418,7 +420,7 @@ FF.data = {
   map: {
     areas: [
       { id: 'groves',   name: 'Groves',   w: 960 },
-      { id: 'fields',   name: 'Fields',   w: 1500 },
+      { id: 'fields',   name: 'Fields',   w: 1000 },
       { id: 'barnyard', name: 'Barnyard', w: 1220 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
       { id: 'friends',  name: 'Friends',  w: 2560 }

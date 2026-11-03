@@ -45,7 +45,7 @@
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [],
-      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, orders: [], pin: null, buildings: {}, plots: []
+      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, orders: [], pin: null, buildings: {}, fieldLv: {}, fieldStock: {}
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -104,7 +104,14 @@
     if (raw.groves && typeof raw.groves === 'object') s.groves = raw.groves;
     if (Array.isArray(raw.orders)) s.orders = raw.orders.filter(o => o && o.items && D.animals[o.animal] && Object.keys(o.items).every(t => D.fruits[t]));
     if (s.orders.some(o => o.id === raw.pin)) s.pin = raw.pin;
-    if (Array.isArray(raw.plots)) s.plots = raw.plots.slice(0, D.fields.max).map(p => ({ crop: p && D.fields.crops[p.crop] ? p.crop : null, day: n(p && p.day) }));
+    const crops = Object.keys(D.fields.crops), num = v => (Number.isFinite(+v) ? +v : 0);
+    if (raw.fieldLv && typeof raw.fieldLv === 'object') crops.forEach(c => { if (raw.fieldLv[c] > 0) s.fieldLv[c] = Math.floor(num(raw.fieldLv[c])); });
+    if (raw.fieldStock && typeof raw.fieldStock === 'object') crops.forEach(c => { const f = raw.fieldStock[c]; if (f && typeof f === 'object') s.fieldStock[c] = { stock: num(f.stock), day: num(f.day) }; });
+    // The old hand-planted plots: anything planted becomes that crop's field, and extra plots are paid back.
+    if (Array.isArray(raw.plots) && raw.plots.length) {
+      raw.plots.forEach(p => { if (p && D.fields.crops[p.crop]) s.fieldLv[p.crop] = Math.max(1, s.fieldLv[p.crop] || 0); });
+      s.coins += D.fields.oldPlotCosts.slice(0, Math.max(0, raw.plots.length - 4)).reduce((a, b) => a + b, 0);
+    }
     if (raw.buildings && typeof raw.buildings === 'object') for (const b of D.buildings) {
       const v = raw.buildings[b.id];
       if (v && typeof v === 'object') s.buildings[b.id] = { level: U.clamp(n(v.level), 1, b.slots.length), queue: Array.isArray(v.queue) ? v.queue.filter(q => q && D.fruits[q.out]) : [] };

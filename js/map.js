@@ -367,22 +367,28 @@
     for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * 3, y); ctx.quadraticCurveTo(x + i * 6 * k, y - 22 * k, x + i * 9 * k, y - 34 * k); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke(); }
     if (ripe) { ctx.fillStyle = '#c99a30'; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.ellipse(x + i * 9 * k, y - 34 * k, 3, 5, i * 0.4, 0, TAU); ctx.fill(); } }
   }
-  function plot(x, y, p, owned) {
-    const ctx = G.ctx, w = 190, h = 100;
-    ctx.globalAlpha = owned ? 1 : 0.45;
-    Draw.rr(x - w / 2, y - h, w, h, 12); Draw.fillStroke('#9a6a3a', 4);
+  // A field: rows of its crop, as many grown as it has ready, with a tag saying how many.
+  function field(x, y, c, owned) {
+    const ctx = G.ctx, w = 300, h = 150, Fl = FF.fields;
+    ctx.globalAlpha = owned ? 1 : 0.5;
+    Draw.rr(x - w / 2, y - h, w, h, 14); Draw.fillStroke('#9a6a3a', 4);
     ctx.strokeStyle = '#7a4f28'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-    for (let r = 0; r < 3; r++) { ctx.beginPath(); ctx.moveTo(x - 80, y - h + 28 + r * 28); ctx.lineTo(x + 80, y - h + 28 + r * 28); ctx.stroke(); }
+    for (let r = 0; r < 4; r++) { ctx.beginPath(); ctx.moveTo(x - w / 2 + 20, y - h + 30 + r * 32); ctx.lineTo(x + w / 2 - 20, y - h + 30 + r * 32); ctx.stroke(); }
     ctx.globalAlpha = 1;
-    if (!p || !p.crop) return;
-    const info = D.fields.crops[p.crop], grown = Math.min(1, (FF.save.day - p.day) / info.days), ripe = grown >= 1;
-    for (let r = 0; r < 3; r++) for (let i = 0; i < 5; i++) {
-      const px = x - 72 + i * 36, py = y - h + 26 + r * 28;
-      if (grown === 0) sprout(px, py, 0.6);
-      else if (p.crop === 'corn') cornStalk(px, py, 0.45 + 0.4 * grown, ripe);
-      else hayTuft(px, py, 0.5 + 0.45 * grown, ripe);
+    if (!owned) return;
+    const ready = Fl.ready(c), share = ready / Math.max(1, Fl.holds(c)), spots = 28, full = Math.round(spots * share);
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 7; i++) {
+      const k = r * 7 + i, px = x - w / 2 + 34 + i * 39, py = y - h + 28 + r * 32;
+      if (k >= full) sprout(px, py, 0.55);
+      else if (c === 'corn') cornStalk(px, py, 0.8, true);
+      else hayTuft(px, py, 0.9, true);
     }
-    if (ripe) { ctx.beginPath(); ctx.arc(x + w / 2 - 6, y - h - 4, 16, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.textAlign = 'center'; ctx.fillText('!', x + w / 2 - 6, y - h + 3); }
+    const tag = ready + ' ready', tx = x, ty = y + 34;
+    ctx.font = `800 24px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
+    ctx.strokeText(tag, tx, ty); ctx.fillStyle = D.colors.card; ctx.fillText(tag, tx, ty);
+    ctx.font = `800 18px "Baloo 2", sans-serif`; ctx.lineWidth = 5; const lv = D.fruits[c].name + ' field · level ' + Fl.level(c);
+    ctx.strokeText(lv, x, y - h - 12); ctx.fillStyle = D.colors.sun; ctx.fillText(lv, x, y - h - 12);
+    if (ready >= Fl.holds(c)) { ctx.beginPath(); ctx.arc(x + w / 2 - 4, y - h - 4, 18, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 22px "Baloo 2", sans-serif`; ctx.fillText('!', x + w / 2 - 4, y - h + 4); }
   }
   function scarecrow(x, y, s) {
     const ctx = G.ctx;
@@ -397,15 +403,14 @@
   function fields(x0) {
     label(x0 + 750, 'Fields');
     scarecrow(x0 + 70, STREET - 4, 70);
-    const open = FF.fields.open(), list = open ? FF.fields.plots() : [];
-    for (let i = 0; i < D.fields.max; i++) {
-      const col = i % 6, row = Math.floor(i / 6), x = x0 + 230 + col * 215, y = STREET - 130 + row * 120;
-      const owned = i < list.length;
-      plot(x, y, list[i], owned && open);
-      if (!open && i === 2) sign(x, y - 40, 'Fields open when\nyou have ' + D.fields.trees + ' trees', true);
-      if (open && i === list.length && FF.fields.nextPlotCost() != null) sign(x, y - 40, 'New field\n' + FF.fields.nextPlotCost() + ' coins', true);
-      if (owned || (open && i === list.length) || (!open && i === 2)) target(x - 100, y - 110, x + 100, y + 8, () => { FF.sfx.tick(); FF.fields.tap(i, x, y - 130); });
-    }
+    const open = FF.fields.open();
+    FF.fields.crops().forEach((c, i) => {
+      const x = x0 + 330 + i * 380, y = STREET - 20, owned = open && FF.fields.level(c) > 0;
+      field(x, y, c, owned);
+      if (!open && i === 0) sign(x, y - 40, 'Fields open when\nyou have ' + D.fields.trees + ' trees', true);
+      if (open && !owned) sign(x, y - 40, D.fruits[c].name + ' field\n' + D.fields.crops[c].cost + ' coins', true);
+      target(x - 160, y - 190, x + 160, y + 40, () => { FF.sfx.tick(); FF.fields.tap(c, x, y - 190); });
+    });
   }
 
   Map.draw = () => {

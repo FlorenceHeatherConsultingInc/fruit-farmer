@@ -265,6 +265,10 @@ button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; 
 .tile.on { background: var(--sun); }
 #shopHats canvas { width: 72px; height: 72px; }
 #groveFilterNote .mini { margin-left: 6px; vertical-align: middle; }
+.fieldinfo { display: flex; align-items: center; gap: 10px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 6px 10px; }
+.fieldinfo b { display: block; font-size: 22px; }
+.fieldinfo small { font-size: 15px; font-weight: 700; opacity: .8; }
+.fieldinfo canvas { width: 64px; height: 64px; }
 .farms { display: flex; flex-direction: column; gap: 6px; }
 .farmcard { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 8px 10px; }
 .farmcard.on { background: var(--sun); }

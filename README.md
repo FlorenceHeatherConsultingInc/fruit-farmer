@@ -31,8 +31,9 @@ browser on that computer.
 - **Buildings:** build a Juice press, Smoothie stand or Jam kitchen in the village's kitchen row. Put
   fruit in and the goods are ready after your next harvest. Collect them to your barn, then sell them
   or use them for orders.
-- **Fields:** once you grow three kinds of fruit, plots open in the village. Plant hay (ready tomorrow) or corn (ready in
-  two days), then tap ripe plots to pick them into the barn. Buy more plots, up to 12.
+- **Fields:** once you grow three kinds of fruit, the Fields open with a free hay field. A corn field costs
+  120. Each field grows a set amount every day by itself and holds two days' worth; tap it to bring it into
+  the barn. Upgrades have no top level: each grows 2 more a day and costs half again as much as the last.
 - **Farm animals:** with fields open, build a chicken coop (corn makes eggs) and a cow barn (hay makes
   milk) in the barnyard.
 - **More kitchens:** a popcorn cart, a salad bar (one of every fruit), a bakery (apple pie from apples,

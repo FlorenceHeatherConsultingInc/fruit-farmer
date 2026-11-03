@@ -22,7 +22,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
 | `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, bonus fruit, catching, carrier drawing. |
 | `js/buildings.js` | Production buildings (`FF.buildings`): building, making, collecting, upgrading, and the building card. Rows in `buildings` in `data.js`. |
-| `js/fields.js` | Fields (`FF.fields`): planting hay and corn, growing over days, picking, buying plots. Numbers in `fields` in `data.js`. |
+| `js/fields.js` | Fields (`FF.fields`): one field per crop that grows by itself each day, the field card, collecting, buying and upgrading. Numbers in `fields` in `data.js`. |
 | `js/orders.js` | The order board (`FF.orders`): making orders, delivering, pinning, the harvest counter. Numbers in `orders` in `data.js`. |
 | `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, and the grove card. `groveMix` in `data.js` sets how much is bonus fruit. |
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
@@ -61,8 +61,8 @@ It works offline except for the Google Font, which falls back to a system font.
 - **New good or building:** add the good to `fruits` with `kind: 'good'` and its art to `GOODS` in `draw.js`, then a row to
   `buildings`. Kitchen buildings appear on the map in list order; barnyard ones have fixed spots in
   `barnyard()` in `map.js`. Collecting counts `made` plus `made<Good>` (such as `madePancakes`) for stickers.
-- **Fields:** `fields` in `data.js` (opening level, plots, plot prices, crop days and yields). A new crop needs
-  a row in `fruits` with `kind: 'crop'`, art in `GOODS`, and a drawer in `plot()` in `map.js`.
+- **Fields:** `fields` in `data.js` (when they open, how much each crop grows, upgrade costs). A new crop needs
+  a row in `fruits` with `kind: 'crop'`, a row in `fields.crops`, art in `GOODS`, and a drawer in `field()` in `map.js`.
 - **Tree prices and when they open:** `cost` and `level` on each row of `trees` in `data.js`.
 - **Shop order:** every shop section lists items cheapest first, rewards last. Order in `data.js` doesn't matter.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
