@@ -33,9 +33,9 @@ FF.data = {
     shake:      { name: 'Milkshakes',   price: 40, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
     pancakes:   { name: 'Pancakes',     price: 55, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
   },
-  // Fields open at farm `level`, with `start` plots; each extra plot costs the next price in plotCosts.
+  // Fields open once you grow `trees` kinds of fruit, with `start` plots; each extra plot costs the next price in plotCosts.
   // days: how many days a crop takes. yield: how many you pick from one plot.
-  fields: { level: 8, start: 4, max: 12, plotCosts: [80, 120, 160, 200, 260, 320, 400, 500], crops: { hay: { days: 1, yield: 3 }, corn: { days: 2, yield: 3 } } },
+  fields: { trees: 3, start: 4, max: 12, plotCosts: [80, 120, 160, 200, 260, 320, 400, 500], crops: { hay: { days: 1, yield: 3 }, corn: { days: 2, yield: 3 } } },
   // Farm points for each good you collect from a building.
   goodsPoints: 2,
   // Production buildings. needs: trees, buildings or fields you must have first. deliver: items you hand
@@ -417,7 +417,7 @@ FF.data = {
   // soon: wooden signs for buildings that arrive in later steps.
   map: {
     areas: [
-      { id: 'groves',   name: 'Groves',   w: 900 },
+      { id: 'groves',   name: 'Groves',   w: 960 },
       { id: 'fields',   name: 'Fields',   w: 1500 },
       { id: 'barnyard', name: 'Barnyard', w: 1220 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
@@ -453,6 +453,7 @@ FF.data = {
     perfectBonus: 1,      // extra coins for a center shot
     streakEvery: 3,       // every this many hits in a row adds 1 coin per fruit...
     streakBonusMax: 1,    // ...up to this many (keep these small: the sparkle is the reward)
+    tripSize: 20,         // how much a market trip picks to start with (you can add more)
     aim: {
       pull: 0.24, pullMin: 92, pullMax: 170,  // full pull, as a fraction of the screen's short side, in pixels
       edgeRoom: 60,       // pixels left between a full pull and the bottom of the screen

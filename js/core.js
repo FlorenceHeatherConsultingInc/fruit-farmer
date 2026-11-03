@@ -44,7 +44,7 @@
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
-      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party',
+      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [],
       seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, filters: {}, orders: [], pin: null, buildings: {}, plots: []
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
@@ -87,6 +87,8 @@
     if (Array.isArray(raw.pastFarms)) s.pastFarms = raw.pastFarms;
     if (Array.isArray(raw.hats)) s.hats = ['party'].concat(raw.hats.filter(h => h !== 'party' && D.hats.some(x => x.id === h)));
     if (s.hats.includes(raw.hat)) s.hat = raw.hat;
+    if (Array.isArray(raw.tips)) s.tips = raw.tips.filter(t => typeof t === 'string');
+    if (Array.isArray(raw.toolsSeen)) s.toolsSeen = raw.toolsSeen.filter(t => typeof t === 'string');
     if (Array.isArray(raw.otherFarms)) s.otherFarms = raw.otherFarms.filter(f => f && typeof f === 'object' && f.farmNo > 0);
     s.seedsPaid = n(raw.seedsPaid);
     if (raw.today && typeof raw.today === 'object') s.today = raw.today;

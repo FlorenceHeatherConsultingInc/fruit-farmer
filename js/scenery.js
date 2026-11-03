@@ -6,7 +6,8 @@
   const FF = window.FF, G = FF.G, D = FF.data, { TAU, clamp, rand, pick } = FF.util;
   const Draw = FF.draw, INK = D.colors.ink, CARD = D.colors.card;
 
-  const S = FF.scenery = {};
+  const S = FF.scenery = { fruitShare: 1 };
+  const some = list => list.slice(0, Math.ceil(list.length * Math.max(0, Math.min(1, S.fruitShare))));
   let clouds = [], stars = [], bits = [], plazaBits = [], cobbles = [], weather = [];
   let bitsKey = '', cobbleKey = '';
 
@@ -131,7 +132,7 @@
         [x - th * 0.13, base - th * 0.97, th * 0.2],
         [x + th * 0.15, base - th * 0.95, th * 0.19]
       ], sc);
-      [[-0.27, -0.6], [-0.32, -0.78], [0.02, -0.66], [0.06, -0.93], [0.27, -0.62], [0.2, -0.82]]
+      some([[-0.27, -0.6], [-0.32, -0.78], [0.02, -0.66], [0.06, -0.93], [0.27, -0.62], [0.2, -0.82]])
         .forEach(([a, b]) => Draw.fruit(type, x + a * th, base + b * th, th * 0.055));
     },
     palm(x, base, th, sc, type) {
@@ -161,7 +162,7 @@
         }
         ctx.restore();
       });
-      for (let i = 0; i < 4; i++) Draw.fruit(type, tx + (i - 1.5) * th * 0.065, ty + th * 0.1 + (i % 2) * th * 0.03, th * 0.065, 1.35);
+      for (let i = 0; i < some([0, 1, 2, 3]).length; i++) Draw.fruit(type, tx + (i - 1.5) * th * 0.065, ty + th * 0.1 + (i % 2) * th * 0.03, th * 0.065, 1.35);
     },
     bush(x, base, th, sc, type) {
       crown([
@@ -171,7 +172,7 @@
         [x - th * 0.13, base - th * 0.07, th * 0.15],
         [x + th * 0.14, base - th * 0.07, th * 0.15]
       ], sc);
-      [[-0.3, -0.12], [-0.08, -0.28], [0.12, -0.16], [0.3, -0.1], [-0.14, -0.05], [0.04, -0.06]]
+      some([[-0.3, -0.12], [-0.08, -0.28], [0.12, -0.16], [0.3, -0.1], [-0.14, -0.05], [0.04, -0.06]])
         .forEach(([a, b]) => Draw.fruit(type, x + a * th, base + b * th, th * 0.05));
     },
     vine(x, base, th, sc, type) {
@@ -182,7 +183,7 @@
       const leaves = [];
       for (let i = 0; i < 6; i++) leaves.push([x - w * 0.42 + i * w * 0.168, top - post * 0.3 + (i % 2) * th * 0.035, th * 0.115]);
       crown(leaves, sc);
-      [-0.28, 0.02, 0.3].forEach(a => Draw.fruit(type, x + a * th, top + th * 0.18, th * 0.075));
+      some([-0.28, 0.02, 0.3]).forEach(a => Draw.fruit(type, x + a * th, top + th * 0.18, th * 0.075));
     }
   };
   const DEPTH = ['vine', 'palm', 'round', 'bush'];

@@ -22,6 +22,8 @@
       { text: 'Fill ' + W.filled + ' baskets (' + Math.min(save.filled, W.filled) + '/' + W.filled + ')', done: save.filled >= W.filled }
     ];
   };
+  const barnPics = {};
+  const barnPic = t => barnPics[t] || (barnPics[t] = FF.draw.fruitIcon(t, 48).toDataURL());
   const animalBadge = kind => FF.draw.toCanvas(84, 84, s => FF.animals.drawHead(kind, s / 2, s * 0.56, s * 0.3, 'idle', 0, { x: 0, y: 0.4 }));
 
   function renderMarket() {
@@ -58,9 +60,10 @@
     $('shopTitle').textContent = TITLES[mode]; $('shopNote').textContent = NOTES[mode];
     document.querySelectorAll('#shopOv [data-modes]').forEach(sec => { sec.hidden = !sec.dataset.modes.split(' ').includes(mode); });
     const cur = FF.carrier(), size = FF.barnSize(), next = D.barn.sizes[save.barnLevel + 1];
-    const stored = FF.FRUIT_TYPES.filter(t => save.barn[t] > 0).map(t => save.barn[t] + ' ' + D.fruits[t].name.toLowerCase());
-    $('shopBarn').innerHTML = `<div class="up"><div class="badge">${I.stall}</div><div><h3>${FF.inBarn()} of ${size === Infinity ? 'any amount' : size}</h3><p>${stored.length ? stored.join(', ') + '.' : 'Empty. Go catch some fruit!'}${next ? ' A bigger barn holds ' + (next === Infinity ? 'as much as you like' : next) + '.' : ''}</p></div>` +
-      (next ? buyBtn('barn', 'next', D.barn.costs[save.barnLevel], 'Buy a bigger barn') : ownedBtn('Biggest')) + `</div>`;
+    const inside = FF.FRUIT_TYPES.filter(t => save.barn[t] > 0);
+    $('shopBarn').innerHTML = `<div class="up"><div class="badge">${I.barn}</div><div><h3>${FF.inBarn()} of ${size === Infinity ? 'any amount' : size}</h3><p>${next ? 'A bigger barn holds ' + (next === Infinity ? 'as much as you like' : next) + '.' : 'The biggest barn.'}</p></div>` +
+      (next ? buyBtn('barn', 'next', D.barn.costs[save.barnLevel], 'Buy a bigger barn') : ownedBtn('Biggest')) + `</div>` +
+      (inside.length ? `<div class="barnlist">${inside.map(t => `<span><img src="${barnPic(t)}" alt="${D.fruits[t].name}">${save.barn[t]}</span>`).join('')}</div>` : '<p class="note">Empty. Go catch some fruit!</p>');
     const carry = $('shopCarry');
     carry.innerHTML = `<p class="note">Pick how your basket looks. It holds ${FF.cap()} whichever you pick.</p><div class="grid3" id="shopLooks"></div>`;
     FF.looksReached().forEach(l => {

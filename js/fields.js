@@ -1,4 +1,4 @@
-/* Fruit Farmer: fields. Once your farm reaches D.fields.level, plots open in the village's Fields
+/* Fruit Farmer: fields. Once you grow D.fields.trees kinds of fruit, plots open in the village's Fields
    area. Tap an empty plot to plant hay or corn; they grow over days of play and you tap a ripe plot
    to pick it into the barn. Hay feeds the cow, corn feeds the chickens and makes popcorn. More
    plots can be bought, up to D.fields.max. Fields belong to the current farm. */
@@ -6,7 +6,7 @@
   const FF = window.FF, D = FF.data, $ = FF.$, I = FF.icons, UI = FF.ui, F = D.fields;
   let plotIndex = -1;
 
-  const isOpen = () => FF.level() >= F.level;
+  const isOpen = () => FF.save.trees.length >= F.trees;
   const plots = () => {
     const s = FF.save;
     if (isOpen() && s.plots.length < F.start) while (s.plots.length < F.start) s.plots.push({ crop: null, day: 0 });
@@ -57,7 +57,7 @@
     open: isOpen, plots, ripe, daysLeft, nextPlotCost, plant, pick, buyPlot,
     // Tapping a plot on the map (x, y: where to show a message, in map units): plant it, pick it, say when it's ready, or offer a new one.
     tap(i, x, y) {
-      if (!isOpen()) { FF.fx.text(x, y, 'Fields open at farm level ' + F.level, false); return; }
+      if (!isOpen()) { FF.fx.text(x, y, 'Fields open when you have ' + F.trees + ' trees', false); return; }
       const p = plots()[i];
       if (!p) { if (i === plots().length && nextPlotCost() != null) { plotIndex = i; render(); UI.show('plant'); } return; }
       if (!p.crop) { plotIndex = i; render(); UI.show('plant'); return; }

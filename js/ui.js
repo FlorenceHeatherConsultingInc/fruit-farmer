@@ -40,6 +40,8 @@
       $('marketHud').hidden = which !== 'market';
       $('mapHud').hidden = which !== 'village';
       $('mapJump').hidden = which !== 'village';
+      $('mapTools').hidden = which !== 'village';
+      if (which !== 'village') $('mapTip').hidden = true;
       $('farmPin').hidden = which !== 'farm' || !FF.orders.hudText();
     },
     bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); },
@@ -67,7 +69,7 @@
 
   // Static icons in the markup
   $('loadIcon').innerHTML = FF.icons.apple;
-  [['mapSleepBtn', 'moon'], ['mapMarketBtn', 'stall'], ['mapShopBtn', 'bag'], ['mapOrdersBtn', 'orders'], ['mapFriendsBtn', 'heart'], ['mapBookBtn', 'book']].forEach(([id, ic]) => { $(id).innerHTML = FF.icons[ic]; });
+  [['mapSleepBtn', 'moon'], ['mapMarketBtn', 'stall'], ['mapShopBtn', 'bag'], ['mapOrdersBtn', 'orders'], ['mapFriendsBtn', 'heart'], ['mapBookBtn', 'book']].forEach(([id, ic]) => { $(id).insertAdjacentHTML('afterbegin', FF.icons[ic]); });
   const AREA_ICONS = { groves: 'tree', fields: 'field', barnyard: 'barn', kitchen: 'pot', friends: 'house' };
   document.querySelectorAll('#mapJump [data-jump]').forEach(b => { b.innerHTML = FF.icons[AREA_ICONS[b.dataset.jump]]; });
   $('pauseBtn').innerHTML = FF.icons.pause;

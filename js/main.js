@@ -29,8 +29,10 @@
       : 'Grow your fruit farm! Catch fruit, keep it in your barn, and sell it at the market. Your basket grows as your farm levels up.';
     $('titleIntro').hidden = !brandNew;
     $('titleFarm').textContent = FF.farmName() + ' · Day ' + s.day;
-    $('titleStats').innerHTML = stat(I.coin, s.coins, 'coin') +
-      `<button class="stat statbtn" type="button" id="titleLevelBtn">${I.basket}<span>Level ${FF.level()} · ${c.name} · holds ${FF.cap()} ›</span></button>`;
+    const p = FF.levelProgress();
+    $('titleStats').innerHTML = stat(I.coin, s.coins + ' coins', 'coin') + stat(I.luck, 'Farm Score ' + s.lifetime) +
+      `<button class="stat statbtn" type="button" id="titleLevelBtn">${I.basket}<span>Level ${p.level}: ${p.need - p.into} more points to level ${p.level + 1} ›</span></button>` +
+      `<p class="note">${c.look === 'hands' ? 'Your hands hold' : 'Your ' + c.name.toLowerCase() + ' holds'} ${FF.cap()} fruit. Catch, sell and pick to earn points.</p>`;
   }
 
   function showSoldCard() {
@@ -42,6 +44,14 @@
 
   // Choosing what to take to market. Everything in the barn starts picked.
   let picks = {}, overflow = 0, mapFrom = 'title', packFrom = null;
+  // Spread the default pick across kinds, up to D.market.tripSize. Steppers can still add the rest.
+  function startPicks() {
+    const s = FF.save, out = {}, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0);
+    FF.FRUIT_TYPES.forEach(t => { out[t] = 0; });
+    let left = D.market.tripSize;
+    while (left > 0 && kinds.some(t => out[t] < s.barn[t])) for (const t of kinds) if (left > 0 && out[t] < s.barn[t]) { out[t]++; left--; }
+    return out;
+  }
   function renderPack() {
     const s = FF.save, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0), total = kinds.reduce((n, t) => n + picks[t], 0);
     $('packNote').textContent = (overflow ? 'The barn is full! ' + overflow + ' fruit stayed in your basket. ' : '') +
@@ -119,8 +129,11 @@
       Screens.backToMap();
     },
     backToMap() {
-      $('mapCoins').innerHTML = `<span class="day">Day ${FF.save.day}</span>` + UI.coinHTML(FF.save.coins);
-      $('mapBasketBtn').innerHTML = I.basket + '<span>' + FF.cap() + '</span>';
+      const s = FF.save, size = FF.barnSize();
+      $('mapCoins').innerHTML = `<span class="day">Day ${s.day}</span>` + UI.coinHTML(s.coins);
+      $('mapBasketBtn').innerHTML = I.basket + '<span>holds ' + FF.cap() + '</span>';
+      $('mapBarnBtn').innerHTML = I.barn + '<span>' + FF.inBarn() + (size === Infinity ? '' : '/' + size) + '</span>';
+      FF.guide.refresh();
     },
     // Bedtime: tell the player what tomorrow brings, then start the next day.
     sleep() {
@@ -136,7 +149,7 @@
       FF.sound.ensure();
       overflow = FF.unloadBasket();
       if (G.state === 'farm') { G.state = 'title'; FF.farm.reset(); UI.hud(null); }
-      picks = { ...FF.save.barn };
+      picks = startPicks();
       renderPack();
       UI.show('pack');
       $('packGo').focus();
@@ -237,13 +250,14 @@
     renderSoundBtns();
   }));
   const on = (id, fn) => $(id).addEventListener('click', fn);
-  on('harvestBtn', () => Screens.village('title'));
+  on('harvestBtn', () => Screens.village('title', 'groves'));
   $('titleStats').addEventListener('click', e => { if (e.target.closest('#titleLevelBtn') && FF.basketPath) FF.basketPath.open('title'); });
   on('farmDoneBtn', () => { if (G.state === 'farm' && !G.overlay) Screens.showFull('done'); });
   on('fullVillageBtn', () => Screens.village('title', 'groves'));
   on('titleBookBtn', () => FF.book.open('title'));
   on('soldVillageBtn', () => Screens.village('sold'));
   on('mapBasketBtn', () => FF.basketPath.open('map'));
+  on('mapBarnBtn', () => FF.shop.open('map', 'barn'));
   on('mapBookBtn', () => FF.book.open('map'));
   on('mapFriendsBtn', () => FF.village.open());
   on('mapOrdersBtn', () => FF.orders.open('map'));

@@ -22,7 +22,7 @@
   };
   Map.start = from => {
     M.from = from || 'title'; M.vel = 0; M.target = null; drag = null;
-    if (!M.seen) { M.seen = true; M.cam = clampCam(areaX('friends') - 40); }
+    M.cam = 0;
     Map.layout();
   };
   Map.jump = id => { M.target = clampCam(areaX(id) - 20); M.vel = 0; FF.sfx.tick(); };
@@ -68,7 +68,7 @@
   function label(x, text) {
     const ctx = G.ctx;
     ctx.font = `800 38px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = INK;
-    ctx.strokeText(text, x, 62); ctx.fillStyle = D.colors.sun; ctx.fillText(text, x, 62);
+    ctx.strokeText(text, x, 112); ctx.fillStyle = D.colors.sun; ctx.fillText(text, x, 112);
   }
   function sign(x, y, text, small) {
     const ctx = G.ctx;
@@ -92,17 +92,17 @@
     const ctx = G.ctx;
     label(x0 + 450, 'Groves');
     D.trees.forEach((t, i) => {
-      const x = x0 + 95 + i * 178, y = STREET - 10, planted = FF.save.trees.includes(t.type);
+      const x = x0 + 150 + i * 178, y = STREET - 10, planted = FF.save.trees.includes(t.type);
       if (!planted) {
         sign(x, y, 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + (FF.save.challenge === 'apples' ? 'not on this farm' : t.cost + ' coins'), true);
         target(x - 80, y - 150, x + 80, y + 10, () => { FF.sfx.tick(); FF.shop.open('map', 'tree'); });
         return;
       }
-      Draw.rr(x - 11, y - 96, 22, 96, 4); Draw.fillStroke(trunkColor(sc), 3);
-      Draw.blob([[x - 40, y - 120, 40], [x + 40, y - 120, 40], [x, y - 164, 52]], sc.foliage[i % sc.foliage.length], 4);
-      // the tree looks as full as the grove is
-      const n = FF.groves.stock(t.type), shown = Math.ceil(7 * n / FF.groves.holds(t.type));
-      for (let k = 0; k < shown; k++) Draw.fruit(t.type, x - 45 + (k % 4) * 30, y - 130 - Math.floor(k / 4) * 38 - (k % 2) * 7, 14);
+      // the same tree as in the orchard, as full as the grove is
+      const n = FF.groves.stock(t.type);
+      FF.scenery.fruitShare = n / FF.groves.holds(t.type);
+      FF.scenery.drawTree(t.shape, x, y, t.shape === 'bush' ? 150 : 175, sc, t.type);
+      FF.scenery.fruitShare = 1;
       ctx.fillStyle = 'rgba(43,35,80,0.15)'; ctx.beginPath(); ctx.ellipse(x, y + 4, 60, 10, 0, 0, TAU); ctx.fill();
       ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = INK;
       const tag = n ? n + ' left' : 'Bare'; ctx.strokeText(tag, x, y + 40); ctx.fillStyle = D.colors.card; ctx.fillText(tag, x, y + 40);
@@ -182,15 +182,6 @@
     ctx.fillStyle = sc.plaza[0]; ctx.strokeStyle = sc.plaza[1]; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.ellipse(x0 + D.map.square, STREET + 30, 110, 46, 0, 0, TAU); ctx.fill(); ctx.stroke();
     if (has('fountain')) decor('fountain', x0 + spot('fountain').x, spot('fountain').y, 2.6);
-    // the order board stands by the square
-    const bx = x0 + D.map.square + 150, by = STREET + 120;
-    Draw.rr(bx - 6, by - 60, 12, 60, 3); Draw.fillStroke('#8a5a32', 3); Draw.rr(bx + 62, by - 60, 12, 60, 3); Draw.fillStroke('#8a5a32', 3);
-    Draw.rr(bx - 20, by - 132, 108, 80, 8); Draw.fillStroke('#c99a62', 4);
-    for (let i = 0; i < 3; i++) { Draw.rr(bx - 8 + i * 32, by - 120, 26, 34, 3); Draw.fillStroke('#fff8e0', 2); }
-    ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText('Orders', bx + 34, by - 64);
-    const ready = FF.orders.readyCount();
-    if (ready) { ctx.beginPath(); ctx.arc(bx + 86, by - 132, 16, 0, TAU); Draw.fillStroke('#ff5e7a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.fillText(ready, bx + 86, by - 125); }
-    target(bx - 30, by - 150, bx + 100, by + 4, () => { FF.sfx.tick(); FF.orders.open('map'); });
     if (has('bench')) decor('bench', x0 + spot('bench').x, spot('bench').y);
     if (has('pond')) decor('pond', x0 + spot('pond').x, spot('pond').y, 2.6);
     if (has('flowers')) [spot('flowers').x, 420, 1120, 1400].forEach(fx => decor('flowers', x0 + fx, spot('flowers').y));
@@ -409,7 +400,7 @@
       const col = i % 6, row = Math.floor(i / 6), x = x0 + 230 + col * 215, y = STREET - 130 + row * 120;
       const owned = i < list.length;
       plot(x, y, list[i], owned && open);
-      if (!open && i === 2) sign(x, y - 40, 'Fields open at\nfarm level ' + D.fields.level, true);
+      if (!open && i === 2) sign(x, y - 40, 'Fields open when\nyou have ' + D.fields.trees + ' trees', true);
       if (open && i === list.length && FF.fields.nextPlotCost() != null) sign(x, y - 40, 'New field\n' + FF.fields.nextPlotCost() + ' coins', true);
       if (owned || (open && i === list.length) || (!open && i === 2)) target(x - 100, y - 110, x + 100, y + 8, () => { FF.sfx.tick(); FF.fields.tap(i, x, y - 130); });
     }
