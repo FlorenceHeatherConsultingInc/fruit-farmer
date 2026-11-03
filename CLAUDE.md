@@ -22,6 +22,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
 | `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, catching, filters, carrier drawing. |
 | `js/buildings.js` | Production buildings (`FF.buildings`): building, making, collecting, upgrading, and the building card. Rows in `buildings` in `data.js`. |
+| `js/fields.js` | Fields (`FF.fields`): planting hay and corn, growing over days, picking, buying plots. Numbers in `fields` in `data.js`. |
 | `js/orders.js` | The order board (`FF.orders`): making orders, delivering, pinning, the harvest counter. Numbers in `orders` in `data.js`. |
 | `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, the grove card, and filters. |
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
@@ -43,7 +44,7 @@ It works offline except for the Google Font, which falls back to a system font.
 
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
-- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm → groves → orders → buildings →
+- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm → groves → orders → buildings → fields →
   animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → map → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.

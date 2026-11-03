@@ -335,6 +335,8 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .slot.making { opacity: .65; }
 .slot.ready { background: #e2f7d6; }
 #buildBody .goals { text-align: left; }
+.grid3.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid3.two canvas { width: 64px; height: 64px; }
 .pagehead { display: flex; justify-content: space-between; align-items: center; }
 .pagehead h3 { margin: 0; font-size: 20px; }
 .stickers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }

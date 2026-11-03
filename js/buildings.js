@@ -108,5 +108,5 @@
     // for tests
     build, make, collect, upgrade
   };
-  FF.orderExtras = () => [...new Set(FF.buildings.outputs())];
+  FF.orderExtras = () => [...new Set([...FF.buildings.outputs(), ...(FF.fields && FF.fields.open() ? Object.keys(D.fields.crops) : [])])];
 })();

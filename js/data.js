@@ -19,8 +19,14 @@ FF.data = {
     // Goods made in buildings. They sit in the barn and sell like fruit.
     juice:      { name: 'Orange juice', price: 10, colors: ['#ff9a1f', '#ffd08a'], kind: 'good' },
     smoothie:   { name: 'Smoothies',    price: 16, colors: ['#ff8fb1', '#fff0f4'], kind: 'good' },
-    jam:        { name: 'Jam jars',     price: 18, colors: ['#e8323f', '#fffaf0'], kind: 'good' }
+    jam:        { name: 'Jam jars',     price: 18, colors: ['#e8323f', '#fffaf0'], kind: 'good' },
+    // Crops grown in fields.
+    hay:        { name: 'Hay',          price: 2,  colors: ['#e8c25a', '#fff3a8'], kind: 'crop' },
+    corn:       { name: 'Corn',         price: 2,  colors: ['#ffd23f', '#5cc24a'], kind: 'crop' }
   },
+  // Fields open at farm `level`, with `start` plots; each extra plot costs the next price in plotCosts.
+  // days: how many days a crop takes. yield: how many you pick from one plot.
+  fields: { level: 8, start: 4, max: 12, plotCosts: [80, 120, 160, 200, 260, 320, 400, 500], crops: { hay: { days: 1, yield: 3 }, corn: { days: 2, yield: 3 } } },
   // Farm points for each good you collect from a building.
   goodsPoints: 2,
   // Production buildings. needs: trees, buildings or fields you must have first. deliver: items you hand
@@ -336,7 +342,7 @@ FF.data = {
       { id: 'friends',  name: 'Friends',  w: 1560 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
       { id: 'barnyard', name: 'Barnyard', w: 1000 },
-      { id: 'fields',   name: 'Fields',   w: 860 }
+      { id: 'fields',   name: 'Fields',   w: 1500 }
     ],
     homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470],
     square: 780

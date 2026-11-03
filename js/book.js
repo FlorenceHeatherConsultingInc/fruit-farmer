@@ -113,7 +113,7 @@
     closeDay();
     s.seeds += seedsFromFarm();
     s.pastFarms.push({ no: s.farmNo, days: Math.max(1, s.day - 1), earned: s.farmEarned, diary: s.diary, challenge: s.challenge });
-    ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'buildings', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
+    ['coins', 'crate', 'barn', 'points', 'groves', 'filters', 'orders', 'pin', 'buildings', 'plots', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today'].forEach(k => { s[k] = n[k]; });
     s.farmNo++;
     s.challenge = challenge || null;
     if (s.seedBuys.includes('start-basket')) s.points = FF.pointsFor(5);

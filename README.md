@@ -31,6 +31,8 @@ browser on that computer.
 - **Buildings:** build a Juice press, Smoothie stand or Jam kitchen in the village's kitchen row. Put
   fruit in and the goods are ready after your next harvest. Collect them to your barn, then sell them
   or use them for orders.
+- **Fields:** at farm level 8, plots open in the village. Plant hay (ready tomorrow) or corn (ready in
+  two days), then tap ripe plots to pick them into the barn. Buy more plots, up to 12.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

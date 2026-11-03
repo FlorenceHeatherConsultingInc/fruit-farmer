@@ -257,16 +257,64 @@
     sign(x0 + 600, STREET - 50, 'Cow barn\ncoming soon', true);
     lot(x0 + 860, STREET - 10, 200, 'Chicken coop\ncoming soon');
   }
-  function fields(x0) {
+  /* ---------- Fields: crops grow taller each day ---------- */
+  function sprout(x, y, k) {
     const ctx = G.ctx;
-    label(x0 + 450, 'Fields');
-    for (let r = 0; r < 2; r++) for (let i = 0; i < 3; i++) {
-      const x = x0 + 170 + i * 230, y = STREET - 40 + r * 120;
-      Draw.rr(x - 95, y - 60, 190, 90, 12); Draw.fillStroke('#9a6a3a', 4);
-      ctx.strokeStyle = '#7a4f28'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-      for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.moveTo(x - 80, y - 38 + k * 24); ctx.lineTo(x + 80, y - 38 + k * 24); ctx.stroke(); }
+    ctx.strokeStyle = '#3f9530'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 12 * k); ctx.stroke();
+    for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + d * 6 * k, y - 13 * k, 6 * k, 3.5 * k, d * -0.5, 0, TAU); Draw.fillStroke('#6cc957', 1.5); }
+  }
+  function cornStalk(x, y, k, ripe) {
+    const ctx = G.ctx, h = 56 * k;
+    ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 7 * k; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - h); ctx.stroke();
+    ctx.strokeStyle = '#4fae3a'; ctx.lineWidth = 4 * k; ctx.stroke();
+    for (const [d, f] of [[-1, 0.35], [1, 0.55], [-1, 0.75]]) { ctx.beginPath(); ctx.moveTo(x, y - h * f); ctx.quadraticCurveTo(x + d * 18 * k, y - h * f - 4, x + d * 22 * k, y - h * f + 10 * k); ctx.strokeStyle = '#4fae3a'; ctx.lineWidth = 4 * k; ctx.stroke(); }
+    if (ripe) { ctx.beginPath(); ctx.ellipse(x + 7, y - h * 0.58, 6, 12, 0.3, 0, TAU); Draw.fillStroke('#ffd23f', 2); ctx.fillStyle = '#e8b06a'; ctx.beginPath(); ctx.arc(x, y - h - 3, 4, 0, TAU); ctx.fill(); }
+  }
+  function hayTuft(x, y, k, ripe) {
+    const ctx = G.ctx, col = ripe ? '#e8c25a' : '#9cc24e';
+    ctx.lineCap = 'round';
+    for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * 3, y); ctx.quadraticCurveTo(x + i * 6 * k, y - 22 * k, x + i * 9 * k, y - 34 * k); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke(); }
+    if (ripe) { ctx.fillStyle = '#c99a30'; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.ellipse(x + i * 9 * k, y - 34 * k, 3, 5, i * 0.4, 0, TAU); ctx.fill(); } }
+  }
+  function plot(x, y, p, owned) {
+    const ctx = G.ctx, w = 190, h = 100;
+    ctx.globalAlpha = owned ? 1 : 0.45;
+    Draw.rr(x - w / 2, y - h, w, h, 12); Draw.fillStroke('#9a6a3a', 4);
+    ctx.strokeStyle = '#7a4f28'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    for (let r = 0; r < 3; r++) { ctx.beginPath(); ctx.moveTo(x - 80, y - h + 28 + r * 28); ctx.lineTo(x + 80, y - h + 28 + r * 28); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    if (!p || !p.crop) return;
+    const info = D.fields.crops[p.crop], grown = Math.min(1, (FF.save.day - p.day) / info.days), ripe = grown >= 1;
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 5; i++) {
+      const px = x - 72 + i * 36, py = y - h + 26 + r * 28;
+      if (grown === 0) sprout(px, py, 0.6);
+      else if (p.crop === 'corn') cornStalk(px, py, 0.45 + 0.4 * grown, ripe);
+      else hayTuft(px, py, 0.5 + 0.45 * grown, ripe);
     }
-    sign(x0 + 400, STREET - 100, 'Hay and corn\ncoming soon');
+    if (ripe) { ctx.beginPath(); ctx.arc(x + w / 2 - 6, y - h - 4, 16, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.textAlign = 'center'; ctx.fillText('!', x + w / 2 - 6, y - h + 3); }
+  }
+  function scarecrow(x, y, s) {
+    const ctx = G.ctx;
+    ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - s * 1.4); ctx.moveTo(x - s * 0.55, y - s * 0.95); ctx.lineTo(x + s * 0.55, y - s * 0.95); ctx.stroke();
+    ctx.strokeStyle = '#8a5a32'; ctx.lineWidth = 5; ctx.stroke();
+    Draw.rr(x - s * 0.32, y - s * 1.05, s * 0.64, s * 0.55, 6); Draw.fillStroke('#4aa3e8', 4);
+    ctx.beginPath(); ctx.arc(x, y - s * 1.3, s * 0.24, 0, TAU); Draw.fillStroke('#e8c88a', 4);
+    ctx.fillStyle = INK; Draw.circlesPath([[x - s * 0.08, y - s * 1.33, s * 0.035], [x + s * 0.08, y - s * 1.33, s * 0.035]]); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x, y - s * 1.5, s * 0.42, s * 0.08, 0, 0, TAU); Draw.fillStroke('#e8c25a', 3);
+    ctx.beginPath(); ctx.moveTo(x - s * 0.22, y - s * 1.5); ctx.quadraticCurveTo(x, y - s * 1.82, x + s * 0.22, y - s * 1.5); ctx.closePath(); Draw.fillStroke('#e8c25a', 3);
+  }
+  function fields(x0) {
+    label(x0 + 750, 'Fields');
+    scarecrow(x0 + 70, STREET - 4, 70);
+    const open = FF.fields.open(), list = open ? FF.fields.plots() : [];
+    for (let i = 0; i < D.fields.max; i++) {
+      const col = i % 6, row = Math.floor(i / 6), x = x0 + 230 + col * 215, y = STREET - 130 + row * 120;
+      const owned = i < list.length;
+      plot(x, y, list[i], owned && open);
+      if (!open && i === 2) sign(x, y - 40, 'Fields open at\nfarm level ' + D.fields.level, true);
+      if (open && i === list.length && FF.fields.nextPlotCost() != null) sign(x, y - 40, 'New field\n' + FF.fields.nextPlotCost() + ' coins', true);
+      if (owned || (open && i === list.length) || (!open && i === 2)) target(x - 100, y - 110, x + 100, y + 8, () => { FF.sfx.tick(); FF.fields.tap(i, x, y - 130); });
+    }
   }
   function showBarn() {
     const s = FF.save, list = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0).map(t => s.barn[t] + ' ' + D.fruits[t].name.toLowerCase());
