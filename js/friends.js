@@ -39,7 +39,7 @@
     hasHome: kind => !!(FF.save.friends[kind] && FF.save.friends[kind].home),
     homesBuilt: () => Object.values(FF.save.friends).filter(f => f.home).length,
     homeCost() { const list = D.homeCosts, n = this.homesBuilt(); return list[Math.min(n, list.length - 1)]; },
-    canMoveIn: kind => !D.animals[kind].rare && hearts(kind) >= FR.homeAt,
+    canMoveIn: kind => hearts(kind) >= FR.homeAt,
     buildHome(kind) { record(kind).home = true; },
     wearsHat: kind => hearts(kind) >= FR.hatAt,
     // Returns what changed, so the market can celebrate it.

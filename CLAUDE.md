@@ -76,7 +76,9 @@ It works offline except for the Google Font, which falls back to a system font.
 - **Seeds and challenges:** `seeds`, `challenges` and `seedShop` in `data.js`. A new challenge also needs its rule added where it applies (see `save.challenge`).
 - **The village map:** `map` in `data.js` lists the areas, home lots and coming-soon signs. Decoration spots are in
   `decorations`. A new area needs a drawing function in `map.js`.
-- **New animal:** add it to `animals` in `data.js` with a name and favorite, then add its ears and snout in `animals.js`. New animals arrive in list order.
+- **New animal:** add it to `animals` in `data.js` with a name and favorite, then add its ears and snout in `animals.js`
+  (markings under the eyes go in `face()`). New animals arrive in list order. Each needs a lot in `map.homes`.
+- **Friend hats:** `hats` in `data.js`, drawn in `hat()` in `animals.js`.
 - **How fast new friends arrive:** `newFriends` in `data.js` (`firstAt` and `every`, in total hearts).
 
 ## Art rules

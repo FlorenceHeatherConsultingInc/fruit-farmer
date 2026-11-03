@@ -280,7 +280,13 @@ FF.data = {
     sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff' },
     hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230' },
     turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c' },
-    // Rare animals are bought with Golden Seeds. They shop at the market but don't take a home.
+    panda:    { name: 'Bamboo',    fav: 'banana',     color: '#ffffff', accent: '#3a3550' },
+    penguin:  { name: 'Pip',       fav: 'shake',      color: '#3a3f5c', accent: '#ff9a1f' },
+    raccoon:  { name: 'Bandit',    fav: 'popcorn',    color: '#a8a8b8', accent: '#4a4a5c' },
+    mouse:    { name: 'Squeak',    fav: 'pie',        color: '#cfc8d8', accent: '#ffb0c0' },
+    llama:    { name: 'Lulu',      fav: 'hay',        color: '#f4e4c8', accent: '#d8b88a' },
+    koala:    { name: 'Gumdrop',   fav: 'grapes',     color: '#a8b0bc', accent: '#f4f0f4' },
+    // Rare animals are bought with Golden Seeds. They shop at the market and can take a home too.
     // like = which animal's shape to draw.
     goldie:   { name: 'Goldie',    fav: 'banana',     color: '#ffd23f', accent: '#ff9a1f', like: 'bunny', rare: true },
     moon:     { name: 'Moonbeam',  fav: 'grapes',     color: '#b8a8f0', accent: '#8a6fe0', like: 'pig', rare: true }
@@ -412,12 +418,12 @@ FF.data = {
   map: {
     areas: [
       { id: 'groves',   name: 'Groves',   w: 900 },
-      { id: 'friends',  name: 'Friends',  w: 1560 },
+      { id: 'friends',  name: 'Friends',  w: 2560 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
       { id: 'barnyard', name: 'Barnyard', w: 1220 },
       { id: 'fields',   name: 'Fields',   w: 1500 }
     ],
-    homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470],
+    homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470, 1590, 1710, 1830, 1950, 2070, 2190, 2310, 2430],
     square: 780
   },
   // Village decorations. x and y place them in the Friends area of the map.

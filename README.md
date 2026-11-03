@@ -45,6 +45,8 @@ browser on that computer.
   decorations. Upgrades, filters and a bigger barn are in the Tool shed in the barnyard. Plant new trees
   by tapping their sign in the groves; tap the barn to see what's inside. Golden Seeds have their own tab
   in the Farm book once you start a second farm.
+- **Friends:** 18 animals arrive one by one as you collect hearts (the last six are a panda, a penguin, a
+  raccoon, a mouse, a llama and a koala). Any friend with three hearts, rare ones too, can move into the village.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it
