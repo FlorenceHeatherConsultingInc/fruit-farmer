@@ -60,7 +60,8 @@ It works offline except for the Google Font, which falls back to a system font.
   `maxAsk` and `mixChance`. `aim` holds the pull and assist numbers. `wallUnlock` holds the goals
   and price.
 - **Seeds and challenges:** `seeds`, `challenges` and `seedShop` in `data.js`. A new challenge also needs its rule added where it applies (see `save.challenge`).
-- **New animal:** add it to `animals` in `data.js` with a name, favorite and `arrive`, then add its ears and snout in `animals.js`.
+- **New animal:** add it to `animals` in `data.js` with a name and favorite, then add its ears and snout in `animals.js`. New animals arrive in list order.
+- **How fast new friends arrive:** `newFriends` in `data.js` (`firstAt` and `every`, in total hearts).
 
 ## Art rules
 

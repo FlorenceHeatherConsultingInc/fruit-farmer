@@ -10,9 +10,12 @@
     return FR.hearts.filter(n => sold >= n).length;
   };
   const totalHearts = () => Object.keys(D.animals).reduce((n, k) => n + hearts(k), 0);
+  // Total hearts needed before an animal arrives (see newFriends in data.js). Starters are always here.
+  const waiting = Object.keys(D.animals).filter(k => !D.animals[k].starter && !D.animals[k].rare);
+  const arriveAt = k => (waiting.includes(k) ? D.newFriends.firstAt + waiting.indexOf(k) * D.newFriends.every : 0);
   const arrived = k => {
     const a = D.animals[k];
-    return a.rare ? FF.save.seedBuys.includes(D.seedShop.find(x => x.animal === k).id) : !a.arrive || totalHearts() >= a.arrive;
+    return a.rare ? FF.save.seedBuys.includes(D.seedShop.find(x => x.animal === k).id) : totalHearts() >= arriveAt(k);
   };
   const available = () => Object.keys(D.animals).filter(arrived);
 
@@ -29,7 +32,7 @@
   seedFromDiaries();
 
   FF.friends = {
-    hearts, totalHearts, available,
+    hearts, totalHearts, available, arriveAt,
     name: kind => D.animals[kind].name,
     sold: kind => (FF.save.friends[kind] ? FF.save.friends[kind].sold : 0),
     nextGoal: kind => FR.hearts[hearts(kind)] || null,

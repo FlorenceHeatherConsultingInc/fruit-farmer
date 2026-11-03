@@ -169,20 +169,24 @@ FF.data = {
   ],
 
   // The silly animals who shop at the market. New kinds also need drawing in animals.js.
-  // arrive = total hearts earned before this animal shows up at the market.
+  // How fast new friends show up. The six starter animals are there from the beginning. The rest
+  // arrive in the order listed below: the first once you've earned firstAt hearts in total, then
+  // one more every `every` hearts. Smaller numbers bring friends sooner.
+  newFriends: { firstAt: 3, every: 3 },
+
   animals: {
-    bunny:    { name: 'Bun',       fav: 'strawberry', color: '#f6f0e6', accent: '#ffb3c7' },
-    pig:      { name: 'Sir Oink',  fav: 'apple',      color: '#ffb0c0', accent: '#ff8fa8' },
-    bear:     { name: 'Honey',     fav: 'grapes',     color: '#b9804a', accent: '#e8c79a' },
-    frog:     { name: 'Hopper',    fav: 'orange',     color: '#7ed35f', accent: '#5cb044' },
-    cat:      { name: 'Whiskers',  fav: 'banana',     color: '#ffb65c', accent: '#ffe0b0' },
-    duck:     { name: 'Waddles',   fav: 'apple',      color: '#ffe066', accent: '#ff9a1f' },
-    owl:      { name: 'Hoot',      fav: 'grapes',     color: '#a98565', accent: '#ffb238', arrive: 2 },
-    fox:      { name: 'Rusty',     fav: 'strawberry', color: '#ff8a3c', accent: '#fff3e0', arrive: 4 },
-    goat:     { name: 'Nibbles',   fav: 'orange',     color: '#e8e0d0', accent: '#b8a890', arrive: 6 },
-    sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff', arrive: 9 },
-    hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230', arrive: 12 },
-    turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c', arrive: 15 },
+    bunny:    { name: 'Bun',       fav: 'strawberry', color: '#f6f0e6', accent: '#ffb3c7', starter: true },
+    pig:      { name: 'Sir Oink',  fav: 'apple',      color: '#ffb0c0', accent: '#ff8fa8', starter: true },
+    bear:     { name: 'Honey',     fav: 'grapes',     color: '#b9804a', accent: '#e8c79a', starter: true },
+    frog:     { name: 'Hopper',    fav: 'orange',     color: '#7ed35f', accent: '#5cb044', starter: true },
+    cat:      { name: 'Whiskers',  fav: 'banana',     color: '#ffb65c', accent: '#ffe0b0', starter: true },
+    duck:     { name: 'Waddles',   fav: 'apple',      color: '#ffe066', accent: '#ff9a1f', starter: true },
+    owl:      { name: 'Hoot',      fav: 'grapes',     color: '#a98565', accent: '#ffb238' },
+    fox:      { name: 'Rusty',     fav: 'strawberry', color: '#ff8a3c', accent: '#fff3e0' },
+    goat:     { name: 'Nibbles',   fav: 'orange',     color: '#e8e0d0', accent: '#b8a890' },
+    sheep:    { name: 'Woolly',    fav: 'banana',     color: '#ffe9d6', accent: '#ffffff' },
+    hedgehog: { name: 'Spike',     fav: 'apple',      color: '#f0d2a8', accent: '#7a5230' },
+    turtle:   { name: 'Shelly',    fav: 'strawberry', color: '#8fd07a', accent: '#a8692c' },
     // Rare animals are bought with Golden Seeds. They shop at the market but don't take a home.
     // like = which animal's shape to draw.
     goldie:   { name: 'Goldie',    fav: 'banana',     color: '#ffd23f', accent: '#ff9a1f', like: 'bunny', rare: true },

@@ -145,8 +145,8 @@
       const pic = FF.draw.toCanvas(84, 84, s => Animals.drawHead(k, s / 2, s * 0.56, s * 0.3, 'idle', 0, { x: 0, y: 0.4 }));
       $('villageFriends').querySelector(`[data-pic="${k}"]`).appendChild(pic);
     });
-    const coming = Object.keys(D.animals).filter(k => !list.includes(k) && D.animals[k].arrive);
-    $('villageNext').textContent = coming.length ? `Earn ${Math.min(...coming.map(k => D.animals[k].arrive)) - F.totalHearts()} more hearts to meet a new friend.` : 'Everyone has arrived!';
+    const coming = Object.keys(D.animals).filter(k => !list.includes(k) && F.arriveAt(k));
+    $('villageNext').textContent = coming.length ? `Earn ${Math.min(...coming.map(F.arriveAt)) - F.totalHearts()} more hearts to meet a new friend.` : 'Everyone has arrived!';
     $('villageDecor').innerHTML = D.decorations.map(d => {
       const on = FF.save.decor.includes(d.id);
       return `<button class="pick${on ? ' on' : ''}" type="button" data-village="decor" data-id="${d.id}" ${on || FF.save.coins >= d.cost ? '' : 'disabled'} aria-pressed="${on}"><b>${d.name}</b><small>${on ? 'Built' : I.coin + d.cost}</small></button>`;
