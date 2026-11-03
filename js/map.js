@@ -119,10 +119,11 @@
     const bob = Math.abs(Math.sin(G.clock * 2 + i)) * 4;
     Animals.drawHead(kind, x + 42, y - 14 - bob, 24, 'idle', G.clock + i, { x: Math.sin(G.clock * 0.7 + i) * 0.6, y: 0.3 });
   }
-  function emptyLot(x, y) {
+  // Only the next couple of empty lots get a sign, so the street doesn't fill up with them.
+  function emptyLot(x, y, signed) {
     const ctx = G.ctx;
     ctx.fillStyle = 'rgba(43,35,80,0.1)'; ctx.beginPath(); ctx.ellipse(x, y - 4, 52, 12, 0, 0, TAU); ctx.fill();
-    sign(x, y, 'For a\nfriend', true);
+    if (signed) sign(x, y, 'For a\nfriend', true);
   }
   function decor(id, x, y, s = 2.3) {
     const ctx = G.ctx;
@@ -169,7 +170,7 @@
     const living = Object.keys(D.animals).filter(FF.friends.hasHome);
     D.map.homes.forEach((hx, i) => {
       const x = x0 + hx, kind = living[i];
-      if (!kind) { emptyLot(x, STREET - 8); return; }
+      if (!kind) { emptyLot(x, STREET - 8, i < living.length + 2); return; }
       cottage(x, STREET - 8, sc.awnings[i % sc.awnings.length], kind, i);
       target(x - 70, STREET - 190, x + 70, STREET + 10, () => { FF.sfx.tick(); FF.village.card(kind); });
     });
@@ -199,9 +200,28 @@
     for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x - w / 2 + i * w / 6, y - 22); ctx.lineTo(x - w / 2 + i * w / 6 - 14, y + 4); ctx.stroke(); }
     sign(x, y - 20, text, true);
   }
-  function kitchen(x0) {
-    label(x0 + 450, 'Kitchen');
-    D.map.soon.kitchen.forEach((n, i) => lot(x0 + 120 + i * 220, STREET - 10, 180, n + '\ncoming soon'));
+  // A market stand for a kitchen building, with its goods on the counter when they're ready.
+  function stand(x, y, b, roof, sc) {
+    const ctx = G.ctx, w = 170, h = 150, out = b.recipes[0].out;
+    Draw.rr(x - w / 2, y - h, w, h, 10); Draw.fillStroke('#fff0d0', 4);
+    for (let j = 0; j < 7; j++) { ctx.fillStyle = j % 2 ? '#fffaf0' : roof; ctx.fillRect(x - w / 2 - 6 + j * (w + 12) / 7, y - h - 16, (w + 12) / 7 + 0.5, 30); }
+    ctx.strokeStyle = INK; ctx.lineWidth = 3.5; ctx.strokeRect(x - w / 2 - 6, y - h - 16, w + 12, 30);
+    Draw.rr(x - w / 2 + 14, y - h + 30, w - 28, 54, 6); Draw.fillStroke('#bfe6fb', 3);
+    Draw.rr(x - w / 2 - 4, y - 58, w + 8, 18, 5); Draw.fillStroke('#c99a62', 3);
+    ctx.font = `800 22px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText(b.name, x, y - 14);
+    const n = FF.buildings.ready(b.id);
+    for (let i = 0; i < Math.min(n, 4); i++) Draw.fruit(out, x - 45 + i * 30, y - 72, 15);
+    if (n) { ctx.beginPath(); ctx.arc(x + w / 2 - 6, y - h - 16, 18, 0, TAU); Draw.fillStroke('#5cc24a', 3); ctx.fillStyle = '#fff'; ctx.font = `800 20px "Baloo 2", sans-serif`; ctx.fillText(n, x + w / 2 - 6, y - h - 9); }
+    else Draw.fruit(out, x, y - h + 57, 18);
+  }
+  function kitchen(x0, sc) {
+    label(x0 + 800, 'Kitchen');
+    FF.buildings.inArea('kitchen').forEach((b, i) => {
+      const x = x0 + 130 + i * 220, y = STREET - 8;
+      if (FF.buildings.owned(b.id)) stand(x, y, b, sc.awnings[i % sc.awnings.length], sc);
+      else lot(x, y, 180, b.name + '\n' + (FF.buildings.canBuild(b.id) ? 'tap to build' : 'build here'));
+      target(x - 100, y - 220, x + 100, y + 20, () => { FF.sfx.tick(); FF.buildings.open(b.id); });
+    });
   }
   function barn(x, y, w, h) {
     const ctx = G.ctx;

@@ -28,6 +28,9 @@ browser on that computer.
 - **New farms:** starting over earns Golden Seeds. Challenge farms pay double, and seeds buy rare
   animals, scenery and head starts in the shop.
 - **Fruit Legend:** reach a Farm Score of 100,000 for a parade of all your friends.
+- **Buildings:** build a Juice press, Smoothie stand or Jam kitchen in the village's kitchen row. Put
+  fruit in and the goods are ready after your next harvest. Collect them to your barn, then sell them
+  or use them for orders.
 - **Orders:** three friends post orders on the board in the village square, or tap Orders. Deliver
   from your barn for extra coins, hearts and farm points. Pin one and your harvest counts toward it.
 - **Save code:** on the Farms page of the Farm book, get a code to back up your game and move it

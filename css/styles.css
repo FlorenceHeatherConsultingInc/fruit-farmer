@@ -323,6 +323,18 @@ button:focus-visible, .speed input:focus-visible + span { outline: 4px solid var
 .special.farm.pin { top: calc(max(12px, env(safe-area-inset-top, 0px)) + 104px); background: var(--card); }
 #farmDoneBtn.glow { background: var(--sun); animation: bump .9s ease-in-out infinite; }
 #mapOrdersBtn { font-size: 17px; padding: 0 12px; }
+.recipes { display: flex; flex-direction: column; gap: 6px; }
+.recipe { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 6px 10px; font-weight: 800; }
+.recipe .ic.sm { width: 34px; height: 34px; }
+.recipe small { margin-left: auto; font-size: 14px; opacity: .75; }
+.recipe .mini { margin-left: auto; }
+.slots { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.slot { width: 64px; height: 72px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+.slot .ic.sm { width: 38px; height: 38px; }
+.slot.empty { border-style: dashed; background: transparent; }
+.slot.making { opacity: .65; }
+.slot.ready { background: #e2f7d6; }
+#buildBody .goals { text-align: left; }
 .pagehead { display: flex; justify-content: space-between; align-items: center; }
 .pagehead h3 { margin: 0; font-size: 20px; }
 .stickers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }

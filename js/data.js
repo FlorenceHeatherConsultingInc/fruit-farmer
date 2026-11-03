@@ -15,8 +15,22 @@ FF.data = {
     banana:     { name: 'Bananas',      price: 3,  colors: ['#ffd93b', '#fff3a8'] },
     strawberry: { name: 'Strawberries', price: 4,  colors: ['#ff3b5c', '#ffd23f'] },
     grapes:     { name: 'Grapes',       price: 5,  colors: ['#8a4bd6', '#c9a6ff'] },
-    star:       { name: 'Gold stars',   price: 10, colors: ['#ffd23f', '#ffffff'] }
+    star:       { name: 'Gold stars',   price: 10, colors: ['#ffd23f', '#ffffff'] },
+    // Goods made in buildings. They sit in the barn and sell like fruit.
+    juice:      { name: 'Orange juice', price: 10, colors: ['#ff9a1f', '#ffd08a'], kind: 'good' },
+    smoothie:   { name: 'Smoothies',    price: 16, colors: ['#ff8fb1', '#fff0f4'], kind: 'good' },
+    jam:        { name: 'Jam jars',     price: 18, colors: ['#e8323f', '#fffaf0'], kind: 'good' }
   },
+  // Farm points for each good you collect from a building.
+  goodsPoints: 2,
+  // Production buildings. needs: trees, buildings or fields you must have first. deliver: items you hand
+  // over to build it. recipes: what goes in and what comes out. slots: how many it makes at once at each
+  // level, and upgrade: what each next level costs. area: where it stands on the village map.
+  buildings: [
+    { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4], upgrade: [200, 500] },
+    { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4], upgrade: [250, 600] },
+    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4], upgrade: [300, 700] }
+  ],
 
   // Harvest speed picked on the title screen.
   // fall: screen-heights per second. gap: seconds between fruit (before a little randomness).
@@ -320,13 +334,12 @@ FF.data = {
     areas: [
       { id: 'groves',   name: 'Groves',   w: 900 },
       { id: 'friends',  name: 'Friends',  w: 1560 },
-      { id: 'kitchen',  name: 'Kitchen',  w: 900 },
+      { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
       { id: 'barnyard', name: 'Barnyard', w: 1000 },
       { id: 'fields',   name: 'Fields',   w: 860 }
     ],
     homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470],
-    square: 780,
-    soon: { kitchen: ['Juice press', 'Smoothie stand', 'Jam kitchen', 'Bakery'] }
+    square: 780
   },
   // Village decorations. x and y place them in the Friends area of the map.
   decorations: [

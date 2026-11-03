@@ -21,6 +21,7 @@ It works offline except for the Google Font, which falls back to a system font.
 | `js/scenery.js` | Sky, hills, trees (round, palm, bush, vine), ground details, weather, market stalls and plaza, shop previews. |
 | `js/ui.js` | SVG icons (`FF.icons`), overlay helpers (`FF.ui`), HUD updates (`FF.hud`). |
 | `js/farm.js` | Harvest mode: carrier movement, the fruit stream and shakes, catching, filters, carrier drawing. |
+| `js/buildings.js` | Production buildings (`FF.buildings`): building, making, collecting, upgrading, and the building card. Rows in `buildings` in `data.js`. |
 | `js/orders.js` | The order board (`FF.orders`): making orders, delivering, pinning, the harvest counter. Numbers in `orders` in `data.js`. |
 | `js/groves.js` | Groves (`FF.groves`): how much each holds, refilling over days, the grove card, and filters. |
 | `js/animals.js` | Animal head drawing (`FF.animals`). |
@@ -42,7 +43,7 @@ It works offline except for the Google Font, which falls back to a system font.
 
 - Plain classic `<script>` files that share one global object, `window.FF`. No modules, so it
   runs from `file://` by double-clicking. Keep it that way unless we add a dev server.
-- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm → groves → orders →
+- Load order matters and is set in `index.html`: data → core → draw → scenery → ui → farm → groves → orders → buildings →
   animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → map → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
@@ -55,6 +56,8 @@ It works offline except for the Google Font, which falls back to a system font.
 - **New basket color or scene:** add a row to `skins` or `scenes` in `data.js`. A scene needs
   every field the others have. New `ground.bits` or `ambient` kinds also need a drawer in
   `scenery.js` (`BITS` or `WEATHER`).
+- **New good or building:** add the good to `fruits` with `kind: 'good'` and its art to `GOODS` in `draw.js`, then a row to
+  `buildings`. Kitchen buildings appear on the map in list order.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
 - **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in

@@ -156,6 +156,28 @@
     }
   };
 
+  /* ---------- Goods art, drawn in a box of size s from its top-left corner ---------- */
+  const GOODS = {
+    juice(ctx, s) {
+      Draw.rr(s * 0.34, s * 0.3, s * 0.32, s * 0.58, s * 0.08); Draw.fillStroke('#ff9a1f', s * 0.05);
+      Draw.rr(s * 0.42, s * 0.12, s * 0.16, s * 0.2, s * 0.04); Draw.fillStroke('#ffd08a', s * 0.04);
+      Draw.rr(s * 0.38, s * 0.5, s * 0.24, s * 0.16, s * 0.03); Draw.fillStroke('#fffaf0', s * 0.03);
+    },
+    smoothie(ctx, s) {
+      ctx.beginPath(); ctx.moveTo(s * 0.3, s * 0.3); ctx.lineTo(s * 0.7, s * 0.3); ctx.lineTo(s * 0.64, s * 0.88); ctx.lineTo(s * 0.36, s * 0.88); ctx.closePath(); Draw.fillStroke('#ff8fb1', s * 0.05);
+      ctx.strokeStyle = INK; ctx.lineWidth = s * 0.06; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(s * 0.55, s * 0.32); ctx.lineTo(s * 0.68, s * 0.08); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(s * 0.5, s * 0.3, s * 0.22, s * 0.06, 0, 0, TAU); Draw.fillStroke('#fff0f4', s * 0.04);
+    },
+    jam(ctx, s) {
+      Draw.rr(s * 0.26, s * 0.36, s * 0.48, s * 0.5, s * 0.1); Draw.fillStroke('#e8323f', s * 0.05);
+      Draw.rr(s * 0.24, s * 0.24, s * 0.52, s * 0.14, s * 0.04); Draw.fillStroke('#fffaf0', s * 0.04);
+      Draw.rr(s * 0.35, s * 0.5, s * 0.3, s * 0.18, s * 0.04); Draw.fillStroke('#fffaf0', s * 0.03);
+    }
+  };
+  // Goods draw through the same call as fruit, centered on the spot and about 2r across.
+  Draw.goodsArt = GOODS;
+  for (const name of Object.keys(GOODS)) FRUIT_ART[name] = r => { const ctx = G.ctx; ctx.save(); ctx.translate(-r * 1.5, -r * 1.55); GOODS[name](ctx, r * 3); ctx.restore(); };
+
   Draw.fruit = (type, x, y, r, rot = 0, alpha = 1, squash = 1) => {
     const ctx = G.ctx, art = FRUIT_ART[type];
     if (!art) return;
