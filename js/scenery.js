@@ -232,7 +232,7 @@
         ctx.fillStyle = '#ffffff';
         ctx.beginPath(); ctx.ellipse(x, y, 16 * b.s, 5 * b.s, 0, Math.PI, TAU); ctx.fill();
       } else {
-        const tw = G.reduce ? 1 : 0.5 + 0.5 * Math.sin(G.clock * 3 + b.a * 3), r = 4 * b.s * tw;
+        const tw = G.reduce || G.caching ? 1 : 0.5 + 0.5 * Math.sin(G.clock * 3 + b.a * 3), r = 4 * b.s * tw;
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); ctx.stroke();
       }
@@ -272,6 +272,13 @@
     const band = H - groundY - 22, draw = BITS[g.bits];
     if (draw) for (const b of bits) draw(b, b.x, groundY + 16 + b.y * band, sc);
     ctx.restore();
+  };
+
+  // Hills, trees and ground for the harvest, kept as one saved picture (Draw.layer) and
+  // repainted only when the scene, the trees or the fruit left on them change.
+  S.farmBack = (groundY, sc = FF.scene()) => {
+    const key = [sc.id, FF.save.trees.join(), S.fruitShare, groundY, S.treeHeight()].join(';');
+    Draw.layer('farm', key, () => { S.hills(groundY, sc); S.trees(groundY, sc); S.ground(groundY, sc); });
   };
 
   /* ---------- Weather ---------- */
@@ -362,18 +369,20 @@
         Draw.circlesPath([0.15, 0.4, 0.7, 0.9].map(k => [x0 + sw * k, top + 4, 4 + (k * 10 % 3)])); ctx.fill();
       }
     }
-    if (sc.lights) {
-      const y = top + 34, sag = 10;
-      ctx.strokeStyle = 'rgba(20,16,40,0.8)'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(0, y);
-      for (let x = 0; x < W; x += 80) ctx.quadraticCurveTo(x + 40, y + sag * 2, x + 80, y);
-      ctx.stroke();
-      for (let x = 20; x < W; x += 40) {
-        const k = ((x % 80) - 40) / 40, by = y + sag * (1 - k * k) + 4;
-        const on = 0.6 + 0.4 * Math.sin(G.clock * 3 + x);
-        ctx.fillStyle = `rgba(255,220,120,${0.25 * on})`; ctx.beginPath(); ctx.arc(x, by, 10, 0, TAU); ctx.fill();
-        ctx.fillStyle = ['#ffe680', '#ff9ec4', '#9ad0ff'][(x / 40 | 0) % 3]; ctx.beginPath(); ctx.arc(x, by, 4, 0, TAU); ctx.fill();
-      }
+  };
+  // String lights over the stalls twinkle, so they're drawn every frame on top of the saved stalls.
+  S.lights = (horizon, sc = FF.scene()) => {
+    if (!sc.lights) return;
+    const ctx = G.ctx, { W } = G, y = horizon - 92 + 34, sag = 10;
+    ctx.strokeStyle = 'rgba(20,16,40,0.8)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, y);
+    for (let x = 0; x < W; x += 80) ctx.quadraticCurveTo(x + 40, y + sag * 2, x + 80, y);
+    ctx.stroke();
+    for (let x = 20; x < W; x += 40) {
+      const k = ((x % 80) - 40) / 40, by = y + sag * (1 - k * k) + 4;
+      const on = 0.6 + 0.4 * Math.sin(G.clock * 3 + x);
+      ctx.fillStyle = `rgba(255,220,120,${0.25 * on})`; ctx.beginPath(); ctx.arc(x, by, 10, 0, TAU); ctx.fill();
+      ctx.fillStyle = ['#ffe680', '#ff9ec4', '#9ad0ff'][(x / 40 | 0) % 3]; ctx.beginPath(); ctx.arc(x, by, 4, 0, TAU); ctx.fill();
     }
   };
 
@@ -399,6 +408,12 @@
     const draw = { leaves: BITS.leaves, sparkle: BITS.sparkle, sprinkles: BITS.sprinkles }[sc.ground.bits];
     if (draw) for (const b of plazaBits) draw(b, b.x, horizon + 14 + b.y * (H - horizon - 20), sc);
     ctx.fillStyle = 'rgba(43,35,80,0.15)'; ctx.fillRect(0, horizon, W, 3);
+  };
+
+  // Stalls and plaza for the market, kept as one saved picture; the lights go on top.
+  S.marketBack = (horizon, sc = FF.scene()) => {
+    Draw.layer('market', sc.id + ';' + horizon, () => { S.stalls(horizon, sc); S.plaza(horizon, sc); });
+    S.lights(horizon, sc);
   };
 
   /* ---------- Small preview for the shop ---------- */

@@ -7,7 +7,7 @@
   const Draw = FF.draw, Animals = FF.animals, INK = D.colors.ink;
   const WORLD_H = 700, HORIZON = 250, STREET = 500, TAP_MOVE = 10, GLIDE = 4.5;
   const M = { k: 1, top: 0, cam: 0, vel: 0, target: null, from: 'title' };
-  let drag = null, hits = [];
+  let drag = null, hits = [], shownArea = null;
 
   // midX: the middle of the screen, in world units, for messages that float over the map.
   const Map = FF.map = { metrics: () => M, midX: () => M.cam + FF.G.W / 2 / M.k };
@@ -60,7 +60,8 @@
       M.vel *= Math.exp(-GLIDE * dt);
       if (Math.abs(M.vel) < 5 || M.cam <= 0 || M.cam >= clampCam(1e9)) M.vel = 0;
     }
-    document.querySelectorAll('[data-jump]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.jump === Map.areaAt())));
+    const here = Map.areaAt();
+    if (here !== shownArea) { shownArea = here; document.querySelectorAll('[data-jump]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.jump === here))); }
     FF.scenery.update(dt); FF.fx.update(dt);
   };
 

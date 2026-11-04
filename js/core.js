@@ -18,6 +18,8 @@
   // Shared runtime state. W and H are the screen size in CSS pixels; ctx is the canvas being drawn to.
   FF.G = {
     W: 0, H: 0, ctx: null, clock: 0,
+    px: 1,            // canvas pixels per CSS pixel (lowered on slow devices, see main.js)
+    caching: false,   // true while painting a saved background layer (Draw.layer)
     reduce: matchMedia('(prefers-reduced-motion: reduce)').matches,
     state: 'title',   // title | farm | market
     overlay: null,    // which card is open, if any

@@ -50,6 +50,11 @@ It works offline except for the Google Font, which falls back to a system font.
   animals → friends → stickers → market-layouts → market → shop → board → book → village → parade → map → quests → guide → main.
 - Everything draws to one `<canvas>` through `FF.G.ctx`. Sizes come from `FF.G.W` and `FF.G.H`
   (CSS pixels). Each mode has `layout()`, `start()`, `update(dt)`, `draw()` and pointer handlers.
+- Speed on slow tablets: `G.px` is the drawing resolution. `watchSpeed()` in `main.js` lowers it
+  when frames are slow and remembers it under `fruitfarmer.px`. Scenery that doesn't move is
+  kept as a saved picture with `Draw.layer()` (`farmBack`, `marketBack` in `scenery.js`). Anything
+  that animates must be drawn outside those layers. Updates run in small steps, so a slow device
+  skips frames and doesn't slow down. Avoid `shadowBlur` and `filter`, which are slow on old devices.
 - Progress saves to `localStorage` under `fruitfarmer.save`. `loadSave()` in `core.js` cleans
   old or partial saves; when adding new saved fields, give them a default there.
 

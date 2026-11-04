@@ -7,7 +7,7 @@
   let from = 'title', t = 0, march = [], bits = [], W = 0, H = 0;
 
   function size() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = G.px || 1;
     W = window.innerWidth; H = window.innerHeight;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);

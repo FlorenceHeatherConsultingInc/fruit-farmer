@@ -489,8 +489,7 @@
     ctx.save();
     if (sk) ctx.translate(Math.sin(G.clock * 70) * sk, Math.cos(G.clock * 57) * sk);
     S.sky(M.horizon);
-    S.stalls(M.horizon);
-    S.plaza(M.horizon);
+    S.marketBack(M.horizon, sc);
     Layouts[active].draw(M, targets, aim && aim.target, sc);
     if (revealT > 0) Layouts.wall.drawCloth(M, clamp(1 - revealT, 0, 1), sc);
     drawTray();

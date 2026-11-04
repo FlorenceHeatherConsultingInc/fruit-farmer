@@ -6,12 +6,20 @@
   const screenCtx = cv.getContext('2d');
   G.ctx = screenCtx;
 
+  // Drawing resolution: canvas pixels per CSS pixel. Starts sharp (up to 2); on a slow tablet
+  // watchSpeed() lowers pxCap so there are fewer pixels to paint each frame, and this browser
+  // remembers it so the next visit starts smooth.
+  let pxCap = 2;
+  try { const kept = parseFloat(localStorage.getItem('fruitfarmer.px')); if (kept >= 0.75 && kept <= 2) pxCap = kept; } catch (_) {}
+  function sizeCanvas() {
+    const px = G.px = Math.min(window.devicePixelRatio || 1, pxCap);
+    cv.width = Math.round(G.W * px); cv.height = Math.round(G.H * px);
+    screenCtx.setTransform(px, 0, 0, px, 0, 0);
+  }
   FF.layout = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const box = cv.getBoundingClientRect();
     G.W = Math.round(box.width); G.H = Math.round(box.height);
-    cv.width = Math.round(G.W * dpr); cv.height = Math.round(G.H * dpr);
-    screenCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sizeCanvas();
     FF.scenery.layout(); FF.farm.layout(); FF.market.layout(); FF.map.layout();
   };
   window.addEventListener('resize', FF.layout);
@@ -379,23 +387,48 @@
   window.addEventListener('blur', () => { G.input.keys.left = G.input.keys.right = false; });
 
   /* ---------- Game loop ---------- */
+  // If frames keep coming slowly, draw fewer pixels. Gaps over a quarter second (a hidden tab,
+  // a card opening) don't count. It only ever steps down, so the picture never flips back and forth.
+  const PX_STEPS = [1.5, 1.25, 1, 0.75];
+  let speedSpan = 0, speedFrames = 0;
+  function watchSpeed(gap) {
+    if (gap > 0.25) { speedSpan = speedFrames = 0; return; }
+    speedSpan += gap; speedFrames++;
+    if (speedSpan < 2) return;
+    const fps = speedFrames / speedSpan;
+    speedSpan = speedFrames = 0;
+    if (fps >= 45) return;
+    // Below 1 only when it's really struggling; a soft picture is worse than a 30 fps one.
+    const next = PX_STEPS.find(s => s < G.px - 0.01 && (s >= 1 || fps < 24));
+    if (next == null) return;
+    pxCap = next; sizeCanvas();
+    try { localStorage.setItem('fruitfarmer.px', String(next)); } catch (_) {}
+  }
+
   let last = performance.now();
   let lastError = '';
+  const STEP = 1 / 30;
   function frame(now) {
     requestAnimationFrame(frame);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const gap = (now - last) / 1000;
     last = now;
+    watchSpeed(gap);
+    // A slow device moves the game on in a few small steps instead of slowing it down.
+    // Past 10 frames a second it does slow down, so nothing jumps too far at once.
+    const dt = Math.min(0.1, Math.max(0, gap)), steps = Math.max(1, Math.ceil(dt / STEP - 0.01)), sdt = dt / steps;
     G.clock += dt;
     try {
-      if (G.state === 'title') FF.farm.update(dt, true);
-      else if (G.state === 'village') { if (!G.overlay) FF.map.update(dt); }
-      else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
-      else if (G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
+      for (let i = 0; i < steps; i++) {
+        if (G.state === 'title') FF.farm.update(sdt, true);
+        else if (G.state === 'village') { if (!G.overlay) FF.map.update(sdt); }
+        else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(sdt, false);
+        else if (G.overlay === 'full') { FF.fx.update(sdt); FF.scenery.update(sdt); }
+      }
       if (G.overlay === 'parade') FF.parade.tick(dt);
       if (G.state === 'market') FF.market.draw(); else if (G.state === 'village') FF.map.draw(); else FF.farm.draw(G.state === 'title');
     } catch (e) {
       // Keep playing. Note the error once (in the console and in this browser) so it can be fixed.
-      G.ctx = screenCtx; G.ctx.setTransform(Math.min(window.devicePixelRatio || 1, 2), 0, 0, Math.min(window.devicePixelRatio || 1, 2), 0, 0);
+      G.ctx = screenCtx; G.ctx.setTransform(G.px, 0, 0, G.px, 0, 0);
       const msg = String(e && e.stack || e).slice(0, 600);
       if (msg !== lastError) { lastError = msg; console.error(e); try { localStorage.setItem('fruitfarmer.lastError', new Date().toISOString() + ' ' + G.state + ' ' + msg); } catch (x) {} }
     }

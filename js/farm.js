@@ -378,9 +378,7 @@
   Farm.draw = demo => {
     const S = FF.scenery;
     S.sky(groundY);
-    S.hills(groundY);
-    S.trees(groundY);
-    S.ground(groundY);
+    S.farmBack(groundY);
     for (const f of fruits) if (f.landed) Draw.fruit(f.type, f.x, f.y, f.r, f.rot, Math.max(0, f.life), 0.85);
     if (!demo) drawSpeedLines();
     drawCarrier(demo);

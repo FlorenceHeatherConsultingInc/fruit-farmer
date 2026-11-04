@@ -146,9 +146,10 @@
     },
     star(r, lw) {
       const ctx = G.ctx;
-      ctx.shadowColor = 'rgba(255,220,60,0.9)'; ctx.shadowBlur = r * 0.6;
+      // Soft glow from see-through rings (a blur shadow is very slow on older tablets).
+      ctx.fillStyle = 'rgba(255,220,60,0.22)'; ctx.beginPath(); ctx.arc(0, 0, r * 1.45, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,220,60,0.3)'; ctx.beginPath(); ctx.arc(0, 0, r * 1.2, 0, TAU); ctx.fill();
       Draw.starPath(r * 1.05); Draw.fillStroke(SUN, lw);
-      ctx.shadowBlur = 0;
       ctx.fillStyle = INK;
       ctx.beginPath(); ctx.arc(-r * 0.2, -r * 0.05, r * 0.08, 0, TAU); ctx.arc(r * 0.2, -r * 0.05, r * 0.08, 0, TAU); ctx.fill();
       ctx.beginPath(); ctx.arc(0, r * 0.1, r * 0.16, 0.15 * Math.PI, 0.85 * Math.PI);
@@ -251,6 +252,24 @@
     c.setAttribute('aria-hidden', 'true');
     return c;
   };
+  // A saved full-screen picture of scenery that doesn't move. `paint` runs only when `key`, the
+  // screen size or the drawing resolution changes; every other frame just copies the picture,
+  // which is far cheaper on a slow tablet than drawing every tree and tuft again.
+  const layers = {};
+  Draw.layer = (name, key, paint) => {
+    const { W, H } = G, px = G.px || 1, full = key + '|' + W + 'x' + H + '@' + px;
+    const L = layers[name] || (layers[name] = { c: document.createElement('canvas'), key: '' });
+    if (L.key !== full) {
+      L.key = '';
+      L.c.width = Math.max(1, Math.round(W * px)); L.c.height = Math.max(1, Math.round(H * px));
+      const lctx = L.c.getContext('2d'), prev = G.ctx;
+      lctx.setTransform(px, 0, 0, px, 0, 0);
+      G.ctx = lctx; G.caching = true;
+      try { paint(); L.key = full; } finally { G.ctx = prev; G.caching = false; }
+    }
+    G.ctx.drawImage(L.c, 0, 0, W, H);
+  };
+
   Draw.fruitIcon = (type, size = 84) => Draw.toCanvas(size, size, s => Draw.fruit(type, s / 2, s / 2 + 2, s * 0.32));
 
   /* ---------- Particles and floating text ---------- */
