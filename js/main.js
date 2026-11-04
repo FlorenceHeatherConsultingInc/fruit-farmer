@@ -50,8 +50,15 @@
     const s = FF.save, kinds = FF.FRUIT_TYPES.filter(t => s.barn[t] > 0), total = kinds.reduce((n, t) => n + picks[t], 0);
     $('packNote').textContent = (overflow ? 'The barn is full! ' + overflow + ' fruit stayed in your basket. ' : '') +
       (kinds.length ? 'Pick what to sell. The rest stays in your barn.' : 'Your barn is empty. Go catch some fruit!');
-    $('packRows').innerHTML = kinds.map(t => `<div class="up pack"><div class="badge" data-fruit="${t}"></div><div><h3>${FF.data.fruits[t].name}</h3><p>${picks[t]} of ${s.barn[t]}</p></div>` +
-      `<div class="stepper"><button class="mini" type="button" data-pack="${t}" data-d="-1" aria-label="One less ${FF.data.fruits[t].name}" ${picks[t] ? '' : 'disabled'}>−</button><button class="mini" type="button" data-pack="${t}" data-d="1" aria-label="One more ${FF.data.fruits[t].name}" ${picks[t] < s.barn[t] ? '' : 'disabled'}>+</button></div></div>`).join('');
+    const all = kinds.reduce((n, t) => n + s.barn[t], 0);
+    const step = (t, d) => {
+      const name = FF.data.fruits[t].name, n = Math.abs(d), less = d < 0;
+      const label = (n === 1 ? (less ? 'One less ' : 'One more ') : (less ? n + ' less ' : n + ' more ')) + name;
+      return `<button class="mini" type="button" data-pack="${t}" data-d="${d}" aria-label="${label}" ${(less ? picks[t] > 0 : picks[t] < s.barn[t]) ? '' : 'disabled'}>${less ? '−' : '+'}${n}</button>`;
+    };
+    $('packRows').innerHTML = (kinds.length ? `<div class="packall"><button class="mini" type="button" data-packall="all" ${total < all ? '' : 'disabled'}>Take all</button><button class="mini" type="button" data-packall="none" ${total ? '' : 'disabled'}>Take none</button></div>` : '') +
+      kinds.map(t => `<div class="up pack"><div class="badge" data-fruit="${t}"></div><div><h3>${FF.data.fruits[t].name}</h3><p>${picks[t]} of ${s.barn[t]}</p></div>` +
+      `<div class="stepper">${[-10, -5, -1, 1, 5, 10].map(d => step(t, d)).join('')}</div></div>`).join('');
     kinds.forEach(t => $('packRows').querySelector(`[data-fruit="${t}"]`).appendChild(FF.draw.fruitIcon(t)));
     $('packGo').disabled = total === 0;
     $('packGo').textContent = total ? 'Go sell ' + total + ' fruit' : 'Go to market';
@@ -288,6 +295,11 @@
   on('packBack', () => { if (packFrom === 'map') { packFrom = null; UI.hideAll(); Screens.backToMap(); } else Screens.title(); });
   on('doneBtn', () => FF.market.finish());
   $('packRows').addEventListener('click', e => {
+    const a = e.target.closest('[data-packall]');
+    if (a) {
+      FF.FRUIT_TYPES.forEach(t => { picks[t] = a.dataset.packall === 'all' ? FF.save.barn[t] || 0 : 0; });
+      FF.sfx.tick(); renderPack(); return;
+    }
     const b = e.target.closest('[data-pack]');
     if (!b) return;
     const t = b.dataset.pack;
