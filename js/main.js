@@ -35,12 +35,6 @@
       `<p class="note">${c.look === 'hands' ? 'Your hands hold' : 'Your ' + c.name.toLowerCase() + ' holds'} ${FF.cap()} fruit. Catch, sell and pick to earn points.</p>`;
   }
 
-  function showSoldCard() {
-    $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin');
-    UI.show('sold');
-    FF.fx.confetti(); FF.sfx.party();
-    $('soldShopBtn').focus();
-  }
 
   // Choosing what to take to market. Everything in the barn starts picked.
   let picks = {}, overflow = 0, mapFrom = 'title', packFrom = null;
@@ -73,17 +67,24 @@
     return FF.save.trees.find(t => left(t) > 0) || null;
   }
   function summaryHTML(up) {
-    const s = FF.save, v = FF.farm.visit, got = FF.FRUIT_TYPES.filter(t => v.caught[t] > 0), pts = s.points - (v.points || s.points);
+    const s = FF.save, v = FF.farm.visit, got = FF.FRUIT_TYPES.filter(t => v.caught[t] > 0), pts = s.points - v.points;
     const bonus = Object.values(FF.farm.bonus).reduce((a, b) => a + b, 0);
+    // What the barn will hold once this basket is unloaded.
+    const have = t => s.barn[t] + s.crate[t], stored = FF.FRUIT_TYPES.filter(t => have(t) > 0), size = FF.barnSize();
+    const total = stored.reduce((a, t) => a + have(t), 0);
     const p = FF.levelProgress(), next = p.level + 1, nextLook = FF.lookFor(next), nowLook = FF.lookFor(p.level);
-    const gives = nextLook.look !== nowLook.look ? `a new ${nextLook.name.toLowerCase()} that holds ${FF.capAt(next)}` : FF.capAt(next) > FF.capAt(p.level) ? `room for ${FF.capAt(next)} fruit` : 'more farm points';
-    const newLook = up && up.newLook;
-    return (newLook ? `<div class="newlook"><span data-look="${FF.carrier().look}"></span><b>Your ${FF.carrier().name.toLowerCase()} holds ${FF.cap()}!</b></div>` : '') +
-      `<div class="caught">${got.length ? got.map(t => `<span class="item">${img(t)}×${v.caught[t]}</span>`).join('') : '<span>Nothing caught this time.</span>'}</div>` +
-      (bonus ? `<div class="pts">including ${bonus} bonus fruit!</div>` : '') +
-      `<div class="pts"><b>+${pts}</b> farm points${up && !newLook ? ` · now holds ${FF.cap()}` : ''}</div>` +
+    const gives = nextLook.look !== nowLook.look ? ` Then you get a ${nextLook.name.toLowerCase()} that carries ${FF.capAt(next)} fruit!` : FF.capAt(next) > FF.capAt(p.level) ? ` Then you can carry ${FF.capAt(next)} fruit.` : '';
+    const newLook = up && up.newLook, row = (t, n) => `<span class="item">${img(t)}<b>${n}</b></span>`;
+    return (newLook ? `<div class="newlook"><span data-look="${FF.carrier().look}"></span><b>Your new ${FF.carrier().name.toLowerCase()} carries ${FF.cap()} fruit!</b></div>` : '') +
+      (up && !newLook ? `<div class="grew">You can carry <b>${FF.cap()}</b> fruit now!</div>` : '') +
+      `<div class="label">You picked</div>` +
+      `<div class="caught">${got.length ? got.map(t => row(t, v.caught[t])).join('') : '<span>Nothing this time.</span>'}</div>` +
+      (bonus ? `<div class="pts">${bonus} of them ${bonus === 1 ? 'was a' : 'were'} sparkly bonus fruit!</div>` : '') +
+      `<div class="label">Now in your barn${size === Infinity ? '' : `: ${total} of ${size}`}</div>` +
+      `<div class="caught">${stored.length ? stored.map(t => row(t, have(t))).join('') : '<span>Empty</span>'}</div>` +
+      `<div class="pts">You earned <b>${pts}</b> farm ${pts === 1 ? 'point' : 'points'}.</div>` +
       `<div class="lvl"><span>Level ${p.level}</span><div class="meter"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></div><span>${next}</span></div>` +
-      `<p class="note">${p.need - p.into} more points to level ${next}: ${gives}.</p>`;
+      `<p class="note">${p.need - p.into} more ${p.need - p.into === 1 ? 'point' : 'points'} to level ${next}.${gives}</p>`;
   }
 
   /* ---------- The Basket path ---------- */
@@ -128,7 +129,6 @@
       if (G.state === 'farm') FF.farm.reset();
       const up = FF.releaseLevel();
       if (up) setTimeout(() => FF.levelUp(up.to, up.newLook), 300);
-      FF.book.startDay();
       mapFrom = from === 'sold' ? 'sold' : 'title';
       G.state = 'village';
       UI.hideAll(); clearInput();
@@ -177,7 +177,6 @@
     // A harvest round in one grove.
     farm(grove, keep) {
       FF.sound.ensure();
-      FF.book.startDay();
       const sel = document.querySelector('input[name="speed"]:checked');
       if (sel) { FF.save.speed = sel.value; FF.persist(); }
       G.state = 'farm';
@@ -219,12 +218,15 @@
     showSold() {
       const earned = FF.market.earned();
       FF.book.sold();
-      if (FF.save.legend && !FF.save.legendSeen) { FF.save.legendSeen = true; FF.persist(); FF.parade.open('sold'); return; }
       const left = FF.market.unsold();
-      $('soldTitle').textContent = left ? 'All done!' : 'Sold out!';
-      $('soldMsg').textContent = (earned ? 'You earned ' + earned + ' coins this trip. ' : '') + (left ? left + ' fruit went back to the barn.' : earned ? 'Nice throwing!' : 'All your fruit is sold.');
-      showSoldCard();
-      $('soldShopBtn').focus();
+      // Selling ends back in the village. The day only changes when you go to bed.
+      Screens.village('sold');
+      if (FF.save.legend && !FF.save.legendSeen) { FF.save.legendSeen = true; FF.persist(); FF.parade.open('sold'); return; }
+      const x = FF.map.midX();
+      FF.fx.text(x, 200, left ? 'Done selling!' : 'All sold!', true);
+      if (earned) setTimeout(() => FF.fx.text(x, 260, '+' + earned + ' coins', true), 400);
+      if (left) setTimeout(() => FF.fx.text(x, 320, left + ' back in the barn', false), 800);
+      FF.fx.confetti(); FF.sfx.party();
     },
     pause() {
       if (G.state !== 'farm' || G.overlay) return;
@@ -238,12 +240,10 @@
     afterShop(from) {
       if (from === 'map') { UI.hideAll(); Screens.backToMap(); FF.layout(); }
       else if (from === 'market') { UI.hideAll(); FF.market.refresh(); FF.hud.coins(); }
-      else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
       else { renderTitle(); UI.show('title'); }
     },
     afterBook(from) {
-      if (from === 'map') { UI.hideAll(); Screens.backToMap(); }
-      else if (from === 'sold') { $('soldStats').innerHTML = stat(I.coin, FF.save.coins, 'coin'); UI.show('sold'); }
+      if (from === 'map' || from === 'sold') { UI.hideAll(); Screens.backToMap(); }
       else Screens.title();
     }
   };
@@ -268,7 +268,6 @@
   on('farmDoneBtn', () => { if (G.state === 'farm' && !G.overlay) Screens.showFull('done'); });
   on('fullVillageBtn', () => Screens.village('title', 'groves'));
   on('titleBookBtn', () => FF.book.open('title'));
-  on('soldVillageBtn', () => Screens.village('sold'));
   on('mapBasketBtn', () => FF.basketPath.open('map'));
   on('mapBarnBtn', () => FF.shop.open('map', 'barn'));
   on('mapBookBtn', () => FF.book.open('map'));
@@ -279,13 +278,12 @@
   on('sleepNo', () => { UI.hideAll(); Screens.backToMap(); });
   on('sleepYes', () => {
     FF.book.sleep(); UI.hideAll(); Screens.backToMap();
-    FF.fx.text(FF.map.metrics().cam + 300, 200, 'Good morning! Day ' + FF.save.day, true); FF.sfx.star();
+    FF.fx.text(FF.map.midX(), 200, 'Good morning! Day ' + FF.save.day, true); FF.sfx.star();
   });
-  on('mapMarketBtn', () => { if (FF.inBarn()) { packFrom = 'map'; Screens.toMarket(); } else FF.fx.text(FF.map.metrics().cam + 300, 200, 'The barn is empty. Go pick some fruit!', false); });
+  on('mapMarketBtn', () => { if (FF.inBarn()) { packFrom = 'map'; Screens.toMarket(); } else FF.fx.text(FF.map.midX(), 200, 'The barn is empty. Go pick some fruit!', false); });
   on('mapShopBtn', () => FF.shop.open('map'));
   on('plantDone', () => { UI.hideAll(); Screens.backToMap(); });
   $('mapJump').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) FF.map.jump(b.dataset.jump); });
-  on('soldBookBtn', () => FF.book.open('sold'));
   on('packGo', () => Screens.market(picks));
   on('packBack', () => { if (packFrom === 'map') { packFrom = null; UI.hideAll(); Screens.backToMap(); } else Screens.title(); });
   on('doneBtn', () => FF.market.finish());
@@ -300,8 +298,6 @@
   on('resumeBtn', Screens.resume);
   on('homeBtn', () => Screens.village('title', 'groves'));
   on('keepBtn', () => { const g = keepGrove; if (!g) return; FF.unloadBasket(); Screens.farm(g, true); });
-  on('soldShopBtn', () => FF.shop.open('sold'));
-  on('soldFarmBtn', () => Screens.village('title', 'groves'));
   on('shopBtn', () => FF.shop.open('market'));
   document.addEventListener('visibilitychange', () => { if (document.hidden) Screens.pause(); });
 
@@ -382,7 +378,7 @@
       if (G.state === 'title') FF.farm.update(dt, true);
       else if (G.state === 'village') { if (!G.overlay) FF.map.update(dt); }
       else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
-      else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
+      else if (G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
       if (G.overlay === 'parade') FF.parade.tick(dt);
       if (G.state === 'market') FF.market.draw(); else if (G.state === 'village') FF.map.draw(); else FF.farm.draw(G.state === 'title');
     } catch (e) {

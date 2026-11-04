@@ -13,7 +13,7 @@ It works offline except for the Google Font, which falls back to a system font.
 
 | File | What's in it |
 | --- | --- |
-| `index.html` | Page markup: HUD, arrow pads, overlay cards (title, pause, full, sold, shop). Loads the scripts in order. |
+| `index.html` | Page markup: HUD, arrow pads, overlay cards (title, pause, full, shop, quest). Selling ends straight back in the village. Loads the scripts in order. |
 | `css/styles.css` | All interface styling (cards, buttons, HUD). |
 | `js/data.js` | **All game content and tuning.** Fruit prices, harvest speeds, movement feel, carriers, trees, upgrades, basket colors, scenes, market rules. Start here for most changes. |
 | `js/core.js` | Helpers (`FF.util`), shared state (`FF.G`), saved progress (`FF.save`, `FF.persist`), sound effects (`FF.sfx`). |

@@ -42,8 +42,9 @@ browser on that computer.
   milk) in the barnyard.
 - **More kitchens:** a popcorn cart, a salad bar (one of every fruit), a bakery (apple pie from apples,
   eggs and milk) and a diner (milkshakes and pancakes), each unlocked by the ones before.
-- **Days:** the day shows in the village and while you harvest. Coming back from market starts the next day,
-  or tap Sleep in the village to end the day whenever you like.
+- **Days:** the day shows in the village and while you harvest. The day only changes when you tap the
+  moon in the village and go to bed, so you can harvest, sell and shop as much as you like first. Selling
+  ends straight back in the village.
 - **Farms:** the Farms tab in the Farm book lists every farm. Play any of them again, remove one, or start a
   new one. Start over from nothing (press and hold) wipes everything for a brand-new game.
 - **Shop and Tool shed:** the Shop sells looks: basket looks and colors, scenery, friend hats and village

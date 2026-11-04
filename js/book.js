@@ -258,9 +258,8 @@
     bonus: earn,
     bought(name) { today().bought.push(name); },
     delivered(name) { const t = today(); (t.delivered || (t.delivered = [])).push(name); },
-    sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
-    startDay() { if (today().sold) { closeDay(); FF.stickers.check(); FF.persist(); } },
-    // Going to bed ends the day even if nothing happened in it.
+    sold() { FF.persist(); FF.board.sync(); FF.board.backup(); },
+    // Only going to bed ends the day, even if nothing happened in it. Selling never does.
     sleep() { FF.stickers.add('slept'); const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
     open(origin) {
       FF.sound.ensure();

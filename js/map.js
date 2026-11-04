@@ -9,7 +9,8 @@
   const M = { k: 1, top: 0, cam: 0, vel: 0, target: null, from: 'title' };
   let drag = null, hits = [];
 
-  const Map = FF.map = { metrics: () => M };
+  // midX: the middle of the screen, in world units, for messages that float over the map.
+  const Map = FF.map = { metrics: () => M, midX: () => M.cam + FF.G.W / 2 / M.k };
   // Only the areas the quests have opened are on the map, and the kitchen and barnyard are as wide
   // as what's been revealed in them, so the map ends where the farm ends.
   const U = id => FF.quests.isUnlocked(id);
