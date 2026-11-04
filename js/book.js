@@ -7,7 +7,7 @@
   const PAGE_STEP = 15, MAX_PAGES = 500;
   let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null, confirmRemove = null, confirmWipe = false;
   // Everything that belongs to one farm. The rest (score, friends, stickers, looks, seeds) is shared.
-  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'orders', 'pin', 'buildings', 'fieldLv', 'fieldStock', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid', 'questsDone', 'questOn', 'questBase', 'unlocked'];
+  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'basket', 'basketLook', 'groves', 'treeGrows', 'orders', 'pin', 'buildings', 'fieldLv', 'fieldStock', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid', 'questsDone', 'questOn', 'questBase', 'unlocked'];
 
   const dateKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const blankDay = () => ({ date: dateKey(), harvest: {}, sales: {}, bought: [], perfect: 0, earned: 0, sold: false });
@@ -170,7 +170,7 @@
     FARM_KEYS.forEach(k => { s[k] = n[k] === undefined ? null : JSON.parse(JSON.stringify(n[k])); });
     s.farmNo = next; s.seedsPaid = 0;
     s.challenge = challenge || null;
-    if (s.seedBuys.includes('start-basket')) s.points = FF.pointsFor(5);
+    if (s.seedBuys.includes('start-basket')) s.basket = Math.max(s.basket, D.basketLooks[1].from);
     if (s.seedBuys.includes('start-tree') && challenge !== 'apples') s.trees.push('orange');
     if (challenge === 'wallrush') { s.wallOwned = true; s.wallRevealed = true; s.marketLayout = 'wall'; }
     FF.stickers.check();
@@ -187,6 +187,7 @@
     s.otherFarms.push(stash());
     FARM_KEYS.forEach(k => { s[k] = target[k] != null ? target[k] : JSON.parse(JSON.stringify(fresh[k] === undefined ? null : fresh[k])); });
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = s.crate[t] || 0; s.barn[t] = s.barn[t] || 0; });
+    if (target.basket == null) FF.oldFarm(s);   // a farm put away before baskets were bought
     s.otherFarms.sort((a, b) => a.farmNo - b.farmNo);
     FF.stickers.check(); FF.persist(); FF.layout();
     return true;

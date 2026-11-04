@@ -70,12 +70,18 @@ It works offline except for the Google Font, which falls back to a system font.
 - **Fields:** `fields` in `data.js` (when they open, how much each crop grows, upgrade costs). A new crop needs
   a row in `fruits` with `kind: 'crop'`, a row in `fields.crops`, art in `GOODS`, and a drawer in `field()` in `map.js`.
 - **Tree prices and when they open:** `cost` and `level` on each row of `trees` in `data.js`.
+- **Tree size:** trees don't grow with the farm level. Each starts at `holds` and the player buys grows on the
+  grove card (`growCost` per tree, `treeGrow` for how much bigger and pricier each grow gets). Saved in `save.treeGrows`.
 - **Shop order:** every shop section lists items cheapest first, rewards last. Order in `data.js` doesn't matter.
 - **New fruit:** add it to `fruits` and `trees` in `data.js`, then add its art to `FRUIT_ART`
   in `draw.js`.
-- **Basket growth and level pace:** `basketLooks` and `levels` in `data.js`. A new `look` needs drawing code in
-  `drawCarrier()` in `farm.js`. Every look catches the same width. The level is held during a harvest
-  (`FF.holdLevel()` / `FF.releaseLevel()`), so the basket only changes on the harvest summary card.
+- **Basket size:** bought in the Tool shed, not tied to level. `basket` in `data.js` sets the start, how much
+  bigger each upgrade is and its price; `save.basket` holds the size. `basketLooks` sets which look starts at
+  which size. A new `look` needs drawing code in `drawCarrier()` in `farm.js`. Every look catches the same width.
+- **Level pace:** `levels` in `data.js`. The level only decides when things open (tree `level`, `market.newFriendLevel`,
+  `wallUnlock.level`); `FF.levelGoals()` in `core.js` lists them for the level cards. Quest rewards give coins only.
+  The level is held during a harvest (`FF.holdLevel()` / `FF.releaseLevel()`), so level-ups show on the harvest summary card.
+- **Progression plan:** `docs/progression.md` has the agreed redesign and what's still to build.
 - **How far in from the edges fruit falls:** `speeds.edge` in `data.js`.
 - **Barn size:** `barn` in `data.js`. Fruit caught goes to the barn when a harvest ends (`FF.unloadBasket()`), and only
   sales take it out (`market.js`).

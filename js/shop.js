@@ -105,7 +105,13 @@
       return `<button class="pick${on ? ' on' : ''}" type="button" data-act="decor" data-id="${d.id}" ${on || save.coins >= d.cost ? '' : 'disabled'} aria-pressed="${on}"><b>${d.name}</b><small>${on ? 'Built' : I.coin + d.cost}</small></button>`;
     }).join('');
 
-    $('shopUps').innerHTML = byCost(D.upgrades, u => u.costs[Math.min(save.up[u.id] || 0, u.costs.length - 1)]).map(u => {
+    // A bigger basket first (it never runs out), then the other upgrades, cheapest first.
+    const bigger = FF.basketNext(save.basket), nextLook = FF.lookFor(bigger), newLook = nextLook.look !== FF.lookFor(save.basket).look;
+    $('shopUps').innerHTML =
+      `<div class="up"><div class="badge">${I.basket}</div><div><h3>Bigger basket</h3><p>You carry ${FF.cap()}. ` +
+      (FF.canGrowBasket() ? (newLook ? `Next: a ${nextLook.name.toLowerCase()} that carries ${bigger}!` : `Next: carry ${bigger}.`) + ' Fewer trips!' : 'Tiny Hands stays small.') + `</p></div>` +
+      (FF.canGrowBasket() ? buyBtn('basket', 'next', FF.basketPrice(save.basket), 'Buy a bigger basket') : closedBtn()) + `</div>` +
+      byCost(D.upgrades, u => u.costs[Math.min(save.up[u.id] || 0, u.costs.length - 1)]).map(u => {
       const lvl = save.up[u.id], max = lvl >= u.costs.length;
       return `<div class="up"><div class="badge">${I[u.icon]}</div><div><h3>${u.name}</h3><p>${u.desc}</p>${pips(lvl, u.costs.length)}</div>` +
         (max ? ownedBtn('Max') : save.challenge === 'noups' ? closedBtn() : buyBtn('up', u.id, u.costs[lvl], 'Buy ' + u.name)) + `</div>`;
@@ -158,6 +164,16 @@
     const id = b.dataset.id, save = FF.save;
     switch (b.dataset.act) {
       case 'look': if (FF.looksReached().some(l => l.look === id)) { save.basketLook = id; FF.sfx.coin(); FF.layout(); } break;
+      case 'basket': {
+        const got = FF.growBasket();
+        if (!got) { FF.sfx.nope(); break; }
+        FF.sfx.buy(); FF.book.bought('Bigger basket (' + got.to + ')');
+        if (got.newLook) { FF.fx.confetti(); FF.sfx.party(); }
+        FF.persist(); render(); UI.bump($('shopCoins'));
+        $('shopNote').textContent = got.newLook ? 'Wow! You got a ' + FF.carrier().name.toLowerCase() + '! It carries ' + got.to + '.' : 'Now you carry ' + got.to + '!';
+        FF.stickers.check();
+        return;
+      }
       case 'barn': { const cost = D.barn.costs[save.barnLevel]; if (cost != null && spend(cost)) { save.barnLevel++; FF.book.bought('Bigger barn'); } break; }
       case 'tree': { const t = D.trees.find(x => x.type === id); if (t && FF.treeReady(t) && spend(t.cost)) { save.trees.push(id); FF.book.bought(t.name); } break; }
       case 'up': { const u = D.upgrades.find(x => x.id === id), lvl = save.up[id]; if (u && lvl < u.costs.length && spend(u.costs[lvl])) { save.up[id]++; FF.book.bought(u.name); } break; }

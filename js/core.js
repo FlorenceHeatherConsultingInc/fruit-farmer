@@ -31,23 +31,53 @@
   const SAVE_KEY = 'fruitfarmer.save';
 
   /* ---------- Farm levels and the basket ---------- */
-  const lookFor = level => D.basketLooks.filter(l => level >= l.from).pop();
-  const capAt = level => { const l = lookFor(level); return Math.round(l.start + Math.min(level - l.from, l.tiers - 1) * l.step); };
+  // The look for a basket that holds `size`.
+  const lookFor = size => D.basketLooks.filter(l => size >= l.from).pop();
+  // What the next bigger basket holds, and what it costs.
+  const basketNext = size => Math.max(size + 1, Math.round(size * D.basket.by));
+  const basketPrice = size => D.basket.pricePer * basketNext(size);
   // Points needed to go from `level` to the next one.
-  const stepAt = level => Math.ceil(2 * capAt(level) * (1 + level / D.levels.levelPace));
+  const stepAt = level => D.levels.perLevel * level;
   function pointsFor(level) { let p = 0; for (let l = 1; l < level; l++) p += stepAt(l); return p; }
   function levelOf(points) { let l = 1, need = stepAt(1); while (points >= need) { points -= need; l++; need = stepAt(l); } return l; }
+  // Before baskets were bought, the basket grew with the level. Old saves keep what they carried.
+  function oldCarry(points) {
+    const looks = [[1, 4, 2, 1], [5, 10, 6, 1], [15, 15, 17, 1], [30, 20, 34, 1.5], [50, 25, 66, 2], [75, Infinity, 118, 2]];
+    const cap = l => { const [from, tiers, start, step] = looks.filter(x => l >= x[0]).pop(); return Math.round(start + Math.min(l - from, tiers - 1) * step); };
+    let l = 1, need;
+    while (points >= (need = Math.ceil(2 * cap(l) * (1 + l / 12)))) { points -= need; l++; }
+    return cap(l);
+  }
+
+  // What a tree holds after some grows, and what its next grow costs.
+  const treeSize = (type, grows) => {
+    let h = D.trees.find(t => t.type === type).holds;
+    for (let i = 0; i < grows; i++) h = Math.max(h + 1, Math.round(h * D.treeGrow.by));
+    return h;
+  };
+  const treeGrowCost = (type, grows) => Math.round(D.trees.find(t => t.type === type).growCost * Math.pow(D.treeGrow.costBy, grows));
+  // A farm from before baskets and trees were grown by hand: keep the basket it carried, grow its trees
+  // to at least that size, and tick off the new quests it has already gone past.
+  function oldFarm(s) {
+    s.basket = Math.max(D.basket.start, oldCarry(s.points || 0));
+    s.treeGrows = s.treeGrows || {};
+    (s.trees || []).forEach(t => { let g = 0; while (treeSize(t, g) < s.basket) g++; s.treeGrows[t] = g; });
+    if (Array.isArray(s.questsDone)) ['grow', 'basket'].forEach(id => {
+      const i = D.quests.findIndex(q => q.id === id);
+      if (i >= 0 && !s.questsDone.includes(id) && D.quests.some((q, j) => j > i && s.questsDone.includes(q.id))) s.questsDone.push(id);
+    });
+  }
 
   function freshSave() {
     const s = {
-      coins: 0, crate: {}, barn: {}, barnLevel: 0, points: 0, basketLook: null, up: {}, trips: 0, speed: 'slow',
+      coins: 0, crate: {}, barn: {}, barnLevel: 0, points: 0, basket: D.basket.start, basketLook: null, up: {}, trips: 0, speed: 'slow',
       trees: D.trees.filter(t => !t.cost).map(t => t.type),
       skins: [D.skins[0].id], skin: D.skins[0].id,
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
       friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [], questsDone: [], questOn: null, questBase: 0, unlocked: [],
-      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, orders: [], pin: null, buildings: {}, fieldLv: {}, fieldStock: {}
+      seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, treeGrows: {}, orders: [], pin: null, buildings: {}, fieldLv: {}, fieldStock: {}
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
     D.upgrades.forEach(u => s.up[u.id] = 0);
@@ -69,6 +99,8 @@
     // before farm levels, the carrier you'd bought sets your level
     s.points = raw.points != null ? n(raw.points) : pointsFor([1, 5, 15, 30, 50][U.clamp(n(raw.tier), 0, 4)]);
     if (D.basketLooks.some(l => l.look === raw.basketLook)) s.basketLook = raw.basketLook;
+    if (raw.basket > 0) s.basket = Math.floor(raw.basket);
+    if (raw.treeGrows && typeof raw.treeGrows === 'object') D.trees.forEach(t => { if (raw.treeGrows[t.type] > 0) s.treeGrows[t.type] = n(raw.treeGrows[t.type]); });
     s.trees = D.trees.filter(t => !t.cost || has(raw.trees, t.type)).map(t => t.type);
     D.upgrades.forEach(u => s.up[u.id] = U.clamp(n(raw.up && raw.up[u.id]), 0, u.costs.length));
     s.skins = D.skins.filter(k => !k.cost || has(raw.skins, k.id)).map(k => k.id);
@@ -138,6 +170,8 @@
     const ch = raw.challenge === 'nomagnet' ? 'noups' : raw.challenge;
     if (D.challenges.some(c => c.id === ch)) s.challenge = ch;
     if (Array.isArray(raw.ribbonWeeks)) s.ribbonWeeks = raw.ribbonWeeks;
+    // Saves from before baskets and trees were grown by hand.
+    if (raw.basket == null && (s.points > 0 || s.trips > 0)) oldFarm(s);
     return s;
   }
 
@@ -150,28 +184,48 @@
   // Handy lookups for the current progress
   FF.pointsFor = pointsFor;
   FF.levelOfPoints = levelOf;
-  FF.capAt = capAt; FF.lookFor = lookFor;
+  FF.lookFor = lookFor; FF.basketNext = basketNext; FF.basketPrice = basketPrice;
+  FF.treeSize = treeSize; FF.treeGrowCost = treeGrowCost; FF.oldFarm = oldFarm;
   // During a harvest the level is held where it started; points still add up and the level-up comes at the end.
   let held = null;
   FF.realLevel = () => levelOf(FF.save.points);
   FF.level = () => (held != null ? held : FF.realLevel());
   FF.holdLevel = () => { held = FF.realLevel(); };
-  // Ends the hold and returns { from, to, newLook } if the harvest earned a level.
+  // Ends the hold and returns { from, to } if the harvest earned a level.
   FF.releaseLevel = () => {
     if (held == null) return null;
-    const from = held, to = FF.realLevel(), newLook = lookFor(to).look !== lookFor(from).look;
+    const from = held, to = FF.realLevel();
     held = null;
-    if (to > from) { FF.layout(); return { from, to, newLook }; }
-    return null;
+    return to > from ? { from, to } : null;
   };
+  // What each farm level opens, in level order, and what one level opens.
+  FF.levelGoals = () => [
+    ...(FF.save.challenge === 'apples' ? [] : D.trees.filter(t => t.level).map(t => ({ level: t.level, text: (/^[aeiou]/i.test(t.name) ? 'an ' : 'a ') + t.name.toLowerCase() + ' to plant' }))),
+    { level: D.market.newFriendLevel, text: 'a new animal at the market' },
+    { level: D.market.wallUnlock.level, text: 'the Barrel wall goal' }
+  ].sort((a, b) => a.level - b.level);
+  FF.opensAt = level => FF.levelGoals().filter(g => g.level === level).map(g => g.text);
   FF.levelProgress = () => { const l = FF.realLevel(); return { level: l, into: FF.save.points - pointsFor(l), need: stepAt(l) }; };
-  FF.looksReached = () => D.basketLooks.filter(l => FF.level() >= l.from);
-  // What you carry: its name, tier and capacity come from your level; how it looks can be any look you've reached.
+  // What you carry: you buy bigger baskets in the Tool shed. Tiny Hands never carries more than seeds.tinyCap.
+  FF.cap = () => (FF.save.challenge === 'tiny' ? Math.min(D.seeds.tinyCap, FF.save.basket) : FF.save.basket);
+  FF.looksReached = () => D.basketLooks.filter(l => FF.cap() >= l.from);
+  // Its name and capacity come from its size; how it looks can be any look you've reached.
   FF.carrier = () => {
-    const level = FF.level(), now = lookFor(level), shown = FF.looksReached().find(l => l.look === FF.save.basketLook) || now;
-    return { look: shown.look, name: now.name, full: now.full, tier: Math.min(level - now.from, now.tiers - 1) + 1, cap: capAt(level) };
+    const now = lookFor(FF.cap()), shown = FF.looksReached().find(l => l.look === FF.save.basketLook) || now;
+    return { look: shown.look, name: now.name, full: now.full, cap: FF.cap() };
   };
-  FF.cap = () => (FF.save.challenge === 'tiny' ? Math.min(D.seeds.tinyCap, capAt(FF.level())) : capAt(FF.level()));
+  // A bigger basket, if you can: returns { from, to, newLook } or null.
+  FF.canGrowBasket = () => !(FF.save.challenge === 'tiny' && FF.save.basket >= D.seeds.tinyCap);
+  FF.growBasket = () => {
+    const s = FF.save, cost = basketPrice(s.basket);
+    if (!FF.canGrowBasket() || s.coins < cost) return null;
+    const from = s.basket, to = basketNext(from);
+    s.coins -= cost; s.basket = s.challenge === 'tiny' ? Math.min(to, D.seeds.tinyCap) : to;
+    const newLook = lookFor(s.basket).look !== lookFor(from).look;
+    if (newLook) s.basketLook = null;
+    FF.persist(); FF.layout();
+    return { from, to: s.basket, newLook };
+  };
   FF.carried = () => FF.FRUIT_TYPES.reduce((sum, t) => sum + FF.save.crate[t], 0);
   FF.inBarn = () => FF.FRUIT_TYPES.reduce((sum, t) => sum + FF.save.barn[t], 0);
   FF.barnSize = () => D.barn.sizes[FF.save.barnLevel];
@@ -183,11 +237,11 @@
     return FF.carried();
   };
   FF.addPoints = n => {
-    const before = FF.level(), look = lookFor(before).look;
+    const before = FF.level();
     FF.save.points += n;
     if (held != null) return;
     const after = FF.level();
-    if (after > before && FF.levelUp) FF.levelUp(after, lookFor(after).look !== look);
+    if (after > before && FF.levelUp) FF.levelUp(after);
   };
   // A tree you can plant now: not planted yet, and your farm has reached its level.
   FF.treeReady = t => !FF.save.trees.includes(t.type) && FF.level() >= (t.level || 1);

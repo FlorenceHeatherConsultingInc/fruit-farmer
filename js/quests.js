@@ -21,6 +21,8 @@
     if (n.stat) return [Math.max(0, stat(n.stat) - base), n.n];
     if (n.level) return [Math.min(FF.realLevel(), n.level), n.level];
     if (n.tree) return [sv.trees.includes(n.tree) ? 1 : 0, 1];
+    if (n.grown) return [(sv.treeGrows[n.grown] || 0) > 0 ? 1 : 0, 1];
+    if (n.basket) return [Math.min(sv.basket, n.basket), n.basket];
     if (n.up) return [(sv.up[n.up] || 0) > 0 ? 1 : 0, 1];
     if (n.skins) return [Math.min(sv.skins.length, n.skins), n.skins];
     if (n.met) return [Math.min(Object.values(sv.friends).filter(f => f && f.sold > 0).length, n.met), n.met];
@@ -43,7 +45,7 @@
     if (FF.fields.crops().some(c => sv.fieldLv[c] > 0)) unlock('fields');
     FF.fields.crops().forEach(c => { if (sv.fieldLv[c] > 0) unlock('field:' + c); });
     if (sv.wallOwned) unlock('wall');
-    if (sv.up.speed > 0 || sv.up.luck > 0 || sv.barnLevel > 0) { unlock('barnyard'); unlock('shed'); }
+    if (sv.up.speed > 0 || sv.up.luck > 0 || sv.barnLevel > 0 || sv.basket > D.basket.start) { unlock('barnyard'); unlock('shed'); }
   }
   // A save from before quests: tick off every quest it has already done, counting from zero.
   function migrate() {
@@ -67,7 +69,7 @@
   function finish(q) {
     const sv = s();
     sv.questsDone.push(q.id); sv.questOn = null;
-    sv.coins += q.reward; FF.addPoints(q.reward);
+    sv.coins += q.reward;
     FF.persist();
   }
 
@@ -124,7 +126,7 @@
     $('questBody').innerHTML = `<div class="qchapter">Chapter ${q.ch}: ${D.questChapters[q.ch - 1]}</div>` +
       `<div class="qspeech"><img src="${bunPic()}" alt=""><p>${wait ? 'Keep catching, selling and picking. Your next quest starts at level ' + q.level + '!' : q.bun}</p></div>` +
       `<div class="qgoal"><b>${wait ? 'Reach level ' + q.level : q.text}</b><span class="qmeter"><i style="width:${Math.round(100 * Math.min(1, have / need))}%"></i></span><span>${Math.min(have, need)}/${need}</span></div>` +
-      `<p class="note">Reward: ${q.reward} coins and ${q.reward} farm points.</p>`;
+      `<p class="note">Reward: ${q.reward} coins.</p>`;
     $('questGo').hidden = wait;
     UI.show('quest'); $(wait ? 'questOk' : 'questGo').focus({ preventScroll: true });
   }
@@ -133,7 +135,7 @@
     const next = current(), news = next && s().questOn === next.id ? (next.reveal || []) : [];
     $('questTitle').textContent = 'Quest done!';
     $('questBody').innerHTML = `<div class="qspeech"><img src="${bunPic()}" alt=""><p>You did it: ${q.text.toLowerCase()}!</p></div>` +
-      `<div class="qreward">+${q.reward} coins · +${q.reward} farm points</div>` +
+      `<div class="qreward">+${q.reward} coins</div>` +
       news.map(id => `<div class="qnew">New: ${revealName(id)}!</div>`).join('') +
       (!next ? `<div class="qnew">Every quest is done! Your whole farm is open. The Sticker Book has more goals.</div>` : waiting(next) ? `<p class="note">Your next quest starts at level ${next.level}.</p>` : '');
     $('questGo').hidden = true;

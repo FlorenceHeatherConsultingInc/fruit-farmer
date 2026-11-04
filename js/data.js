@@ -10,16 +10,16 @@ FF.data = {
 
   // Sell price in coins and the sparkle colors when caught. Gold stars fall rarely from any tree.
   fruits: {
-    apple:      { name: 'Apples',       price: 1,  colors: ['#e8322f', '#ff8a7a'] },
-    orange:     { name: 'Oranges',      price: 2,  colors: ['#ff9a1f', '#ffd08a'] },
-    banana:     { name: 'Bananas',      price: 3,  colors: ['#ffd93b', '#fff3a8'] },
-    strawberry: { name: 'Strawberries', price: 4,  colors: ['#ff3b5c', '#ffd23f'] },
-    grapes:     { name: 'Grapes',       price: 5,  colors: ['#8a4bd6', '#c9a6ff'] },
-    star:       { name: 'Gold stars',   price: 10, colors: ['#ffd23f', '#ffffff'] },
+    apple:      { name: 'Apples',       price: 2,  colors: ['#e8322f', '#ff8a7a'] },
+    orange:     { name: 'Oranges',      price: 3,  colors: ['#ff9a1f', '#ffd08a'] },
+    banana:     { name: 'Bananas',      price: 5,  colors: ['#ffd93b', '#fff3a8'] },
+    strawberry: { name: 'Strawberries', price: 7,  colors: ['#ff3b5c', '#ffd23f'] },
+    grapes:     { name: 'Grapes',       price: 9,  colors: ['#8a4bd6', '#c9a6ff'] },
+    star:       { name: 'Gold stars',   price: 15, colors: ['#ffd23f', '#ffffff'] },
     // Goods made in buildings. They sit in the barn and sell like fruit.
-    juice:      { name: 'Orange juice', price: 10, colors: ['#ff9a1f', '#ffd08a'], kind: 'good' },
-    smoothie:   { name: 'Smoothies',    price: 16, colors: ['#ff8fb1', '#fff0f4'], kind: 'good' },
-    jam:        { name: 'Jam jars',     price: 18, colors: ['#e8323f', '#fffaf0'], kind: 'good' },
+    juice:      { name: 'Orange juice', price: 14, colors: ['#ff9a1f', '#ffd08a'], kind: 'good' },
+    smoothie:   { name: 'Smoothies',    price: 24, colors: ['#ff8fb1', '#fff0f4'], kind: 'good' },
+    jam:        { name: 'Jam jars',     price: 28, colors: ['#e8323f', '#fffaf0'], kind: 'good' },
     // Crops grown in fields.
     hay:        { name: 'Hay',          price: 2,  colors: ['#e8c25a', '#fff3a8'], kind: 'crop' },
     corn:       { name: 'Corn',         price: 2,  colors: ['#ffd23f', '#5cc24a'], kind: 'crop' },
@@ -28,10 +28,10 @@ FF.data = {
     milk:       { name: 'Milk',         price: 12, colors: ['#ffffff', '#4aa3e8'], kind: 'good' },
     // Second-step goods, made from other goods.
     popcorn:    { name: 'Popcorn',      price: 10, colors: ['#fff6d8', '#e8323f'], kind: 'good' },
-    salad:      { name: 'Fruit salads', price: 26, colors: ['#5cc24a', '#ff3b5c'], kind: 'good' },
-    pie:        { name: 'Apple pies',   price: 36, colors: ['#e8a85a', '#e8322f'], kind: 'good' },
-    shake:      { name: 'Milkshakes',   price: 40, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
-    pancakes:   { name: 'Pancakes',     price: 55, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
+    salad:      { name: 'Fruit salads', price: 40, colors: ['#5cc24a', '#ff3b5c'], kind: 'good' },
+    pie:        { name: 'Apple pies',   price: 40, colors: ['#e8a85a', '#e8322f'], kind: 'good' },
+    shake:      { name: 'Milkshakes',   price: 50, colors: ['#ff8fb1', '#ffffff'], kind: 'good' },
+    pancakes:   { name: 'Pancakes',     price: 70, colors: ['#e8b06a', '#e8323f'], kind: 'good' }
   },
   // Fields open once you grow `trees` kinds of fruit. One field per crop, in this order (the first is free).
   // grow: how many a level 1 field grows each day; perLevel: how many more each upgrade adds. A field holds
@@ -46,16 +46,16 @@ FF.data = {
   // over to build it. recipes: what goes in and what comes out. slots: how many it makes at once at each
   // level, and upgrade: what each next level costs. area: where it stands on the village map.
   buildings: [
-    { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 150, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4, 5], upgrade: [200, 500, 1000], worker: 'presses', more: 'Another press' },
-    { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 250, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4, 5], upgrade: [250, 600, 1200], worker: 'blenders', more: 'Another blender' },
-    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 300, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'pots', more: 'Another pot' },
-    { id: 'popcorn',  name: 'Popcorn cart',   area: 'kitchen', cost: 350, needs: { fields: true }, recipes: [{ in: { corn: 3 }, out: 'popcorn' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'poppers', more: 'Another popper' },
-    { id: 'salad',    name: 'Salad bar',      area: 'kitchen', cost: 500, needs: { trees: ['apple', 'orange', 'banana', 'strawberry', 'grapes'] }, recipes: [{ in: { apple: 1, orange: 1, banana: 1, strawberry: 1, grapes: 1 }, out: 'salad' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'bowls', more: 'Another bowl' },
-    { id: 'bakery',   name: 'Bakery',         area: 'kitchen', cost: 900, needs: { buildings: ['coop', 'cows'] }, deliver: { egg: 5 }, recipes: [{ in: { apple: 3, egg: 1, milk: 1 }, out: 'pie' }], slots: [2, 3, 4, 5], upgrade: [600, 1200, 2400], worker: 'ovens', more: 'Another oven' },
-    { id: 'diner',    name: 'Diner',          area: 'kitchen', cost: 1500, needs: { buildings: ['bakery', 'jam'] }, deliver: { pie: 3 }, recipes: [{ in: { milk: 1, smoothie: 1 }, out: 'shake' }, { in: { egg: 1, milk: 1, jam: 1 }, out: 'pancakes' }], slots: [2, 3, 4, 5], upgrade: [800, 1600, 3200], worker: 'cooks', more: 'Another cook' },
+    { id: 'juice',    name: 'Juice press',    area: 'kitchen', cost: 100, needs: { trees: ['orange'] }, recipes: [{ in: { orange: 3 }, out: 'juice' }], slots: [2, 3, 4, 5], upgrade: [200, 500, 1000], worker: 'presses', more: 'Another press' },
+    { id: 'smoothie', name: 'Smoothie stand', area: 'kitchen', cost: 180, needs: { trees: ['banana', 'strawberry'] }, deliver: { banana: 10 }, recipes: [{ in: { banana: 2, strawberry: 1 }, out: 'smoothie' }], slots: [2, 3, 4, 5], upgrade: [250, 600, 1200], worker: 'blenders', more: 'Another blender' },
+    { id: 'jam',      name: 'Jam kitchen',    area: 'kitchen', cost: 200, needs: { trees: ['strawberry'] }, recipes: [{ in: { strawberry: 3 }, out: 'jam' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'pots', more: 'Another pot' },
+    { id: 'popcorn',  name: 'Popcorn cart',   area: 'kitchen', cost: 250, needs: { fields: true }, recipes: [{ in: { corn: 3 }, out: 'popcorn' }], slots: [2, 3, 4, 5], upgrade: [300, 700, 1400], worker: 'poppers', more: 'Another popper' },
+    { id: 'salad',    name: 'Salad bar',      area: 'kitchen', cost: 350, needs: { trees: ['apple', 'orange', 'banana', 'strawberry', 'grapes'] }, recipes: [{ in: { apple: 1, orange: 1, banana: 1, strawberry: 1, grapes: 1 }, out: 'salad' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'bowls', more: 'Another bowl' },
+    { id: 'bakery',   name: 'Bakery',         area: 'kitchen', cost: 600, needs: { buildings: ['coop', 'cows'] }, deliver: { egg: 5 }, recipes: [{ in: { apple: 3, egg: 1, milk: 1 }, out: 'pie' }], slots: [2, 3, 4, 5], upgrade: [600, 1200, 2400], worker: 'ovens', more: 'Another oven' },
+    { id: 'diner',    name: 'Diner',          area: 'kitchen', cost: 1000, needs: { buildings: ['bakery', 'jam'] }, deliver: { pie: 3 }, recipes: [{ in: { milk: 1, smoothie: 1 }, out: 'shake' }, { in: { egg: 1, milk: 1, jam: 1 }, out: 'pancakes' }], slots: [2, 3, 4, 5], upgrade: [800, 1600, 3200], worker: 'cooks', more: 'Another cook' },
     // Farm animals live in the barnyard. More slots means more animals.
-    { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4, 5, 6], upgrade: [300, 700, 1400, 2800], worker: 'hens', more: 'More hens' },
-    { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 600, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'cows', more: 'More cows' }
+    { id: 'coop',     name: 'Chicken coop',   area: 'barnyard', cost: 250, needs: { fields: true }, recipes: [{ in: { corn: 2 }, out: 'egg' }], slots: [2, 3, 4, 5, 6], upgrade: [300, 700, 1400, 2800], worker: 'hens', more: 'More hens' },
+    { id: 'cows',     name: 'Cow barn',       area: 'barnyard', cost: 400, needs: { fields: true }, recipes: [{ in: { hay: 3 }, out: 'milk' }], slots: [2, 3, 4, 5], upgrade: [400, 900, 1800], worker: 'cows', more: 'More cows' }
   ],
 
   // Harvest speed picked on the title screen.
@@ -88,40 +88,46 @@ FF.data = {
   // Gold star chance for each fruit: base + perLevel × Lucky stars level.
   stars: { base: 0.04, perLevel: 0.05 },
 
-  // Your basket grows a tier every farm level. Each look covers the levels from `from` onward: it
-  // holds `start` at its first tier and `step` more each tier after. The last look never stops.
-  // look picks the drawing in farm.js. Every look catches the same width.
+  // The basket only grows when you buy a bigger one in the Tool shed. You start holding `start`.
+  // Each upgrade multiplies what it holds by `by` (at least +1) and costs `pricePer` x the new size.
+  // There is no top. Tiny Hands stops it at seeds.tinyCap.
+  basket: { start: 2, by: 1.25, pricePer: 4 },
+  // How the basket looks: each look starts at a size (`from`). look picks the drawing in farm.js.
+  // Every look catches the same width.
   basketLooks: [
-    { look: 'hands',  name: 'Your hands',    full: 'Hands full!',       from: 1,  tiers: 4,        start: 2,   step: 1 },
-    { look: 'basket', name: 'Little basket', full: 'Basket full!',      from: 5,  tiers: 10,       start: 6,   step: 1 },
-    { look: 'handle', name: 'Big basket',    full: 'Basket full!',      from: 15, tiers: 15,       start: 17,  step: 1 },
-    { look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', from: 30, tiers: 20,       start: 34,  step: 1.5 },
-    { look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        from: 50, tiers: 25,       start: 66,  step: 2 },
-    { look: 'wagon',  name: 'Wagon',         full: 'Wagon full!',       from: 75, tiers: Infinity, start: 118, step: 2 }
+    { look: 'hands',  name: 'Your hands',    full: 'Hands full!',       from: 2 },
+    { look: 'basket', name: 'Little basket', full: 'Basket full!',      from: 6 },
+    { look: 'handle', name: 'Big basket',    full: 'Basket full!',      from: 17 },
+    { look: 'barrow', name: 'Wheelbarrow',   full: 'Wheelbarrow full!', from: 34 },
+    { look: 'cart',   name: 'Fruit cart',    full: 'Cart full!',        from: 66 },
+    { look: 'wagon',  name: 'Wagon',         full: 'Wagon full!',       from: 118 }
   ],
 
-  // Farm points and levels. Points to reach the next level = 2 x what you can carry x (1 + level / levelPace),
-  // so early levels take about one trip and later ones about three. Bigger levelPace = faster levels.
-  levels: { pointsPerCatch: 1, pointsPerSale: 1, levelPace: 12 },
+  // Farm points and levels. Going from level L to L + 1 takes perLevel x L points. The level only decides
+  // when new things open (trees, the third animal, the Barrel wall). Quest rewards give coins, not points.
+  levels: { pointsPerCatch: 1, pointsPerSale: 1, perLevel: 20 },
 
   // How much the barn holds, and what each bigger barn costs.
   barn: { sizes: [100, 200, 400, 800, Infinity], costs: [150, 400, 1000, 2500] },
 
   // Orchard trees, each one a grove. The apple tree is free. spot = where it stands (0 = left edge, 1 = right edge).
-  // A grove holds `holds` fruit plus `perLevel` for each farm level, and refills over `refill` days.
+  // A grove holds `holds` fruit and refills over `refill` days. Your level doesn't change it: tap the tree
+  // and Grow it. Each grow multiplies what it holds by treeGrow.by (at least +1). The first grow costs
+  // `growCost`, and each one after costs treeGrow.costBy times the last. There is no top.
   // shape picks the drawing in scenery.js: round, palm, bush or vine.
+  treeGrow: { by: 1.3, costBy: 1.4 },
   trees: [
-    { type: 'apple',      name: 'Apple tree',       cost: 0,   spot: 0.30, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
-    { type: 'orange',     name: 'Orange tree',      cost: 60,  level: 3,  spot: 0.70, shape: 'round', holds: 10, perLevel: 2, refill: 1 },
-    { type: 'banana',     name: 'Banana tree',      cost: 150, level: 6,  spot: 0.10, shape: 'palm', holds: 10, perLevel: 1.5, refill: 1 },
-    { type: 'strawberry', name: 'Strawberry patch', cost: 350, level: 10, spot: 0.50, shape: 'bush', holds: 10, perLevel: 1.5, refill: 2 },
-    { type: 'grapes',     name: 'Grape vine',       cost: 800, level: 15, spot: 0.90, shape: 'vine', holds: 10, perLevel: 1, refill: 2 }
+    { type: 'apple',      name: 'Apple tree',       cost: 0,   spot: 0.30, shape: 'round', holds: 6, growCost: 10,  refill: 1 },
+    { type: 'orange',     name: 'Orange tree',      cost: 40,  level: 3,  spot: 0.70, shape: 'round', holds: 6, growCost: 25,  refill: 1 },
+    { type: 'banana',     name: 'Banana tree',      cost: 150, level: 6,  spot: 0.10, shape: 'palm', holds: 6, growCost: 50,  refill: 1 },
+    { type: 'strawberry', name: 'Strawberry patch', cost: 350, level: 10, spot: 0.50, shape: 'bush', holds: 6, growCost: 100, refill: 2 },
+    { type: 'grapes',     name: 'Grape vine',       cost: 800, level: 15, spot: 0.90, shape: 'vine', holds: 6, growCost: 200, refill: 2 }
   ],
 
   // Upgrades with one price per level. The ids are used by the game: speed, luck.
   upgrades: [
     { id: 'speed',  icon: 'speed',  name: 'Zippy wheels', desc: 'Zip across the orchard faster and smoother.', costs: [20, 60, 190] },
-    { id: 'luck',   icon: 'luck',   name: 'Lucky stars',  desc: 'More gold stars fall. Stars sell for 10!',   costs: [40, 160] }
+    { id: 'luck',   icon: 'luck',   name: 'Lucky stars',  desc: 'More gold stars fall. Stars sell for 15!',   costs: [40, 160] }
   ],
 
   // Basket colors. body = main color, rim = top band, weave = the woven lines.
@@ -321,15 +327,15 @@ FF.data = {
     { id: 'rare-goldie', name: 'Goldie',      desc: 'A rare golden bunny comes to market.', cost: 5, animal: 'goldie' },
     { id: 'rare-moon',   name: 'Moonbeam',    desc: 'A rare moonlit pig comes to market.',  cost: 5, animal: 'moon' },
     { id: 'scene-gold',  name: 'Golden Hour', desc: 'Special scenery for every farm.',      cost: 8, scene: 'gold' },
-    { id: 'start-basket', name: 'Head start: basket', desc: 'New farms start with the Little basket.', cost: 6 },
+    { id: 'start-basket', name: 'Head start: basket', desc: 'New farms start with the Little basket (holds 6).', cost: 6 },
     { id: 'start-tree',   name: 'Head start: tree',   desc: 'New farms start with the Orange tree.',   cost: 10 }
   ],
 
   // Quests, one at a time, in order. Each one says what to do (text), what Bun says when it starts (bun),
   // what it needs, what it reveals when it starts (reveal), where Show me points (go), and its reward in
-  // coins (points are the same number). level: the quest waits until the farm reaches it.
+  // coins (no farm points). level: the quest waits until the farm reaches it.
   // need kinds: stat (a counter in save.stats, counted from when the quest starts), level, tree, up, skins,
-  // met, homes, built, fed, fieldLv, pallet, wall, ordersToday.
+  // met, homes, built, fed, fieldLv, pallet, wall, ordersToday, grown (a tree grown once), basket (holds at least n).
   // reveal names: barn, market, sleep, book, shop, friends, orders, street, barnyard, shed, kitchen,
   // fields, field:<crop>, tree:<fruit>, b:<building>, wall. Finishing the last quest opens everything.
   questChapters: ['Your first day', 'Growing', 'Friends', 'The kitchen', 'Fields', 'Farm animals', 'Sweet treats', 'Master farmer'],
@@ -342,14 +348,18 @@ FF.data = {
       bun: "Let's sell! Tap the market stall, pull back the slingshot and throw fruit into the baskets." },
     { id: 'sleep',     ch: 1, text: 'Go to bed',                      need: { stat: 'slept', n: 1 },             go: { tool: 'mapSleepBtn' },   reward: 10,  reveal: ['sleep'],
       bun: 'Trees grow more fruit overnight. Tap the moon when you want a new day.' },
+    { id: 'grow',      ch: 1, text: 'Grow your apple tree',           need: { grown: 'apple' },                  go: { area: 'groves' },        reward: 10,
+      bun: 'A bigger tree holds more apples! Tap the apple tree and tap Grow.' },
     { id: 'level3',    ch: 2, text: 'Reach farm level 3',             need: { level: 3 },                        go: { tool: 'mapBasketBtn' },  reward: 15,  reveal: ['book'],
       bun: 'Catching, selling and picking all earn farm points. Fill your level bar up to level 3! The Farm book shows how your farm is doing.' },
     { id: 'orange',    ch: 2, text: 'Plant an orange tree',           need: { tree: 'orange' },     level: 3,    go: { area: 'groves' },        reward: 15,  reveal: ['tree:orange'],
       bun: "You're ready for an orange tree! Tap the new tree spot in the Groves." },
+    { id: 'basket',    ch: 2, text: 'Get a bigger basket',            need: { basket: 3 },                       go: { area: 'barnyard' },      reward: 15,  reveal: ['barnyard', 'shed'],
+      bun: 'Look, the Barnyard! The Tool shed there sells bigger baskets. Carry more, make fewer trips!' },
     { id: 'clear',     ch: 2, text: 'Pick a whole tree in one visit', need: { stat: 'treesCleared', n: 1 },      go: { area: 'groves' },        reward: 15,
       bun: 'When your basket is full, tap Keep picking to empty it and keep going until the tree is bare.' },
-    { id: 'zippy',     ch: 2, text: 'Buy Zippy wheels',               need: { up: 'speed' },                     go: { area: 'barnyard' },      reward: 20,  reveal: ['barnyard', 'shed'],
-      bun: 'Look, the Barnyard! Your barn is there, and so is the Tool shed. Zippy wheels help you zoom.' },
+    { id: 'zippy',     ch: 2, text: 'Buy Zippy wheels',               need: { up: 'speed' },                     go: { area: 'barnyard' },      reward: 20,
+      bun: 'Zippy wheels in the Tool shed help you zoom across the orchard.' },
     { id: 'color',     ch: 2, text: 'Pick a new basket color',        need: { skins: 2 },                        go: { tool: 'mapShopBtn' },    reward: 20,  reveal: ['shop'],
       bun: 'The Shop has colors and scenery for your farm. Pick a new basket color!' },
     { id: 'meet',      ch: 3, text: 'Sell to 3 different animals',    need: { met: 3 },                          go: { tool: 'mapMarketBtn' },  reward: 25,  reveal: ['friends'],

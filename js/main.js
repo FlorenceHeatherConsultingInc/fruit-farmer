@@ -34,13 +34,13 @@
     const brandNew = s.trips === 0 && s.points === 0 && s.coins === 0;
     $('titleIntro').textContent = brandNew
       ? "You're a brand-new fruit farmer! For now you only have your hands, so you can carry 2 fruit. Catch them, then sell them at the market."
-      : 'Grow your fruit farm! Catch fruit, keep it in your barn, and sell it at the market. Your basket grows as your farm levels up.';
+      : 'Grow your fruit farm! Catch fruit, keep it in your barn, and sell it at the market. Grow your trees and get a bigger basket with your coins.';
     $('titleIntro').hidden = !brandNew;
     $('titleFarm').textContent = FF.farmName() + ' · Day ' + s.day;
     const p = FF.levelProgress();
     $('titleStats').innerHTML = stat(I.coin, s.coins + ' coins', 'coin') + stat(I.luck, 'Farm Score ' + s.lifetime) +
       `<button class="stat statbtn" type="button" id="titleLevelBtn">${I.basket}<span>Level ${p.level}: ${p.need - p.into} more points to level ${p.level + 1} ›</span></button>` +
-      `<p class="note">${c.look === 'hands' ? 'Your hands hold' : 'Your ' + c.name.toLowerCase() + ' holds'} ${FF.cap()} fruit. Catch, sell and pick to earn points.</p>`;
+      `<p class="note">${c.look === 'hands' ? 'Your hands hold' : 'Your ' + c.name.toLowerCase() + ' holds'} ${FF.cap()} fruit. Catch, sell and pick to earn points and open new things.</p>`;
   }
 
 
@@ -87,11 +87,10 @@
     // What the barn will hold once this basket is unloaded.
     const have = t => s.barn[t] + s.crate[t], stored = FF.FRUIT_TYPES.filter(t => have(t) > 0), size = FF.barnSize();
     const total = stored.reduce((a, t) => a + have(t), 0);
-    const p = FF.levelProgress(), next = p.level + 1, nextLook = FF.lookFor(next), nowLook = FF.lookFor(p.level);
-    const gives = nextLook.look !== nowLook.look ? ` Then you get a ${nextLook.name.toLowerCase()} that carries ${FF.capAt(next)} fruit!` : FF.capAt(next) > FF.capAt(p.level) ? ` Then you can carry ${FF.capAt(next)} fruit.` : '';
-    const newLook = up && up.newLook, row = (t, n) => `<span class="item">${img(t)}<b>${n}</b></span>`;
-    return (newLook ? `<div class="newlook"><span data-look="${FF.carrier().look}"></span><b>Your new ${FF.carrier().name.toLowerCase()} carries ${FF.cap()} fruit!</b></div>` : '') +
-      (up && !newLook ? `<div class="grew">You can carry <b>${FF.cap()}</b> fruit now!</div>` : '') +
+    const p = FF.levelProgress(), next = p.level + 1, opens = FF.opensAt(next);
+    const gives = opens.length ? ' Then: ' + opens.join(', ') + '!' : '';
+    const row = (t, n) => `<span class="item">${img(t)}<b>${n}</b></span>`;
+    return (up && FF.opensAt(up.to).length ? `<div class="grew">New: <b>${FF.opensAt(up.to).join(', ')}</b>!</div>` : '') +
       `<div class="label">You picked</div>` +
       `<div class="caught">${got.length ? got.map(t => row(t, v.caught[t])).join('') : '<span>Nothing this time.</span>'}</div>` +
       (bonus ? `<div class="pts">${bonus} of them ${bonus === 1 ? 'was a' : 'were'} sparkly bonus fruit!</div>` : '') +
@@ -107,19 +106,21 @@
   FF.basketPath = {
     open(origin) {
       pathFrom = origin || 'title';
-      const p = FF.levelProgress(), lvl = p.level, looks = D.basketLooks, L = D.levels;
-      const holds = (l, i) => { const next = looks[i + 1]; return next ? FF.capAt(l.from) + '–' + FF.capAt(next.from - 1) : FF.capAt(l.from) + '+'; };
+      const p = FF.levelProgress(), lvl = p.level, looks = D.basketLooks, L = D.levels, cap = FF.cap();
+      const holds = (l, i) => { const next = looks[i + 1]; return next ? l.from + '–' + (next.from - 1) : l.from + '+'; };
+      const goals = FF.levelGoals().filter(g => g.level > lvl).slice(0, 4);
       $('basketBody').innerHTML =
         `<div class="summary"><div class="lvl"><span>Level ${lvl}</span><div class="meter"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></div><span>${lvl + 1}</span></div>` +
-        `<p class="note">${p.need - p.into} more points to level ${lvl + 1}. Your ${FF.carrier().name.toLowerCase()} holds ${FF.cap()}.</p></div>` +
+        `<p class="note">${p.need - p.into} more points to level ${lvl + 1}.</p></div>` +
+        (goals.length ? `<div class="label">Coming up</div><ul class="ways">${goals.map(g => `<li>Level ${g.level}: ${g.text}</li>`).join('')}</ul>` : '') +
+        `<div class="label">Baskets</div><p class="note">Your ${FF.carrier().name.toLowerCase()} holds ${cap}. Buy a bigger one in the Tool shed.</p>` +
         `<div class="path">${looks.map((l, i) => {
-          const here = FF.lookFor(lvl) === l, got = lvl >= l.from;
-          return `<div class="pathrow${here ? ' on' : ''}${got ? '' : ' locked'}"><span data-look="${l.look}"></span><div><b>${l.name}</b><small>${l.from === 1 ? 'To start' : 'Level ' + l.from} · holds ${holds(l, i)}</small></div>${here ? '<span class="pill">You</span>' : got ? '<span class="pill tick">Got it</span>' : ''}</div>`;
+          const here = FF.lookFor(cap) === l, got = cap >= l.from;
+          return `<div class="pathrow${here ? ' on' : ''}${got ? '' : ' locked'}"><span data-look="${l.look}"></span><div><b>${l.name}</b><small>Holds ${holds(l, i)}</small></div>${here ? '<span class="pill">You</span>' : got ? '<span class="pill tick">Got it</span>' : ''}</div>`;
         }).join('')}</div>` +
         `<div class="label">How to earn farm points</div><ul class="ways">` +
         `<li>Catch a fruit: ${L.pointsPerCatch}</li><li>Sell a fruit: ${L.pointsPerSale}</li><li>Pick a crop: 1</li>` +
-        `<li>Deliver an order: ${D.orders.pointsPerItem} for each item</li><li>Collect goods from a kitchen: ${D.goodsPoints} each</li><li>Build a building: 10</li></ul>` +
-        `<p class="note">Your basket only changes at the end of a harvest.</p>`;
+        `<li>Deliver an order: ${D.orders.pointsPerItem} for each item</li><li>Collect goods from a kitchen: ${D.goodsPoints} each</li><li>Build a building: 10</li></ul>`;
       document.querySelectorAll('#basketBody [data-look]').forEach(el => el.appendChild(FF.farm.lookPreview(el.dataset.look)));
       UI.show('basket'); $('basketDone').focus({ preventScroll: true });
     },
@@ -127,12 +128,11 @@
   };
 
   // Level-up cheers, wherever you are.
-  FF.levelUp = (level, newLook) => {
-    const c = FF.carrier(), fx = FF.fx;
+  FF.levelUp = level => {
+    const fx = FF.fx, opens = FF.opensAt(level);
     FF.sfx.buy();
     fx.text(G.W / 2, G.H * 0.32, 'Level ' + level + '!', true);
-    setTimeout(() => fx.text(G.W / 2, G.H * 0.32 + 50, newLook ? 'Your basket became a ' + c.name + '!' : c.name + ' holds ' + FF.cap(), newLook), 450);
-    if (newLook) fx.confetti();
+    if (opens.length) { setTimeout(() => fx.text(G.W / 2, G.H * 0.32 + 50, 'New: ' + opens[0] + '!', true), 450); fx.confetti(); }
     FF.layout(); FF.hud.load(); FF.stickers.check();
   };
 
@@ -143,7 +143,7 @@
       FF.unloadBasket();
       if (G.state === 'farm') FF.farm.reset();
       const up = FF.releaseLevel();
-      if (up) setTimeout(() => FF.levelUp(up.to, up.newLook), 300);
+      if (up) setTimeout(() => FF.levelUp(up.to), 300);
       mapFrom = from === 'sold' ? 'sold' : 'title';
       G.state = 'village';
       UI.hideAll(); clearInput();
@@ -218,7 +218,7 @@
     // The end of a harvest: full, bare or Done. Shows what you caught and what the next level brings.
     showFull(why) {
       const up = FF.releaseLevel(), c = FF.carrier(), next = nextPick(), room = FF.barnSize() - FF.inBarn() - FF.carried() > 0;
-      $('fullTitle').textContent = up && up.newLook ? 'New: ' + c.name + '!' : up ? 'Level ' + up.to + '!' : why === true ? 'All picked!' : why === 'done' ? 'Harvest done' : c.full;
+      $('fullTitle').textContent = up ? 'Level ' + up.to + '!' : why === true ? 'All picked!' : why === 'done' ? 'Harvest done' : c.full;
       $('fullMsg').textContent = !room ? 'The barn is full! Sell some at the market, or build a bigger barn.' : why === true && !next ? 'Every tree is picked. They grow more fruit tomorrow.' : why === true ? 'This grove refills tomorrow.' : '';
       // One tap to carry on: the same tree if it still has fruit, otherwise the next tree that does.
       keepGrove = room ? next : null;
@@ -227,7 +227,7 @@
       $('fullSummary').innerHTML = summaryHTML(up);
       document.querySelectorAll('#fullSummary [data-look]').forEach(el => el.appendChild(FF.farm.lookPreview(el.dataset.look)));
       UI.show('full');
-      if (up) { FF.sfx.buy(); if (up.newLook) { FF.fx.confetti(); FF.sfx.party(); } FF.stickers.check(); FF.hud.load(); }
+      if (up) { FF.sfx.buy(); if (FF.opensAt(up.to).length) { FF.fx.confetti(); FF.sfx.party(); } FF.stickers.check(); FF.hud.load(); }
       $(keepGrove ? 'keepBtn' : 'fullVillageBtn').focus();
     },
     showSold() {
