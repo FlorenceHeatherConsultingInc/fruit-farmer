@@ -383,6 +383,7 @@
     for (const f of fruits) if (f.landed) Draw.fruit(f.type, f.x, f.y, f.r, f.rot, Math.max(0, f.life), 0.85);
     if (!demo) drawSpeedLines();
     drawCarrier(demo);
+    const ctx = G.ctx;
     for (const f of fruits) {
       if (f.landed || !f.bonus) continue;
       const tw = 0.5 + 0.5 * Math.sin(G.clock * 9 + f.x);

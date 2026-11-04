@@ -371,18 +371,28 @@
 
   /* ---------- Game loop ---------- */
   let last = performance.now();
+  let lastError = '';
   function frame(now) {
+    requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     G.clock += dt;
-    if (G.state === 'title') FF.farm.update(dt, true);
-    else if (G.state === 'village') { if (!G.overlay) FF.map.update(dt); }
-    else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
-    else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
-    if (G.overlay === 'parade') FF.parade.tick(dt);
-    if (G.state === 'market') FF.market.draw(); else if (G.state === 'village') FF.map.draw(); else FF.farm.draw(G.state === 'title');
-    requestAnimationFrame(frame);
+    try {
+      if (G.state === 'title') FF.farm.update(dt, true);
+      else if (G.state === 'village') { if (!G.overlay) FF.map.update(dt); }
+      else if (!G.overlay) (G.state === 'farm' ? FF.farm : FF.market).update(dt, false);
+      else if (G.overlay === 'sold' || G.overlay === 'full') { FF.fx.update(dt); FF.scenery.update(dt); }
+      if (G.overlay === 'parade') FF.parade.tick(dt);
+      if (G.state === 'market') FF.market.draw(); else if (G.state === 'village') FF.map.draw(); else FF.farm.draw(G.state === 'title');
+    } catch (e) {
+      // Keep playing. Note the error once (in the console and in this browser) so it can be fixed.
+      G.ctx = screenCtx; G.ctx.setTransform(Math.min(window.devicePixelRatio || 1, 2), 0, 0, Math.min(window.devicePixelRatio || 1, 2), 0, 0);
+      const msg = String(e && e.stack || e).slice(0, 600);
+      if (msg !== lastError) { lastError = msg; console.error(e); try { localStorage.setItem('fruitfarmer.lastError', new Date().toISOString() + ' ' + G.state + ' ' + msg); } catch (x) {} }
+    }
   }
+  // If the browser drops the drawing surface (low memory on a phone), set it up again.
+  cv.addEventListener('contextrestored', () => FF.layout());
   Screens.title();
   requestAnimationFrame(frame);
 
