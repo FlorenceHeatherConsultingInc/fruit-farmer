@@ -3,7 +3,7 @@
    until it's tapped. Refreshing the guide also moves the quests along. */
 (() => {
   const FF = window.FF, $ = FF.$;
-  const U = id => FF.quests.isUnlocked(id);
+  const U = id => !FF.quests || FF.quests.isUnlocked(id);
 
   // Which quest reveal shows each bar button and each area.
   const TOOLS = { market: 'market', sleep: 'sleep', shop: 'shop', book: 'book', orders: 'orders', friends: 'friends' };
