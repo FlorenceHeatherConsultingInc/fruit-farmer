@@ -108,6 +108,9 @@ It works offline except for the Google Font, which falls back to a system font.
   width on purpose, so you can always catch some fruit but not every fruit. Missed fruit stays on the tree.
 - In the market, the player must never hold a fruit nobody wants (see `askForLoaded()`), and
   every opening must be reachable by a pull (see `aimRange()`).
+- A friend who arrives stays until served: never replace them to fit the fruit. Instead the slingshot
+  loads a fruit someone wants (`reload()`), new friends ask for what's coming up (`upcoming()`), and
+  a friend whose fruit runs out takes "Anything!". Fruit nobody wants yet is faded in the tray.
 - Big touch targets, short words, lots of sound and sparkle feedback.
 - Short taps should feel precise; holding should build up to a fast, smooth zip.
 - In the market, back rows usually pay more, with some variety.

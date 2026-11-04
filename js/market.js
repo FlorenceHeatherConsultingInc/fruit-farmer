@@ -38,7 +38,7 @@
     const m = t => type === 'any' || t === type;
     let n = 0;
     for (const t of ammo) if (m(t)) n++;
-    for (const s of shots) if (m(s.type)) n++;
+    for (const s of shots) if (s.phase !== 'drop' && m(s.type)) n++;  // dropping: already paid for
     if (loaded && m(loaded)) n++;
     return n;
   }
@@ -49,6 +49,18 @@
     return n;
   }
   const takes = (t, type) => t && t.state === 'open' && t.got < t.need && (t.wants === 'any' || t.wants === type);
+  const wanted = type => targets.some(t => takes(t, type));
+  // Wanted even counting the fruit already flying at them.
+  const stillWanted = type => targets.some(t => takes(t, type) && t.need - t.got > shots.filter(s => s.target === t && s.phase !== 'fall').length);
+
+  // What a new friend should ask for: the fruit you're holding if nobody wants it, otherwise
+  // something coming up soon in the tray that nobody is asking for yet.
+  function upcoming(spare, t) {
+    const fits = f => f && spare.includes(f) && !targets.some(x => x !== t && takes(x, f));
+    if (fits(loaded)) return loaded;
+    const soon = ammo.slice(0, MK.lookAhead).filter(fits);
+    return soon.length ? pick(soon) : null;
+  }
 
   function newRequest(t, force) {
     t.got = 0; t.inside = []; t.t = 0; t.pop = 1; t.wrongs = 0;
@@ -56,8 +68,12 @@
     const stock = FF.FRUIT_TYPES.filter(f => available(f) > 0);
     if (!stock.length) { t.state = 'closed'; return; }
     const spare = stock.filter(f => free(f, t) > 0);
+    // every fruit left is promised to someone already: keep the spot empty rather than promise too much
+    if (!spare.length && !force) { t.state = 'closed'; return; }
     const pool = FF.friends.available(), unused = pool.filter(k => !targets.some(x => x.kind === k)), plain = spare.length ? spare : stock;
-    t.wants = force || (Math.random() < MK.anyChance ? 'any' : pick(plain));
+    const loadedLonely = loaded && !wanted(loaded);
+    t.wants = force || (loadedLonely && spare.includes(loaded) ? loaded
+      : Math.random() < MK.anyChance ? 'any' : upcoming(spare, t) || pick(plain));
     // whoever loves this fruit comes to ask for it, if they're free
     const fans = (unused.length ? unused : pool).filter(k => D.animals[k].fav === t.wants);
     t.kind = pick(fans.length ? fans : unused.length ? unused : pool);
@@ -73,18 +89,38 @@
     const left = available(t.wants);
     if (t.need - t.got <= left) return;
     if (shots.some(s => s.target === t)) return;
-    if (t.got === 0 && left === 0) { if (t.t > 0.6) newRequest(t); return; }
+    if (t.got === 0 && left === 0) {
+      if (t.t <= 0.6) return;
+      // their fruit ran out, so they stay and take anything instead of leaving
+      const spare = free('any', t);
+      if (spare > 0) {
+        t.wants = 'any'; t.need = Math.min(t.need, spare); t.price = 1 + pay().rowBonus[t.row]; t.pop = 1;
+        FX.text(t.x, t.y - t.R, 'Anything!', false);
+      } else { t.state = 'closed'; t.t = 0; }
+      return;
+    }
     t.need = t.got + left;
     if (left === 0) fillUp(t);
   }
-  // Never leave the player holding a fruit nobody wants.
+  // Load the next fruit someone is asking for, so the player never sees their fruit switch.
+  // If nobody wants anything in the tray yet, wait while a friend cheers or a fruit flies: the
+  // next request is for what's coming up.
+  function reload() {
+    let i = ammo.findIndex(stillWanted);
+    if (i < 0) i = ammo.findIndex(wanted);
+    if (i < 0 && !targets.some(t => t.state === 'closed') && (shots.length || targets.some(t => t.state === 'happy'))) return;
+    loaded = ammo.splice(Math.max(0, i), 1)[0]; popIn = 1;
+  }
+  // Never leave the player holding a fruit nobody wants. A friend who has arrived always
+  // stays until served: an empty spot asks for the fruit instead, or it goes back in the tray.
   function askForLoaded() {
-    if (!loaded || drag || shots.length || revealT > 0 || targets.some(t => takes(t, loaded))) return;
-    const t = targets.find(x => x.state === 'closed') || targets.find(x => x.state === 'open' && x.got === 0);
+    if (!loaded || drag || shots.length || revealT > 0 || wanted(loaded)) return;
+    const t = targets.find(x => x.state === 'closed');
     if (t) { newRequest(t, loaded); return; }
-    // everyone is waiting on fruit further back in the tray, so bring one forward
-    const i = ammo.findIndex(f => targets.some(x => takes(x, f)));
-    if (i >= 0) { const next = ammo.splice(i, 1)[0]; ammo.push(loaded); loaded = next; popIn = 1; }
+    // a cheering friend asks for this fruit next, so hold on rather than switch it
+    if (targets.some(x => x.state === 'happy')) return;
+    const i = ammo.findIndex(wanted);
+    if (i >= 0) { const next = ammo.splice(i, 1)[0]; ammo.unshift(loaded); loaded = next; popIn = 1; }
   }
 
   /* ---------- Aiming ---------- */
@@ -232,7 +268,7 @@
       if (was > 1 && revealT <= 1) { FX.confetti(); FF.sfx.party(); }
       if (revealT <= 0) { FF.save.wallRevealed = true; FF.persist(); }
     }
-    if (!loaded && reloadT <= 0 && ammo.length) { loaded = ammo.shift(); popIn = 1; }
+    if (!loaded && reloadT <= 0 && ammo.length) reload();
     aim = drag && loaded ? aimFrom(drag) : null;
     if (info && (info.t -= dt) <= 0) info = null;
 
@@ -323,6 +359,8 @@
     const { step, n } = trayRow(), i = Math.floor((x - 24 + step / 2) / step);
     if (!loaded || i < 0 || i > n) return;
     if (i === n) { if (ammo.length > n) { ammo.push(...ammo.splice(0, n)); FF.sfx.tick(); } return; }
+    // faded fruit: nobody is asking for it yet
+    if (!wanted(ammo[i])) { FF.sfx.nope(); FX.text(24 + i * step, M.trayY - 18, 'Not yet!', false); return; }
     [ammo[i], loaded] = [loaded, ammo[i]];
     popIn = 1; FF.sfx.tick();
     FF.stickers.add('swaps'); FF.stickers.check();
@@ -366,7 +404,11 @@
     Draw.rr(-10, y, W + 20, H - y + 10, 10); Draw.fillStroke('#b98652', 4);
     ctx.fillStyle = 'rgba(43,35,80,0.12)'; ctx.fillRect(0, y + 10, W, 4);
     const { r, cy, step, n } = trayRow();
-    for (let i = 0; i < n; i++) Draw.fruit(ammo[i], 24 + i * step, cy, r);
+    for (let i = 0; i < n; i++) {
+      ctx.globalAlpha = wanted(ammo[i]) ? 1 : 0.4;
+      Draw.fruit(ammo[i], 24 + i * step, cy, r);
+    }
+    ctx.globalAlpha = 1;
     ctx.font = `800 22px ${FONT}`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     if (ammo.length > n) {
       ctx.textAlign = 'center'; ctx.lineWidth = 5; ctx.strokeStyle = INK;

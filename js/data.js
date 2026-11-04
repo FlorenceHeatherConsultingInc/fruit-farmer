@@ -546,6 +546,7 @@ FF.data = {
     // The Barrel wall appears in the shop from the start. Reach all three goals, then buy it.
     wallUnlock: { level: 15, fruitKinds: 3, filled: 10, cost: 150 },  // goals to unlock the Barrel wall
     anyChance: 0.15,      // chance an animal takes any fruit (1 coin plus the row bonus)
+    lookAhead: 4,         // a new friend asks for a fruit you're holding or among this many next in the tray
     tipPerFruit: 1,       // bonus when a basket or barrel is filled, per fruit it held
     perfectBonus: 1,      // extra coins for a center shot
     streakEvery: 3,       // every this many hits in a row adds 1 coin per fruit...
