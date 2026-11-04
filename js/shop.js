@@ -31,6 +31,8 @@
   function renderMarket() {
     const save = FF.save, box = $('shopMarket'), goals = wallGoals(), W = D.market.wallUnlock;
     box.innerHTML = '';
+    box.parentElement.hidden = mode !== 'looks' || !(save.wallOwned || FF.quests.isUnlocked('wall'));
+    if (box.parentElement.hidden) return;
     if (save.wallOwned) {
       box.className = 'grid3';
       [['friends', 'Animal friends', 'bunny'], ['wall', 'Barrel wall', 'pig']].forEach(([id, name, kind]) => {
@@ -79,7 +81,7 @@
     });
 
     const trees = $('shopTrees'); trees.innerHTML = '';
-    byCost(D.trees.filter(t => t.cost), t => t.cost).forEach(t => {
+    byCost(D.trees.filter(t => t.cost && (save.trees.includes(t.type) || FF.quests.isUnlocked('tree:' + t.type))), t => t.cost).forEach(t => {
       const row = document.createElement('div'); row.className = 'up';
       const badge = document.createElement('div'); badge.className = 'badge'; badge.appendChild(FF.draw.fruitIcon(t.type));
       row.appendChild(badge);
@@ -175,6 +177,7 @@
     open(origin, m) {
       FF.sound.ensure();
       from = origin; mode = TITLES[m] ? m : 'looks';
+      if (mode === 'barn') FF.stickers.add('barnLooks');
       render();
       UI.show('shop');
       $('shopDone').focus({ preventScroll: true });

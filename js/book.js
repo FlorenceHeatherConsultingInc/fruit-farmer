@@ -7,7 +7,7 @@
   const PAGE_STEP = 15, MAX_PAGES = 500;
   let from = 'title', tab = 'score', shown = PAGE_STEP, confirmNew = false, period = null, confirmRemove = null, confirmWipe = false;
   // Everything that belongs to one farm. The rest (score, friends, stickers, looks, seeds) is shared.
-  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'orders', 'pin', 'buildings', 'fieldLv', 'fieldStock', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid'];
+  const FARM_KEYS = ['coins', 'crate', 'barn', 'points', 'groves', 'orders', 'pin', 'buildings', 'fieldLv', 'fieldStock', 'up', 'trips', 'trees', 'marketLayout', 'wallOwned', 'wallRevealed', 'filled', 'day', 'farmEarned', 'diary', 'today', 'farmNo', 'farmName', 'challenge', 'seedsPaid', 'questsDone', 'questOn', 'questBase', 'unlocked'];
 
   const dateKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const blankDay = () => ({ date: dateKey(), harvest: {}, sales: {}, bought: [], perfect: 0, earned: 0, sold: false });
@@ -130,7 +130,7 @@
   }
   function render() {
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
-    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : tab === 'stickers' ? FF.stickers.html() : tab === 'seeds' ? seedsHTML() : farmsHTML();
+    $('bookBody').innerHTML = tab === 'score' ? scoreHTML() : tab === 'diary' ? diaryHTML() : tab === 'family' ? FF.board.html() : tab === 'stickers' ? FF.stickers.html() : tab === 'seeds' ? seedsHTML() : tab === 'quests' ? FF.quests.logHTML() : farmsHTML();
   }
 
   /* ---------- Golden Seeds: kept across all farms ---------- */
@@ -261,7 +261,7 @@
     sold() { today().sold = true; FF.persist(); FF.board.sync(); FF.board.backup(); },
     startDay() { if (today().sold) { closeDay(); FF.stickers.check(); FF.persist(); } },
     // Going to bed ends the day even if nothing happened in it.
-    sleep() { const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
+    sleep() { FF.stickers.add('slept'); const d = FF.save.day; closeDay(); if (FF.save.day === d) { FF.save.day++; FF.save.today = blankDay(); } FF.stickers.check(); FF.persist(); },
     open(origin) {
       FF.sound.ensure();
       from = origin; tab = 'score'; shown = PAGE_STEP; confirmNew = false; period = null; confirmRemove = null; confirmWipe = false;

@@ -140,7 +140,8 @@
     backToMap() {
       const s = FF.save, size = FF.barnSize();
       $('mapCoins').innerHTML = `<span class="day">Day ${s.day}</span>` + UI.coinHTML(s.coins);
-      $('mapBasketBtn').innerHTML = I.basket + '<span>holds ' + FF.cap() + '</span>';
+      const p = FF.levelProgress();
+      $('mapBasketBtn').innerHTML = `<span>Lv ${p.level}</span><span class="lvbar"><i style="width:${Math.round(100 * p.into / p.need)}%"></i></span>`;
       $('mapBarnBtn').innerHTML = I.barn + '<span>' + FF.inBarn() + (size === Infinity ? '' : '/' + size) + '</span>';
       FF.guide.refresh();
       FF.hud.barn();

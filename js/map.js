@@ -10,8 +10,19 @@
   let drag = null, hits = [];
 
   const Map = FF.map = { metrics: () => M };
-  const areaX = id => { let x = 0; for (const a of D.map.areas) { if (a.id === id) return x; x += a.w; } return 0; };
-  const worldW = () => D.map.areas.reduce((n, a) => n + a.w, 0);
+  // Only the areas the quests have opened are on the map, and the kitchen and barnyard are as wide
+  // as what's been revealed in them, so the map ends where the farm ends.
+  const U = id => FF.quests.isUnlocked(id);
+  const kitchenRow = () => FF.buildings.inArea('kitchen').filter(b => FF.buildings.owned(b.id) || U('b:' + b.id));
+  const yardRow = () => [U('shed') && 'shed', ...['coop', 'cows'].filter(id => FF.buildings.owned(id) || U('b:' + id))].filter(Boolean);
+  const groveCount = () => D.trees.filter(t => FF.save.trees.includes(t.type) || (U('tree:' + t.type) && FF.save.challenge !== 'apples')).length;
+  const areas = () => D.map.areas.filter(a => FF.guide.area(a.id)).map(a =>
+    a.id === 'groves' ? { ...a, w: Math.max(480, 150 + groveCount() * 178 + 40) } :
+    a.id === 'kitchen' ? { ...a, w: Math.max(420, 140 + kitchenRow().length * 220) } :
+    a.id === 'barnyard' ? { ...a, w: 520 + yardRow().length * 270 } :
+    a.id === 'fields' ? { ...a, w: U('field:corn') || FF.fields.level('corn') ? 1000 : 640 } : a);
+  const areaX = id => { let x = 0; for (const a of areas()) { if (a.id === id) return x; x += a.w; } return 0; };
+  const worldW = () => areas().reduce((n, a) => n + a.w, 0);
   const viewW = () => G.W / M.k;
   const clampCam = c => clamp(c, 0, Math.max(0, worldW() - viewW()));
 
@@ -26,7 +37,18 @@
     Map.layout();
   };
   Map.jump = id => { M.target = clampCam(areaX(id) - 20); M.vel = 0; FF.sfx.tick(); };
-  Map.areaAt = () => { const mid = M.cam + viewW() / 2; let x = 0; for (const a of D.map.areas) { if (mid < x + a.w) return a.id; x += a.w; } return D.map.areas[D.map.areas.length - 1].id; };
+  Map.areaAt = () => { const list = areas(), mid = M.cam + viewW() / 2; let x = 0; for (const a of list) { if (mid < x + a.w) return a.id; x += a.w; } return list[list.length - 1].id; };
+  // Where something is, in world units (for tests and Show me).
+  Map.spot = id => {
+    const [kind, what] = id.split(':');
+    if (kind === 'tree') return areaX('groves') + 150 + D.trees.findIndex(t => t.type === what) * 178;
+    if (kind === 'b' && FF.buildings.def(what).area === 'kitchen') return areaX('kitchen') + 130 + kitchenRow().findIndex(b => b.id === what) * 220;
+    if (kind === 'b' || id === 'shed') return areaX('barnyard') + 560 + yardRow().indexOf(what || id) * 270;
+    if (id === 'barn') return areaX('barnyard') + 290;
+    if (kind === 'field') return areaX('fields') + 330 + FF.fields.crops().indexOf(what) * 380;
+    return areaX(id);
+  };
+  Map.areaX = areaX;
 
   Map.update = dt => {
     if (M.target != null) {
@@ -90,13 +112,12 @@
   /* ---------- Groves ---------- */
   function groves(x0, sc) {
     const ctx = G.ctx;
-    label(x0 + 450, 'Groves');
+    label(x0 + Math.max(240, 60 + groveCount() * 89), 'Groves');
     D.trees.forEach((t, i) => {
       const x = x0 + 150 + i * 178, y = STREET - 10, planted = FF.save.trees.includes(t.type);
       if (!planted) {
-        const lvl = FF.level() < (t.level || 1);
-        if (FF.save.challenge === 'apples') { sign(x, y, t.name + '\nnot on this farm', true); return; }
-        sign(x, y, lvl ? t.name + '\nlevel ' + t.level : 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + t.cost + ' coins', true);
+        if (!U('tree:' + t.type) || FF.save.challenge === 'apples') return;
+        sign(x, y, 'Plant ' + D.fruits[t.type].name.toLowerCase() + '\n' + t.cost + ' coins', true);
         target(x - 80, y - 150, x + 80, y + 10, () => { FF.sfx.tick(); FF.shop.open('map', 'tree'); });
         return;
       }
@@ -161,7 +182,7 @@
     }
   };
   function friends(x0, sc) {
-    const ctx = G.ctx, area = D.map.areas.find(a => a.id === 'friends'), has = id => FF.save.decor.includes(id);
+    const ctx = G.ctx, area = areas().find(a => a.id === 'friends'), has = id => FF.save.decor.includes(id);
     const spot = id => D.decorations.find(d => d.id === id);
     label(x0 + area.w / 2, 'Friends');
     if (FF.stickers.hasReward('party')) {
@@ -227,8 +248,8 @@
     nodeStatus(x, y + 22, b);
   }
   function kitchen(x0, sc) {
-    label(x0 + 800, 'Kitchen');
-    FF.buildings.inArea('kitchen').forEach((b, i) => {
+    label(x0 + Math.max(210, 70 + kitchenRow().length * 110), 'Kitchen');
+    kitchenRow().forEach((b, i) => {
       const x = x0 + 130 + i * 220, y = STREET - 8;
       if (FF.buildings.owned(b.id)) stand(x, y, b, sc.awnings[i % sc.awnings.length], sc);
       else lot(x, y, 180, b.name + '\n' + (FF.buildings.canBuild(b.id) ? 'tap to build' : 'build here'));
@@ -258,21 +279,21 @@
   }
   function barnyard(x0) {
     const ctx = G.ctx;
-    label(x0 + 500, 'Barnyard');
+    label(x0 + 300, 'Barnyard');
     silo(x0 + 120, STREET - 6, 76, 230);
     barn(x0 + 290, STREET - 2, 240, 230);
     // the barn is real now: it holds what you've caught
     ctx.font = `800 24px "Baloo 2", "Trebuchet MS", sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff0d0';
     ctx.fillText('Barn', x0 + 290, STREET - 118);
     target(x0 + 160, STREET - 290, x0 + 420, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'barn'); });
-    shed(x0 + 1100, STREET - 6);
-    target(x0 + 1000, STREET - 190, x0 + 1200, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'shed'); });
-    for (const [id, x] of [['coop', x0 + 600], ['cows', x0 + 870]]) {
-      const b = FF.buildings.def(id), y = STREET - 10;
+    yardRow().forEach((id, i) => {
+      const x = x0 + 560 + i * 270, y = STREET - 10;
+      if (id === 'shed') { shed(x, STREET - 6); target(x - 100, STREET - 190, x + 100, STREET, () => { FF.sfx.tick(); FF.shop.open('map', 'shed'); }); return; }
+      const b = FF.buildings.def(id);
       if (FF.buildings.owned(id)) (id === 'cows' ? cowPen : chickenYard)(x, y, b);
       else lot(x, y, 200, b.name + '\n' + (FF.buildings.canBuild(id) ? 'tap to build' : 'build here'));
       target(x - 120, y - 230, x + 120, y + 20, () => { FF.sfx.tick(); FF.buildings.open(id); });
-    }
+    });
   }
   // The Tool shed: upgrades and the barn's next size.
   function shed(x, y) {
@@ -414,10 +435,11 @@
     ctx.beginPath(); ctx.moveTo(x - s * 0.22, y - s * 1.5); ctx.quadraticCurveTo(x, y - s * 1.82, x + s * 0.22, y - s * 1.5); ctx.closePath(); Draw.fillStroke('#e8c25a', 3);
   }
   function fields(x0) {
-    label(x0 + 750, 'Fields');
+    label(x0 + 330, 'Fields');
     scarecrow(x0 + 70, STREET - 4, 70);
     const open = FF.fields.open();
     FF.fields.crops().forEach((c, i) => {
+      if (i > 0 && !U('field:' + c) && !FF.fields.level(c)) return;
       const x = x0 + 330 + i * 380, y = STREET - 20, owned = open && FF.fields.level(c) > 0;
       field(x, y, c, owned);
       if (!open && i === 0) sign(x, y - 40, 'Fields open when\nyou have ' + D.fields.trees + ' trees', true);
@@ -439,7 +461,7 @@
     ctx.strokeStyle = sc.plaza[1]; ctx.lineWidth = 3; ctx.strokeRect(v0, STREET, v1 - v0, 60);
     hits = [];
     let x = 0;
-    for (const a of D.map.areas) {
+    for (const a of areas()) {
       if (x + a.w > v0 && x < v1) ({ groves, friends, kitchen, barnyard, fields })[a.id](x, sc);
       x += a.w;
     }

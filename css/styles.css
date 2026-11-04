@@ -417,6 +417,28 @@ button.tile { font: inherit; color: inherit; text-align: left; cursor: pointer; 
 .bp-list { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .bp-item { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 15px; background: var(--card); border: 2px solid var(--ink); border-radius: 999px; padding: 0 8px 0 2px; font-variant-numeric: tabular-nums; }
 .bp-item img { width: 24px; height: 24px; }
+.questbar { position: fixed; z-index: 2; left: 50%; transform: translateX(-50%); bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + 72px); width: min(460px, calc(100vw - 24px)); box-sizing: border-box; display: flex; align-items: center; gap: 8px; background: var(--card); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 4px 10px 4px 4px; font: inherit; font-weight: 800; font-size: 15px; color: var(--ink); cursor: pointer; text-align: left; }
+.questbar img { width: 38px; height: 38px; flex: none; }
+.questbar .qtext { flex: 1; min-width: 0; line-height: 1.15; }
+.qmeter { display: inline-block; width: 64px; height: 12px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: var(--paper); flex: none; }
+.qmeter i { display: block; height: 100%; background: var(--leaf, #5cc24a); }
+.qcount { font-variant-numeric: tabular-nums; flex: none; }
+.questbody { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.qchapter { text-align: center; font-weight: 800; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
+.qspeech { display: flex; gap: 10px; align-items: flex-start; }
+.qspeech img { width: 64px; height: 64px; flex: none; }
+.qspeech p { margin: 0; background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; font-weight: 700; font-size: 17px; text-align: left; }
+.qgoal { display: flex; align-items: center; gap: 8px; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 10px; background: var(--paper); }
+.qgoal b { flex: 1; text-align: left; font-size: 17px; }
+.qreward { text-align: center; font-weight: 800; font-size: 18px; }
+.qnew { text-align: center; font-weight: 800; font-size: 18px; background: var(--sun); border: 3px solid var(--ink); border-radius: 14px; padding: 6px; animation: pop .6s ease-out; }
+.qlog { border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 8px 12px; }
+.qlog ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 700; }
+.qlog li { opacity: .5; }
+.qlog li.done { opacity: 1; color: #3f9530; }
+.qlog li.now { opacity: 1; background: var(--sun); border-radius: 8px; padding: 0 6px; }
+.lvlchip .lvbar { display: inline-block; width: 46px; height: 10px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: var(--paper); }
+.lvlchip .lvbar i { display: block; height: 100%; background: var(--leaf, #5cc24a); }
 .tip { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + 78px); width: min(420px, calc(100vw - 32px)); box-sizing: border-box; background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 0 5px 0 var(--ink); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; font-weight: 700; font-size: 17px; }
 .tip p { margin: 0; }
 .tipbtns { display: flex; gap: 8px; }

@@ -44,7 +44,7 @@
       scenes: [D.scenes[0].id], scene: D.scenes[0].id,
       marketLayout: 'friends', wallOwned: false, wallRevealed: false, filled: 0,
       day: 1, farmNo: 1, farmEarned: 0, lifetime: 0, bestDay: 0, byDate: {}, diary: [], pastFarms: [], otherFarms: [], seedsPaid: 0, today: null, family: null, backup: null, crownWeeks: [], ribbonWeeks: [],
-      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [],
+      friends: {}, friendsSeeded: false, decor: [], stickers: [], stats: {}, hats: ['party'], hat: 'party', tips: [], toolsSeen: [], questsDone: [], questOn: null, questBase: 0, unlocked: [],
       seeds: 0, seedBuys: [], challenge: null, legend: false, legendSeen: false, groves: {}, orders: [], pin: null, buildings: {}, fieldLv: {}, fieldStock: {}
     };
     FF.FRUIT_TYPES.forEach(t => { s.crate[t] = 0; s.barn[t] = 0; });
@@ -88,6 +88,11 @@
     if (Array.isArray(raw.hats)) s.hats = ['party'].concat(raw.hats.filter(h => h !== 'party' && D.hats.some(x => x.id === h)));
     if (s.hats.includes(raw.hat)) s.hat = raw.hat;
     if (Array.isArray(raw.tips)) s.tips = raw.tips.filter(t => typeof t === 'string');
+    // Saves from before quests have no quest list: quests.js ticks off what they've done (null means "not yet").
+    s.questsDone = Array.isArray(raw.questsDone) ? raw.questsDone.filter(q => D.quests.some(x => x.id === q)) : (raw.trips || raw.points ? null : []);
+    if (D.quests.some(x => x.id === raw.questOn)) s.questOn = raw.questOn;
+    s.questBase = Number.isFinite(+raw.questBase) ? +raw.questBase : 0;
+    if (Array.isArray(raw.unlocked)) s.unlocked = raw.unlocked.filter(t => typeof t === 'string');
     if (Array.isArray(raw.toolsSeen)) s.toolsSeen = raw.toolsSeen.filter(t => typeof t === 'string');
     if (Array.isArray(raw.otherFarms)) s.otherFarms = raw.otherFarms.filter(f => f && typeof f === 'object' && f.farmNo > 0);
     s.seedsPaid = n(raw.seedsPaid);

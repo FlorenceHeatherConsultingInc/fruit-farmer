@@ -7,6 +7,9 @@ browser on that computer.
 
 ## How to play
 
+- **Quests:** Bun the bunny gives one quest at a time, 35 in all, and each new part of the farm
+  (the market, trees, the barnyard, the kitchen, fields, animals) appears with its quest. The quest bar
+  sits above the area buttons; the Farm book's Quests tab shows the path. Your level shows in the top bar.
 - **Groves:** tap Go harvest, then pick a grove on the village map. Each grove holds a set amount
   of fruit and refills over days. Fruit falls in a steady stream, with a quick shake now and then.
   Tap an arrow to scoot, hold it to zip, or drag your basket. A grove drops its own fruit, with a

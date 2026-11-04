@@ -28,7 +28,7 @@
     right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove', 'orders', 'build', 'plant', 'sleep', 'basket'];
+  const OVERLAYS = ['title', 'pause', 'full', 'sold', 'shop', 'book', 'village', 'parade', 'pack', 'grove', 'orders', 'build', 'plant', 'sleep', 'basket', 'quest'];
   FF.ui = {
     show(id) { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = o !== id; }); G.overlay = id; },
     hideAll() { OVERLAYS.forEach(o => { $(o + 'Ov').hidden = true; }); G.overlay = null; },
@@ -41,8 +41,8 @@
       $('mapHud').hidden = which !== 'village';
       $('mapJump').hidden = which !== 'village';
       $('mapTools').hidden = which !== 'village';
-      $('barnPanel').hidden = which !== 'village';
-      if (which !== 'village') $('mapTip').hidden = true;
+      $('barnPanel').hidden = which !== 'village' || !FF.quests.isUnlocked('barn');
+      if (which !== 'village') $('questBar').hidden = true;
       $('farmPin').hidden = which !== 'farm' || !FF.orders.hudText();
     },
     bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); },
@@ -66,6 +66,7 @@
     // that opens into small icons with numbers. Only what you have shows.
     barn() {
       const s = FF.save, D = FF.data, el = $('barnPanel');
+      el.hidden = FF.G.state !== 'village' || !FF.quests.isUnlocked('barn');
       const groups = [
         { id: 'picked', name: 'Picked', items: FF.FRUIT_TYPES.filter(t => D.fruits[t].kind !== 'good' && s.barn[t] > 0) },
         { id: 'made', name: 'Made', items: FF.FRUIT_TYPES.filter(t => D.fruits[t].kind === 'good' && s.barn[t] > 0) }
@@ -87,7 +88,7 @@
   $('barnPanel').addEventListener('click', e => {
     const b = e.target.closest('[data-fold]');
     if (!b) return;
-    barnOpen[b.dataset.fold] = !barnOpen[b.dataset.fold]; FF.sfx.tick(); FF.hud.barn();
+    barnOpen[b.dataset.fold] = !barnOpen[b.dataset.fold]; FF.sfx.tick(); FF.stickers.add('barnLooks'); FF.hud.barn();
   });
 
   // Static icons in the markup

@@ -102,6 +102,7 @@
     if (pile.length > 9) pile.shift();
     if (demo || FF.carried() >= FF.cap()) return;
     FF.save.crate[f.type]++;
+    FF.stickers.add('caught');
     Farm.visit.caught[f.type] = (Farm.visit.caught[f.type] || 0) + 1;
     if (f.type !== 'star') FF.groves.take(f.type);
     FF.book.harvest(f.type);
@@ -196,7 +197,7 @@
       }
       // the grove is bare when it has nothing left and nothing is falling
       if (bareT < 0 && fullT < 0 && left(grove) <= 0 && !fruits.some(f => !f.landed)) bareT = 0.8;
-      if (bareT > 0 && (bareT -= dt) <= 0) FF.screens.showFull(true);
+      if (bareT > 0 && (bareT -= dt) <= 0) { FF.stickers.add('treesCleared'); FF.screens.showFull(true); }
     }
 
     for (const f of fruits) {

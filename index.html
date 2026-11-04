@@ -45,7 +45,7 @@
 <!-- Village map top bar and jump buttons -->
 <div class="hud" id="mapHud" hidden>
   <div class="chip" id="mapCoins" aria-live="polite"></div>
-  <button class="chip basketchip" id="mapBasketBtn" type="button" aria-label="Basket size"></button>
+  <button class="chip basketchip lvlchip" id="mapBasketBtn" type="button" aria-label="Your level"></button>
   <button class="chip basketchip" id="mapBarnBtn" type="button" aria-label="What's in the barn"></button>
 </div>
 <div class="maptools" id="mapTools" hidden>
@@ -57,7 +57,7 @@
   <button class="iconbtn icon" id="mapFriendsBtn" type="button" aria-label="Friends list" title="Friends" data-tool="friends"></button>
 </div>
 <div class="barnpanel" id="barnPanel" hidden aria-label="What's in the barn"></div>
-<div class="tip" id="mapTip" hidden role="status"><p id="mapTipText"></p><div class="tipbtns"><button class="btn primary" type="button" id="mapTipGo">Show me</button><button class="btn secondary" type="button" id="mapTipOk">OK</button></div></div>
+<button class="questbar" id="questBar" type="button" hidden aria-label="Your quest"></button>
 <nav class="mapjump" id="mapJump" hidden aria-label="Village areas">
   <button type="button" data-jump="groves" aria-label="Groves" title="Groves"></button>
   <button type="button" data-jump="fields" aria-label="Fields" title="Fields"></button>
@@ -149,6 +149,16 @@
   </div>
 </div>
 
+<!-- A quest: what to do next, or Quest done! -->
+<div class="overlay" id="questOv" hidden>
+  <div class="card" role="dialog" aria-labelledby="questTitle">
+    <h2 id="questTitle">Quest</h2>
+    <div class="questbody" id="questBody"></div>
+    <button class="btn primary" type="button" id="questGo">Show me</button>
+    <button class="btn secondary" type="button" id="questOk">OK</button>
+  </div>
+</div>
+
 <!-- Going to bed: ends the day whenever you like -->
 <div class="overlay" id="sleepOv" hidden>
   <div class="card" role="dialog" aria-labelledby="sleepTitle">
@@ -231,6 +241,7 @@
       <button type="button" data-tab="score" aria-pressed="true">Score</button>
       <button type="button" data-tab="diary" aria-pressed="false">Diary</button>
       <button type="button" data-tab="stickers" aria-pressed="false">Stickers</button>
+      <button type="button" data-tab="quests" aria-pressed="false">Quests</button>
       <button type="button" data-tab="farms" aria-pressed="false">Farms</button>
       <button type="button" data-tab="seeds" aria-pressed="false" id="seedsTab" hidden>Seeds</button>
       <button type="button" data-tab="family" aria-pressed="false" id="familyTab" hidden>Family</button>
@@ -286,6 +297,7 @@
 <script src="js/village.js"></script>
 <script src="js/parade.js"></script>
 <script src="js/map.js"></script>
+<script src="js/quests.js"></script>
 <script src="js/guide.js"></script>
 <script src="js/main.js"></script>
 </body>
