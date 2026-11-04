@@ -104,7 +104,8 @@
     if (t.pop >= 1) return;
     if (FF.friends.hearts(t.kind)) {
       ctx.font = `800 ${G.W < 500 ? 13 : 16}px ${FONT}`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = INK;
-      ctx.strokeText(FF.friends.name(t.kind), x, t.y + R * 1.3); ctx.fillStyle = CARD; ctx.fillText(FF.friends.name(t.kind), x, t.y + R * 1.3);
+      const tag = D.animals[t.kind].short || FF.friends.name(t.kind);
+      ctx.strokeText(tag, x, t.y + R * 1.3); ctx.fillStyle = CARD; ctx.fillText(tag, x, t.y + R * 1.3);
     }
     drawBubble(t, clamp(x + hr * 1.2, 56, G.W - 56), headY - hr * 0.72, 1, G.W < 500 ? 1 : 1.35);
     drawPrice(t, x, y + R * 0.8, Math.max(0.82, s));

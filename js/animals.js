@@ -75,6 +75,38 @@
     } else if (kind === 'llama') {
       for (const d of [-1, 1]) { ctx.save(); ctx.translate(d * r * 0.5, -r * 0.8); ctx.rotate(d * 0.25); ctx.beginPath(); ctx.ellipse(0, -r * 0.35, r * 0.16, r * 0.42, 0, 0, TAU); Draw.fillStroke(a.color, lw); ctx.restore(); }
       Draw.blob([[-r * 0.28, -r * 0.9, r * 0.22], [0, -r * 1.0, r * 0.24], [r * 0.28, -r * 0.9, r * 0.22]], a.accent, lw);
+    } else if (kind === 'dog') {
+      for (const d of [-1, 1]) {
+        ctx.save(); ctx.translate(d * r * 0.95, -r * 0.4); ctx.rotate(d * 0.25);
+        ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.27, r * 0.6, 0, 0, TAU); Draw.fillStroke(a.accent, lw);
+        ctx.restore();
+      }
+    } else if (kind === 'flamingo' || kind === 'parrot') {
+      const cols = kind === 'parrot' ? [a.accent, '#ffd23f', a.accent] : [a.accent, a.accent, a.accent];
+      for (let i = 0; i < 3; i++) {
+        ctx.save(); ctx.translate((i - 1) * r * 0.16, -r * 0.82); ctx.rotate((i - 1) * 0.45 + 0.15);
+        ctx.beginPath(); ctx.ellipse(0, -r * 0.3, r * 0.11, r * 0.36, 0, 0, TAU); Draw.fillStroke(cols[i], lw * 0.8);
+        ctx.restore();
+      }
+    } else if (kind === 'skunk') {
+      for (const d of [-1, 1]) { ctx.beginPath(); ctx.arc(d * r * 0.68, -r * 0.68, r * 0.26, 0, TAU); Draw.fillStroke(a.color, lw); }
+    } else if (kind === 'camel') {
+      for (const d of [-1, 1]) { ctx.save(); ctx.translate(d * r * 0.82, -r * 0.5); ctx.rotate(d * 0.9); ctx.beginPath(); ctx.ellipse(0, -r * 0.12, r * 0.13, r * 0.24, 0, 0, TAU); Draw.fillStroke(a.color, lw); ctx.restore(); }
+      Draw.blob([[-r * 0.2, -r * 0.92, r * 0.18], [0, -r * 1.02, r * 0.2], [r * 0.2, -r * 0.92, r * 0.18]], a.accent, lw);
+    } else if (kind === 'donkey') {
+      // one ear up, one flopped over
+      for (const [d, tilt] of [[-1, -0.3], [1, 1.25]]) {
+        ctx.save(); ctx.translate(d * r * 0.45, -r * 0.75); ctx.rotate(tilt);
+        ctx.beginPath(); ctx.ellipse(0, -r * 0.5, r * 0.2, r * 0.62, 0, 0, TAU); Draw.fillStroke(a.color, lw);
+        ctx.beginPath(); ctx.ellipse(0, -r * 0.48, r * 0.09, r * 0.42, 0, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
+        ctx.restore();
+      }
+      Draw.blob([[-r * 0.12, -r * 0.92, r * 0.16], [r * 0.08, -r * 1.0, r * 0.17], [r * 0.24, -r * 0.88, r * 0.14]], a.accent, lw);
+    } else if (kind === 'tiger') {
+      for (const d of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(d * r * 0.86, -r * 0.34); ctx.lineTo(d * r * 0.72, -r * 1.06); ctx.lineTo(d * r * 0.2, -r * 0.84); ctx.closePath(); Draw.fillStroke(a.color, lw);
+        ctx.beginPath(); ctx.moveTo(d * r * 0.72, -r * 0.55); ctx.lineTo(d * r * 0.68, -r * 0.88); ctx.lineTo(d * r * 0.42, -r * 0.78); ctx.closePath(); ctx.fillStyle = '#fff3e0'; ctx.fill();
+      }
     } else if (kind === 'turtle') {
       ctx.beginPath(); ctx.ellipse(0, -r * 0.55, r * 1.2, r * 0.8, 0, Math.PI, 0); ctx.closePath(); Draw.fillStroke(a.accent, lw);
       ctx.strokeStyle = 'rgba(43,35,80,0.35)'; ctx.lineWidth = lw * 0.7;
@@ -142,11 +174,27 @@
     } else if (kind === 'llama') {
       ctx.beginPath(); ctx.ellipse(0, r * 0.34, r * 0.38, r * 0.3, 0, 0, TAU); ctx.fillStyle = '#ffffff'; ctx.fill();
       ctx.fillStyle = INK; Draw.circlesPath([[-r * 0.1, r * 0.22, r * 0.04], [r * 0.1, r * 0.22, r * 0.04]]); ctx.fill();
+    } else if (kind === 'dog' || kind === 'tiger') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.42, r * 0.3, 0, 0, TAU); ctx.fillStyle = '#fff3e0'; ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, r * 0.17, r * 0.13, r * 0.09, 0, 0, TAU); ctx.fillStyle = kind === 'tiger' ? '#ff7a9c' : INK; ctx.fill();
+    } else if (kind === 'skunk') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.2, r * 0.11, r * 0.08, 0, 0, TAU); ctx.fillStyle = '#ff8fb1'; ctx.fill();
+    } else if (kind === 'flamingo') {
+      // a pale beak that bends down to a dark tip
+      ctx.beginPath(); ctx.moveTo(-r * 0.22, r * 0.06); ctx.quadraticCurveTo(r * 0.42, -r * 0.02, r * 0.34, r * 0.36);
+      ctx.lineTo(r * 0.18, r * 0.62); ctx.quadraticCurveTo(r * 0.14, r * 0.34, -r * 0.16, r * 0.28); ctx.closePath(); Draw.fillStroke('#fff0e6', lw * 0.8);
+      ctx.beginPath(); ctx.moveTo(r * 0.33, r * 0.4); ctx.lineTo(r * 0.18, r * 0.62); ctx.lineTo(r * 0.15, r * 0.42); ctx.closePath(); Draw.fillStroke(INK, lw * 0.5);
+    } else if (kind === 'parrot') {
+      ctx.beginPath(); ctx.moveTo(-r * 0.22, r * 0.06); ctx.quadraticCurveTo(r * 0.05, -r * 0.08, r * 0.24, r * 0.1);
+      ctx.quadraticCurveTo(r * 0.34, r * 0.4, r * 0.06, r * 0.56); ctx.quadraticCurveTo(r * 0.14, r * 0.3, -r * 0.2, r * 0.28); ctx.closePath(); Draw.fillStroke('#ffd23f', lw * 0.8);
+    } else if (kind === 'camel' || kind === 'donkey') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.38, r * 0.5, r * 0.32, 0, 0, TAU); Draw.fillStroke(kind === 'camel' ? '#f0d8a8' : '#dcd8e8', lw * 0.8);
+      ctx.fillStyle = INK; Draw.circlesPath([[-r * 0.16, r * 0.3, r * 0.05], [r * 0.16, r * 0.3, r * 0.05]]); ctx.fill();
     } else if (kind === 'koala') {
       ctx.beginPath(); ctx.ellipse(0, r * 0.18, r * 0.16, r * 0.22, 0, 0, TAU); Draw.fillStroke('#3a3550', lw * 0.7);
     }
   }
-  // Markings under the eyes: a panda's patches, a raccoon's mask, a penguin's white face.
+  // Markings under the eyes: a panda's patches, a raccoon's mask, a penguin's white face, a skunk's stripe, a tiger's stripes.
   function face(kind, a, r) {
     const ctx = G.ctx;
     if (kind === 'panda') {
@@ -154,14 +202,32 @@
     } else if (kind === 'raccoon') {
       ctx.beginPath(); ctx.ellipse(0, -r * 0.2, r * 0.82, r * 0.28, 0, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
       ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.42, r * 0.3, 0, 0, TAU); ctx.fillStyle = '#ffffff'; ctx.fill();
+    } else if (kind === 'dog') {
+      ctx.beginPath(); ctx.ellipse(r * 0.38, -r * 0.24, r * 0.3, r * 0.3, 0, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
+    } else if (kind === 'parrot') {
+      for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(d * r * 0.36, -r * 0.18, r * 0.36, r * 0.36, 0, 0, TAU); ctx.fillStyle = '#ffffff'; ctx.fill(); }
+    } else if (kind === 'skunk' || kind === 'tiger') {
+      ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.94, 0, 0, TAU); ctx.clip();
+      if (kind === 'skunk') {
+        ctx.beginPath(); ctx.ellipse(0, -r * 0.82, r * 0.17, r * 0.62, 0, 0, TAU); ctx.fillStyle = a.accent; ctx.fill();
+      } else {
+        // stripes on the forehead and cheeks
+        ctx.strokeStyle = a.accent; ctx.lineCap = 'round'; ctx.lineWidth = r * 0.1;
+        ctx.beginPath();
+        for (const d of [-1, 0, 1]) { ctx.moveTo(d * r * 0.2, -r * 0.98); ctx.lineTo(d * r * 0.16, -r * 0.66 + Math.abs(d) * r * 0.08); }
+        for (const d of [-1, 1]) for (const k of [0, 1]) { ctx.moveTo(d * r * 1.02, r * (0.02 + k * 0.24)); ctx.lineTo(d * r * 0.72, r * (0.06 + k * 0.22)); }
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.94, 0, 0, TAU); ctx.strokeStyle = INK; ctx.lineWidth = Math.max(2, r * 0.13); ctx.stroke();
     } else if (kind === 'penguin') {
       Draw.blob([[-r * 0.32, -r * 0.1, r * 0.4], [r * 0.32, -r * 0.1, r * 0.4], [0, r * 0.3, r * 0.5]], '#ffffff', 0);
     }
   }
 
   function mouth(kind, r, lw, mood) {
-    if (kind === 'duck' || kind === 'owl' || kind === 'penguin') return;
-    const ctx = G.ctx, y = kind === 'pig' ? r * 0.56 : kind === 'bear' || kind === 'fox' || kind === 'goat' ? r * 0.42 : r * 0.36;
+    if (kind === 'duck' || kind === 'owl' || kind === 'penguin' || kind === 'flamingo' || kind === 'parrot') return;
+    const ctx = G.ctx, y = kind === 'pig' ? r * 0.56 : kind === 'camel' || kind === 'donkey' ? r * 0.58 : kind === 'bear' || kind === 'fox' || kind === 'goat' || kind === 'dog' || kind === 'tiger' ? r * 0.42 : r * 0.36;
     ctx.strokeStyle = INK; ctx.lineWidth = lw; ctx.lineCap = 'round';
     if (mood === 'happy') {
       ctx.beginPath(); ctx.arc(0, y - r * 0.06, r * 0.3, 0.05 * Math.PI, 0.95 * Math.PI); ctx.closePath(); Draw.fillStroke('#a0263f', lw * 0.8);
@@ -191,7 +257,7 @@
       ears(kind, a, r, lw, clock);
       ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.94, 0, 0, TAU); Draw.fillStroke(a.color, lw);
       face(kind, a, r);
-      happyInk = kind === 'panda' || kind === 'raccoon' ? '#ffffff' : INK;
+      happyInk = kind === 'panda' || kind === 'raccoon' || kind === 'skunk' ? '#ffffff' : INK;
 
       const blink = mood === 'idle' && Math.sin(clock * 0.9 + x) > 0.985;
       const eyeY = kind === 'frog' ? -r * 0.78 : -r * 0.22, eyeX = kind === 'frog' ? r * 0.46 : r * 0.36;

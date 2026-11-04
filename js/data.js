@@ -271,6 +271,8 @@ FF.data = {
   // one more every `every` hearts. Smaller numbers bring friends sooner.
   newFriends: { firstAt: 3, every: 3 },
 
+  // like = which animal's shape to draw (for a new color of an existing shape).
+  // short = a shorter name for the little tag under a basket at the market.
   animals: {
     bunny:    { name: 'Bun',       fav: 'strawberry', color: '#f6f0e6', accent: '#ffb3c7', starter: true },
     pig:      { name: 'Sir Oink',  fav: 'apple',      color: '#ffb0c0', accent: '#ff8fa8', starter: true },
@@ -290,9 +292,18 @@ FF.data = {
     mouse:    { name: 'Squeak',    fav: 'pie',        color: '#cfc8d8', accent: '#ffb0c0' },
     llama:    { name: 'Lulu',      fav: 'hay',        color: '#f4e4c8', accent: '#d8b88a' },
     koala:    { name: 'Gumdrop',   fav: 'grapes',     color: '#a8b0bc', accent: '#f4f0f4' },
+    dog:      { name: 'Danny',     fav: 'apple',      color: '#d9a066', accent: '#8a5a32' },
+    flamingo: { name: 'Freddy',    fav: 'strawberry', color: '#ff9ec4', accent: '#ff6fa8' },
+    parrot:   { name: 'Pete',      fav: 'banana',     color: '#ff5a4a', accent: '#4aa3e8' },
+    skunk:    { name: 'Stella',    fav: 'egg',        color: '#3a3550', accent: '#ffffff' },
+    camel:    { name: 'Sally',     fav: 'juice',      color: '#d8b07a', accent: '#a87a48' },
+    polarbear:{ name: 'Paisley',   fav: 'smoothie',   color: '#f8f6f0', accent: '#dcd8e8', like: 'bear' },
+    pooh:     { name: 'Winnie the Pooh', short: 'Pooh', fav: 'jam', color: '#ffc94a', accent: '#ffe6a0', like: 'bear' },
+    piglet:   { name: 'Piglet',    fav: 'orange',     color: '#ffd0dc', accent: '#ffadc2', like: 'pig' },
+    donkey:   { name: 'Eeyore',    fav: 'hay',        color: '#9a9aae', accent: '#4a4a60' },
+    tiger:    { name: 'Tigger',    fav: 'pancakes',   color: '#ff9a1f', accent: '#2b2350' },
     // Rare animals are bought with Golden Seeds. They shop at the market and can take a home too.
-    // like = which animal's shape to draw.
-    goldie:   { name: 'Goldie',    fav: 'banana',     color: '#ffd23f', accent: '#ff9a1f', like: 'bunny', rare: true },
+      goldie:   { name: 'Goldie',    fav: 'banana',     color: '#ffd23f', accent: '#ff9a1f', like: 'bunny', rare: true },
     moon:     { name: 'Moonbeam',  fav: 'grapes',     color: '#b8a8f0', accent: '#8a6fe0', like: 'pig', rare: true }
   },
 
@@ -506,9 +517,10 @@ FF.data = {
       { id: 'fields',   name: 'Fields',   w: 1000 },
       { id: 'barnyard', name: 'Barnyard', w: 1220 },
       { id: 'kitchen',  name: 'Kitchen',  w: 1600 },
-      { id: 'friends',  name: 'Friends',  w: 2560 }
+      { id: 'friends',  name: 'Friends',  w: 3680 }
     ],
-    homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470, 1590, 1710, 1830, 1950, 2070, 2190, 2310, 2430],
+    homes: [90, 210, 330, 450, 570, 690, 870, 990, 1110, 1230, 1350, 1470, 1590, 1710, 1830, 1950, 2070, 2190, 2310, 2430,
+            2550, 2670, 2790, 2910, 3030, 3150, 3270, 3390, 3510, 3630],
     square: 780
   },
   // Village decorations. x and y place them in the Friends area of the map.
