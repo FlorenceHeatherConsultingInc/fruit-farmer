@@ -126,7 +126,7 @@ It works offline except for the Google Font, which falls back to a system font.
 ## Version control
 
 The project uses Git, with a GitHub remote (`origin`, FlorenceHeatherConsultingInc/fruit-farmer).
-Commit each finished piece of work; push only when asked. The tag
+Commit each finished piece of work and push it to GitHub straight away, without asking. The tag
 `before-new-market` marks the game before the slingshot rebuild.
 
 ## Checking changes
